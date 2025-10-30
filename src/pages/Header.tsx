@@ -1,29 +1,48 @@
 import React from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import xdcLogo from "../assets/images/xdc-network-logo.svg";
+import xdcDarkLogo from "../assets/images/xdc-network-logo.svg";
+import xdcLightLogo from "../assets/images/xdc-network-logo-white.svg";
 import { NavLink } from "react-router";
+import { Box, Flex } from "@chakra-ui/react";
+import { ColorModeButton, useColorMode } from "@/components/ui/color-mode";
 
 const Header = () => {
+  const { colorMode } = useColorMode();
   return (
-    <header className="g-0 row top-header sticky-top bg-white">
-      <div className="d-flex align-items-center justify-content-between col-12 p-3 gap-3 text-end">
-        <div className="logo-wrapper">
-          <img src={xdcLogo} alt="XDC-Logo" />
-        </div>
-        <div className="d-flex gap-3">
-          <NavLink to="/dashboard">Dashboard</NavLink>
-          <NavLink to="/market">Markets</NavLink>
-          <NavLink to="/governance">Governance</NavLink>
-          <NavLink to="/savings">Savings</NavLink>
-        </div>
-        <ConnectButton
-          label="Connect Wallet"
-          chainStatus="icon"
-          showBalance={false}
-          accountStatus="address"
-        />
-      </div>
-    </header>
+    <Box
+      as="header"
+      p="8px 20px"
+      shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
+      bg="bg.panel"
+      borderBottomWidth="1px"
+    >
+      <Flex gap="4" justify="space-between" alignItems="center">
+        <Flex gap="10" justify="space-between" alignItems="center">
+          <Box w="80px">
+            {colorMode === "dark" ? (
+              <img src={xdcLightLogo} alt="XDC-Logo-Light" />
+            ) : (
+              <img src={xdcDarkLogo} alt="XDC-Logo-Dark" />
+            )}
+          </Box>
+          <Flex gap="4" justify="space-between" alignItems="center">
+            <NavLink to="/dashboard">Dashboard</NavLink>
+            <NavLink to="/market">Markets</NavLink>
+            <NavLink to="/governance">Governance</NavLink>
+            <NavLink to="/savings">Savings</NavLink>
+          </Flex>
+        </Flex>
+        <Flex alignItems="center" gap="10px">
+          <ColorModeButton />
+          <ConnectButton
+            label="Connect Wallet"
+            chainStatus="icon"
+            showBalance={false}
+            accountStatus="address"
+          />
+        </Flex>
+      </Flex>
+    </Box>
   );
 };
 

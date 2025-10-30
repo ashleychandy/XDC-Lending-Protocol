@@ -1,25 +1,26 @@
-import Footer from "@/pages/Footer";
+import { Box, Flex, Container } from "@chakra-ui/react";
 import Header from "@/pages/Header";
-import { routes } from "@/routes/routes";
+import Footer from "@/pages/Footer";
 import { Routes } from "react-router-dom";
+import { routes } from "@/routes/routes";
 
 const Layout = () => {
   return (
-    <div className="page-content-wrapper">
-      <div className="d-flex">
-        <div className="main-window bg-white flex-grow-1">
-          <div className="d-flex flex-column h-100">
+    <Box className="page-content-wrapper">
+      <Flex>
+        <Box bg="white" flex="1">
+          <Flex direction="column" h="100vh">
             <Header />
-            <main id="main-content">
-              <div className="container h-100">
-                <Routes>{routes}</Routes>
-              </div>
-            </main>
+            <Box as="main" id="main-content" flex="1" bg="bg.panel">
+              {/* <Container maxW="container.xl" h="100%"> */}
+              <Routes>{routes}</Routes>
+              {/* </Container> */}
+            </Box>
             <Footer />
-          </div>
-        </div>
-      </div>
-    </div>
+          </Flex>
+        </Box>
+      </Flex>
+    </Box>
   );
 };
 
