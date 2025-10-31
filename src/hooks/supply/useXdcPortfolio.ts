@@ -1,13 +1,9 @@
-// src/hooks/useXdcPortfolio.ts
-import { XDC_MARKETS, type XdcMarket } from "@/config/market.xdc"; // ensure filename matches your actual file
+import { XDC_MARKETS } from "@/config/market.xdc";
 import { useQuery } from "@tanstack/react-query";
 import { readContracts } from "@wagmi/core";
 import { useAccount, useChainId } from "wagmi";
-import { config } from '../config/wagmi';
-const erc20Abi = [
-  { type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "account", type: "address" }], outputs: [{ type: "uint256" }] },
-] as const;
-
+import { xrc20Abi } from "@/config/abis";
+import { config } from "@/providers/WalletProvider";
 const aggV3Abi = [
   {
     type: "function",
@@ -33,7 +29,9 @@ const computeNetApyPct = (totalSupplyUsd: number, totalDebtUsd: number) => {
   const supplyApr = 0.03;
   const borrowApr = 0.07;
   const denom = Math.max(1, totalSupplyUsd - totalDebtUsd);
-  return ((totalSupplyUsd * supplyApr - totalDebtUsd * borrowApr) / denom) * 100;
+  return (
+    ((totalSupplyUsd * supplyApr - totalDebtUsd * borrowApr) / denom) * 100
+  );
 };
 
 const queryKeys = {
@@ -46,31 +44,35 @@ type SupportedChainId = (typeof config.chains)[number]["id"];
 export function useXdcPortfolio() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  const chainIsSupported = !!chainId && config.chains.some((c) => c.id === chainId);
+  const chainIsSupported =
+    !!chainId && config.chains.some((c) => c.id === chainId);
 
   const query = useQuery({
     queryKey: queryKeys.portfolio(address, chainId),
-    enabled: isConnected && !!address && chainIsSupported && XDC_MARKETS.length > 0,
+    enabled:
+      isConnected && !!address && chainIsSupported && XDC_MARKETS.length > 0,
     refetchInterval: 10_000,
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      if (!address || !isConnected || !chainIsSupported || !chainId) return null;
+      if (!address || !isConnected || !chainIsSupported || !chainId)
+        return null;
 
       // ---- Multicall build ----
       // Option A (simple): loosen typing
       const contracts: any[] = [];
 
-      // Option B (strict types): 
+      // Option B (strict types):
       // import type { ReadContractsParameters } from '@wagmi/core'
       // type ContractsParam = ReadContractsParameters<typeof config>['contracts']
       // const contracts: ContractsParam = [];
+      console.log("XDC_MARKETS", XDC_MARKETS);
 
       for (const m of XDC_MARKETS) {
         // aToken balance
         contracts.push({
           address: m.aToken,
-          abi: erc20Abi,
+          abi: xrc20Abi,
           functionName: "balanceOf",
           args: [address],
           chainId: chainId as SupportedChainId,
@@ -79,7 +81,7 @@ export function useXdcPortfolio() {
         if (m.variableDebtToken) {
           contracts.push({
             address: m.variableDebtToken,
-            abi: erc20Abi,
+            abi: xrc20Abi,
             functionName: "balanceOf",
             args: [address],
             chainId: chainId as SupportedChainId,
@@ -89,7 +91,7 @@ export function useXdcPortfolio() {
         if (m.stableDebtToken) {
           contracts.push({
             address: m.stableDebtToken,
-            abi: erc20Abi,
+            abi: xrc20Abi,
             functionName: "balanceOf",
             args: [address],
             chainId: chainId as SupportedChainId,
@@ -120,7 +122,9 @@ export function useXdcPortfolio() {
       for (const m of XDC_MARKETS) {
         // supply
         const supplyRes = res[idx++]?.result as bigint | undefined;
-        const supplyTokens = supplyRes ? toNumber(supplyRes, m.underlyingDecimals) : 0;
+        const supplyTokens = supplyRes
+          ? toNumber(supplyRes, m.underlyingDecimals)
+          : 0;
 
         // variable debt
         let vDebtTokens = 0;
@@ -153,6 +157,8 @@ export function useXdcPortfolio() {
         totalDebtUsd += debtUsd;
       }
 
+      console.log("totalSupplyUsd", totalSupplyUsd);
+      console.log("totalDebtUsd", totalDebtUsd);
       const netWorthUsd = totalSupplyUsd - totalDebtUsd;
       const netApyPct = computeNetApyPct(totalSupplyUsd, totalDebtUsd);
       const rewardsUsd = 0; // plug your incentives later
@@ -160,6 +166,7 @@ export function useXdcPortfolio() {
       return { netWorthUsd, netApyPct, rewardsUsd };
     },
   });
+  console.log("query", query.data);
 
   return {
     netWorthUsd: query.data?.netWorthUsd ?? null,

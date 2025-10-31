@@ -56,7 +56,7 @@ const xdcTestnet: Chain = {
   testnet: true,
 };
 
-const config = getDefaultConfig({
+export const config = getDefaultConfig({
   appName: "XDC Lending Protocol",
   projectId: "YOUR_PROJECT_ID",
   chains: [xdcMainnet, xdcTestnet],

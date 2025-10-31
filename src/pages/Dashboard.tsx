@@ -10,7 +10,7 @@ import {
   Table,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 import xdcIcon from "../assets/images/xdc-icon.webp";
 import usdcIcon from "../assets/images/usdc.svg";
 import notFoundImg from "../assets/images/not-found.png";
@@ -22,18 +22,45 @@ import BorrowModal from "./modal/BorrowModal";
 import RepayModal from "./modal/RepayModal";
 import SupplyDoneModal from "./modal/SupplyDoneModal";
 import BorrowDoneModal from "./modal/BorrowDoneModal";
-import { useXdcPortfolio } from "@/hooks/useXdcPortfolio";
-
-
+import { useXdcPortfolio } from "@/hooks/supply/useXdcPortfolio";
+import { useXdcBorrow } from "@/hooks/borrow/useXdcBorrow";
 
 const Dashboard = () => {
+  const [isSupplyModal, setIsSupplyModal] = useState<boolean>(false);
+  const [isSupplyDoneModal, setIsSupplyDoneModal] = useState<boolean>(false);
+  const [isBorrowModal, setIsBorrowModal] = useState<boolean>(false);
+  const [isBorrowDoneModal, setIsBorrowDoneModal] = useState<boolean>(false);
+  const [isRepayModal, setIsRepayModal] = useState<boolean>(false);
+  const [isWithdrawModal, setIsWithdrawModal] = useState<boolean>(false);
+  const { address, isConnected, chainId } = useAccount();
+
+  // Portfolio stats (Net worth, Net APY, Available rewards)
+  const { netWorthUsd, netApyPct, rewardsUsd, isError, error } =
+    useXdcPortfolio();
+
+  const { totalDebtUsd, avgBorrowApy } = useXdcBorrow();
+
+  console.log("totalDebtUsd", totalDebtUsd);
+  console.log("avgBorrowApy", avgBorrowApy);
+  console.log("netWorthUsd", netWorthUsd);
+  console.log("netApyPct", netApyPct);
+  console.log("rewardsUsd", rewardsUsd);
+
+  const fmtUsd = (v?: number | null) => (v == null ? "—" : `$${v.toFixed(2)}`);
+  const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
+
+  const { data: nativeBalance } = useBalance({
+    address,
+    chainId,
+  });
+
   const yourSupplies = [
     {
       id: 1,
       name: "XDC",
-      balance: 0.5,
-      dollarBalance: "$2,000.00",
-      apy: 0,
+      balance: nativeBalance ? Number(nativeBalance.formatted).toFixed(2) : 0,
+      dollarBalance: netWorthUsd ? `$${netWorthUsd.toFixed(2)}` : "$0.00",
+      apy: netApyPct ? `${netApyPct.toFixed(2)}%` : "0%",
       img: xdcIcon,
     },
   ];
@@ -42,9 +69,9 @@ const Dashboard = () => {
     {
       id: 1,
       name: "XDC",
-      balance: 0.5,
-      dollarBalance: "$2,000.00",
-      apy: 0,
+      balance: nativeBalance ? Number(nativeBalance.formatted).toFixed(2) : 0,
+      dollarBalance: netWorthUsd ? `$${netWorthUsd.toFixed(2)}` : "$0.00",
+      apy: netApyPct ? `${netApyPct.toFixed(2)}%` : "0%",
       img: xdcIcon,
     },
   ];
@@ -53,9 +80,9 @@ const Dashboard = () => {
     {
       id: 1,
       name: "USDC",
-      debt: 0.5,
-      dollarDebt: "$0.50",
-      apy: "89.65%",
+      debt: totalDebtUsd,
+      dollarDebt: `$ ${totalDebtUsd?.toFixed(2)}`,
+      apy: `${avgBorrowApy} % `,
       img: usdcIcon,
     },
   ];
@@ -64,29 +91,25 @@ const Dashboard = () => {
     {
       id: 1,
       name: "USDC",
-      available: 0.5,
+      available: totalDebtUsd,
       dollarAvailable: "$1,583.50",
-      apy: 0,
+      apy: avgBorrowApy,
       img: usdcIcon,
     },
   ];
 
-  const [isSupplyModal, setIsSupplyModal] = useState<boolean>(false);
-  const [isSupplyDoneModal, setIsSupplyDoneModal] = useState<boolean>(false);
-  const [isBorrowModal, setIsBorrowModal] = useState<boolean>(false);
-  const [isBorrowDoneModal, setIsBorrowDoneModal] = useState<boolean>(false);
-  const [isRepayModal, setIsRepayModal] = useState<boolean>(false);
-  const [isWithdrawModal, setIsWithdrawModal] = useState<boolean>(false);
-const { isConnected } = useAccount();
-
-// Portfolio stats (Net worth, Net APY, Available rewards)
-const { netWorthUsd, netApyPct, rewardsUsd, isLoading, isError, error } = useXdcPortfolio();
-
-const fmtUsd = (v?: number | null) => (v == null ? "—" : `$${v.toFixed(2)}`);
-const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
-
   return (
-    <Container maxW="container.xl" h="100%">
+    <Container
+      maxW={{
+        base: "100%",
+        md: "container.md",
+        lg: "container.lg",
+        xl: "container.xl",
+      }}
+      px={{ base: 4, md: 6 }}
+      py={4}
+      h="100%"
+    >
       <Box h="100%" p="30px 0">
         {isSupplyModal && (
           <SupplyModal
@@ -146,12 +169,14 @@ const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
           <Flex direction="column">
             <Box>Net APY</Box>
             {/* was: <Box fontSize="21px" fontWeight="700">—</Box> */}
-            <Box fontSize="21px" fontWeight="700">{fmtPct(netApyPct)}</Box>
+            <Heading size="2xl">{fmtPct(netApyPct)}</Heading>
           </Flex>
 
           <Flex direction="column">
             <Box>Health factor</Box>
-            <Heading size="2xl" color="green.600">3.30K</Heading>
+            <Heading size="2xl" color="green.600">
+              3.30K
+            </Heading>
           </Flex>
 
           <Flex direction="column">
@@ -162,8 +187,8 @@ const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
         </Flex>
 
         {isConnected ? (
-          <Flex gap="4">
-            <Box width="50%">
+          <Flex gap="4" direction={{ base: "column", lg: "row" }}>
+            <Box width={{ base: "100%", lg: "50%" }}>
               <Box
                 shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
                 borderRadius="5px"
@@ -172,7 +197,7 @@ const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
                 <Heading size="xl" p="16px 24px">
                   Your supplies
                 </Heading>
-                {yourSupplies.length === 0 && (
+                {yourSupplies.length !== 0 && (
                   <Flex gap="2" alignItems="center" px="24px">
                     <Flex direction="column">
                       <Box
@@ -180,7 +205,7 @@ const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
                         borderRadius="4px"
                         border="1px solid #eaebef"
                       >
-                        Balance $ 2,000.00
+                        Balance $ {netWorthUsd?.toFixed(2)}
                       </Box>
                     </Flex>
                     <Flex direction="column">
@@ -189,7 +214,7 @@ const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
                         borderRadius="4px"
                         border="1px solid #eaebef"
                       >
-                        APY 0 %
+                        APY {netApyPct?.toFixed(2)} %
                       </Box>
                     </Flex>
                     <Flex direction="column">
@@ -198,12 +223,12 @@ const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
                         borderRadius="4px"
                         border="1px solid #eaebef"
                       >
-                        Collateral $ 2,000.00
+                        Collateral $ {netWorthUsd?.toFixed(2)}
                       </Box>
                     </Flex>
                   </Flex>
                 )}
-                {yourSupplies.length === 0 ? (
+                {yourSupplies.length !== 0 ? (
                   <Box p="15px">
                     <Table.Root size="sm">
                       <Table.Header>
@@ -338,7 +363,7 @@ const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
                 )}
               </Box>
             </Box>
-            <Box width="50%">
+            <Box width={{ base: "100%", lg: "50%" }}>
               <Box
                 shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
                 borderRadius="5px"
@@ -355,7 +380,7 @@ const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
                         borderRadius="4px"
                         border="1px solid #eaebef"
                       >
-                        Balance $ 0.50
+                        Balance $ {totalDebtUsd}
                       </Box>
                     </Flex>
                     <Flex direction="column">
@@ -364,7 +389,7 @@ const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
                         borderRadius="4px"
                         border="1px solid #eaebef"
                       >
-                        APY 89.65 %
+                        APY {avgBorrowApy} %
                       </Box>
                     </Flex>
                     <Flex direction="column">

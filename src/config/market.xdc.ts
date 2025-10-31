@@ -1,23 +1,22 @@
-// src/config/markets.xdc.ts
 export type XdcMarket = {
-  symbol: string
+  symbol: string;
 
   // underlying (ERC20). If native XDC is wrapped, put WXDC here.
-  underlying: `0x${string}`
-  underlyingDecimals: number
+  underlying: `0x${string}`;
+  underlyingDecimals: number;
 
   // Aave-like tokens – these balances are interest-accruing
-  aToken: `0x${string}`
-  variableDebtToken?: `0x${string}` | null
-  stableDebtToken?: `0x${string}` | null
+  aToken: `0x${string}`;
+  variableDebtToken?: `0x${string}` | null;
+  stableDebtToken?: `0x${string}` | null;
 
   // Price source: either a Chainlink-like AggregatorV3 feed...
-  priceFeed?: `0x${string}` | null
-  priceFeedDecimals?: number // usually 8
+  priceFeed?: `0x${string}` | null;
+  priceFeedDecimals?: number; // usually 8
 
   // ...or a temporary hardcoded USD price if you don't have a feed yet
-  hardcodedUsdPrice?: number | null
-}
+  hardcodedUsdPrice?: number | null;
+};
 
 /**
  * >>> FILL THESE with your real XDC contracts <<<

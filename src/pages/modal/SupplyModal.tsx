@@ -16,6 +16,8 @@ import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
 import xdcIcon from "../../assets/images/xdc-icon.webp";
+import { useSupply } from "@/hooks/supply/useSupply";
+import { useAccount, useBalance } from "wagmi";
 
 interface Props {
   isOpen: boolean;
@@ -26,6 +28,17 @@ interface Props {
 const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const { address, chainId } = useAccount();
+
+  const { data: nativeBalance } = useBalance({
+    address,
+    chainId,
+  });
+
+  const { step, handleSupply } = useSupply({
+    tokenAddress: "0x63D61724D76D1A490A50D09039208EDCAf03Fae7",
+    lendingPoolAddress: "0x63D61724D76D1A490A50D09039208EDCAf03Fae7",
+  });
 
   const endElement = value ? (
     <CloseButton
@@ -98,7 +111,10 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                     <Flex justifyContent="space-between" alignItems="center">
                       <Box>$ 0</Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px">Wallet balance 0.6185892</Box>
+                        <Box fontSize="13px">
+                          Wallet balance{" "}
+                          {Number(nativeBalance?.formatted).toFixed(2)}
+                        </Box>
 
                         <Button
                           variant="plain"
@@ -106,6 +122,13 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
+                          onClick={() =>
+                            setValue(
+                              Number(nativeBalance?.formatted).toFixed(
+                                4
+                              ) as string
+                            )
+                          }
                         >
                           MAX
                         </Button>
@@ -151,7 +174,8 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                   disabled={value.trim() === ""}
                   w="100%"
                   fontSize="18px"
-                  onClick={onClickSupply}
+                  // onClick={onClickSupply}
+                  onClick={() => handleSupply(value)}
                 >
                   {value.trim() === "" ? "Enter an amount" : "Supply XDC"}
                 </Button>
