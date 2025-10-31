@@ -36,8 +36,8 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
   });
 
   const { step, handleSupply } = useSupply({
-    tokenAddress: "0x63D61724D76D1A490A50D09039208EDCAf03Fae7",
-    lendingPoolAddress: "0x63D61724D76D1A490A50D09039208EDCAf03Fae7",
+    tokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    lendingPoolAddress: "0xBfC91D59fdAA134A4ED45f7B584cAf96D7792Eff",
   });
 
   const endElement = value ? (

@@ -3,58 +3,64 @@ import { RainbowKitProvider, getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type Chain, http } from "viem";
+import { xdc ,  arbitrumSepolia} from "wagmi/chains";
 
 // XDC Mainnet
-const xdcMainnet: Chain = {
-  id: 50,
-  name: "XDC Mainnet",
-  nativeCurrency: {
-    name: "XDC",
-    symbol: "XDC",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://rpc.xinfin.network"],
-    },
-    public: {
-      http: ["https://rpc.xinfin.network"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "XDC Explorer",
-      url: "https://explorer.xinfin.network",
-    },
-  },
-  testnet: false,
-};
+
+
+
+const xdcMainnet : Chain = xdc;
+const xdcTestnet : Chain = arbitrumSepolia;
+// const xdcMainnet: Chain = {
+//   id: 50,
+//   name: "XDC Mainnet",
+//   nativeCurrency: {
+//     name: "XDC",
+//     symbol: "XDC",
+//     decimals: 18,
+//   },
+//   rpcUrls: {
+//     default: {
+//       http: ["https://rpc.xinfin.network"],
+//     },
+//     public: {
+//       http: ["https://rpc.xinfin.network"],
+//     },
+//   },
+//   blockExplorers: {
+//     default: {
+//       name: "XDC Explorer",
+//       url: "https://explorer.xinfin.network",
+//     },
+//   },
+//   testnet: false,
+// };
 
 // XDC Apothem Testnet
-const xdcTestnet: Chain = {
-  id: 51,
-  name: "XDC Apothem Testnet",
-  nativeCurrency: {
-    name: "TXDC",
-    symbol: "TXDC",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://rpc.apothem.network"],
-    },
-    public: {
-      http: ["https://rpc.apothem.network"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Apothem Explorer",
-      url: "https://apothem.network",
-    },
-  },
-  testnet: true,
-};
+// const xdcTestnet: Chain = {
+//   id: 51,
+//   name: "XDC Apothem Testnet",
+//   nativeCurrency: {
+//     name: "TXDC",
+//     symbol: "TXDC",
+//     decimals: 18,
+//   },
+//   rpcUrls: {
+//     default: {
+//       http: ["https://rpc.apothem.network"],
+//     },
+//     public: {
+//       http: ["https://rpc.apothem.network"],
+//     },
+//   },
+//   blockExplorers: {
+//     default: {
+//       name: "Apothem Explorer",
+//       url: "https://apothem.network",
+//     },
+//   },
+//   testnet: true,
+// };
 
 export const config = getDefaultConfig({
   appName: "XDC Lending Protocol",
