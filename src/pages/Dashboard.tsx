@@ -22,6 +22,9 @@ import BorrowModal from "./modal/BorrowModal";
 import RepayModal from "./modal/RepayModal";
 import SupplyDoneModal from "./modal/SupplyDoneModal";
 import BorrowDoneModal from "./modal/BorrowDoneModal";
+import { useXdcPortfolio } from "@/hooks/useXdcPortfolio";
+
+
 
 const Dashboard = () => {
   const yourSupplies = [
@@ -74,7 +77,14 @@ const Dashboard = () => {
   const [isBorrowDoneModal, setIsBorrowDoneModal] = useState<boolean>(false);
   const [isRepayModal, setIsRepayModal] = useState<boolean>(false);
   const [isWithdrawModal, setIsWithdrawModal] = useState<boolean>(false);
-  const { isConnected } = useAccount();
+const { isConnected } = useAccount();
+
+// Portfolio stats (Net worth, Net APY, Available rewards)
+const { netWorthUsd, netApyPct, rewardsUsd, isLoading, isError, error } = useXdcPortfolio();
+
+const fmtUsd = (v?: number | null) => (v == null ? "—" : `$${v.toFixed(2)}`);
+const fmtPct = (v?: number | null) => (v == null ? "—" : `${v.toFixed(2)}%`);
+
   return (
     <Container maxW="container.xl" h="100%">
       <Box h="100%" p="30px 0">
@@ -129,25 +139,28 @@ const Dashboard = () => {
         <Flex gap="6" alignItems="center" mb="50px">
           <Flex direction="column">
             <Box>Net worth</Box>
-            <Heading size="2xl">$0</Heading>
+            {/* was: <Heading size="2xl">$0</Heading> */}
+            <Heading size="2xl">{fmtUsd(netWorthUsd)}</Heading>
           </Flex>
+
           <Flex direction="column">
             <Box>Net APY</Box>
-            <Box fontSize="21px" fontWeight="700">
-              —
-            </Box>
+            {/* was: <Box fontSize="21px" fontWeight="700">—</Box> */}
+            <Box fontSize="21px" fontWeight="700">{fmtPct(netApyPct)}</Box>
           </Flex>
+
           <Flex direction="column">
             <Box>Health factor</Box>
-            <Heading size="2xl" color="green.600">
-              3.30K
-            </Heading>
+            <Heading size="2xl" color="green.600">3.30K</Heading>
           </Flex>
+
           <Flex direction="column">
             <Box>Available rewards</Box>
-            <Heading size="2xl">$0</Heading>
+            {/* was: <Heading size="2xl">$0</Heading> */}
+            <Heading size="2xl">{fmtUsd(rewardsUsd)}</Heading>
           </Flex>
         </Flex>
+
         {isConnected ? (
           <Flex gap="4">
             <Box width="50%">
