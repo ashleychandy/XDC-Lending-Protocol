@@ -54,10 +54,12 @@ const Dashboard = () => {
     chainId,
   });
 
+  console.log("nativeBalance", nativeBalance);
+
   const yourSupplies = [
     {
       id: 1,
-      name: "XDC",
+      name: nativeBalance?.symbol,
       balance: nativeBalance ? Number(nativeBalance.formatted).toFixed(2) : 0,
       dollarBalance: netWorthUsd ? `$${netWorthUsd.toFixed(2)}` : "$0.00",
       apy: netApyPct ? `${netApyPct.toFixed(2)}%` : "0%",
@@ -68,7 +70,7 @@ const Dashboard = () => {
   const assetsToSupply = [
     {
       id: 1,
-      name: "XDC",
+      name: nativeBalance?.symbol,
       balance: nativeBalance ? Number(nativeBalance.formatted).toFixed(2) : 0,
       dollarBalance: netWorthUsd ? `$${netWorthUsd.toFixed(2)}` : "$0.00",
       apy: netApyPct ? `${netApyPct.toFixed(2)}%` : "0%",

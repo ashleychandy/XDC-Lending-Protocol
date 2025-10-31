@@ -1,9 +1,33 @@
-import { XDC_MARKETS } from "@/config/market.xdc";
 import { useQuery } from "@tanstack/react-query";
 import { readContracts } from "@wagmi/core";
 import { useAccount, useChainId } from "wagmi";
 import { xrc20Abi } from "@/config/abis";
 import { config } from "@/providers/WalletProvider";
+import { XDC_MARKETS } from "@/config/market.xdc";
+
+// 🆕 Example Arbitrum Sepolia market list
+export const ARBITRUM_SEPOLIA_MARKETS = [
+  {
+    symbol: "USDC",
+    underlyingDecimals: 6,
+    aToken: "0xYourATokenAddressHere",
+    variableDebtToken: "0xYourVariableDebtTokenAddressHere",
+    stableDebtToken: null,
+    priceFeed: "0xYourChainlinkPriceFeedAddressHere",
+    priceFeedDecimals: 8,
+  },
+  {
+    symbol: "WETH",
+    underlyingDecimals: 18,
+    aToken: "0xYourWETHATokenAddressHere",
+    variableDebtToken: "0xYourWETHVariableDebtTokenAddressHere",
+    stableDebtToken: null,
+    priceFeed: "0xYourWETHChainlinkFeedAddressHere",
+    priceFeedDecimals: 8,
+  },
+];
+
+// --- Shared AggregatorV3Interface ABI ---
 const aggV3Abi = [
   {
     type: "function",
@@ -20,12 +44,11 @@ const aggV3Abi = [
   },
 ] as const;
 
+// --- Helper functions ---
 const toNumber = (x: bigint, decimals: number) => Number(x) / 10 ** decimals;
 
-/** Replace with your real APR sources (protocol contracts/indexer) */
 const computeNetApyPct = (totalSupplyUsd: number, totalDebtUsd: number) => {
   if (totalSupplyUsd <= 0 && totalDebtUsd <= 0) return 0;
-  // Simple placeholder: 3% supply APR vs 7% borrow APR
   const supplyApr = 0.03;
   const borrowApr = 0.07;
   const denom = Math.max(1, totalSupplyUsd - totalDebtUsd);
@@ -36,7 +59,13 @@ const computeNetApyPct = (totalSupplyUsd: number, totalDebtUsd: number) => {
 
 const queryKeys = {
   portfolio: (address?: `0x${string}`, chainId?: number) =>
-    ["xdcPortfolio", { address, chainId }] as const,
+    ["portfolio", { address, chainId }] as const,
+};
+
+// --- Chain to Market mapping ---
+const MARKET_MAP: Record<number, any[]> = {
+  50: XDC_MARKETS, // XDC Mainnet
+  421614: ARBITRUM_SEPOLIA_MARKETS, // ✅ Arbitrum Sepolia Testnet
 };
 
 type SupportedChainId = (typeof config.chains)[number]["id"];
@@ -44,13 +73,15 @@ type SupportedChainId = (typeof config.chains)[number]["id"];
 export function useXdcPortfolio() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
+
   const chainIsSupported =
     !!chainId && config.chains.some((c) => c.id === chainId);
 
+  const markets = chainId && MARKET_MAP[chainId] ? MARKET_MAP[chainId] : [];
+
   const query = useQuery({
     queryKey: queryKeys.portfolio(address, chainId),
-    enabled:
-      isConnected && !!address && chainIsSupported && XDC_MARKETS.length > 0,
+    enabled: isConnected && !!address && chainIsSupported && markets.length > 0,
     refetchInterval: 10_000,
     refetchIntervalInBackground: true,
     refetchOnWindowFocus: false,
@@ -58,17 +89,9 @@ export function useXdcPortfolio() {
       if (!address || !isConnected || !chainIsSupported || !chainId)
         return null;
 
-      // ---- Multicall build ----
-      // Option A (simple): loosen typing
       const contracts: any[] = [];
 
-      // Option B (strict types):
-      // import type { ReadContractsParameters } from '@wagmi/core'
-      // type ContractsParam = ReadContractsParameters<typeof config>['contracts']
-      // const contracts: ContractsParam = [];
-      console.log("XDC_MARKETS", XDC_MARKETS);
-
-      for (const m of XDC_MARKETS) {
+      for (const m of markets) {
         // aToken balance
         contracts.push({
           address: m.aToken,
@@ -114,34 +137,29 @@ export function useXdcPortfolio() {
         allowFailure: true,
       });
 
-      // Walk through results in the same order we pushed
       let idx = 0;
       let totalSupplyUsd = 0;
       let totalDebtUsd = 0;
 
-      for (const m of XDC_MARKETS) {
-        // supply
+      for (const m of markets) {
         const supplyRes = res[idx++]?.result as bigint | undefined;
         const supplyTokens = supplyRes
           ? toNumber(supplyRes, m.underlyingDecimals)
           : 0;
 
-        // variable debt
         let vDebtTokens = 0;
         if (m.variableDebtToken) {
           const r = res[idx++]?.result as bigint | undefined;
           vDebtTokens = r ? toNumber(r, m.underlyingDecimals) : 0;
         }
 
-        // stable debt
         let sDebtTokens = 0;
         if (m.stableDebtToken) {
           const r = res[idx++]?.result as bigint | undefined;
           sDebtTokens = r ? toNumber(r, m.underlyingDecimals) : 0;
         }
 
-        // price
-        let priceUsd = m.hardcodedUsdPrice != null ? m.hardcodedUsdPrice : 0;
+        let priceUsd = m.hardcodedUsdPrice ?? 0;
         if (m.priceFeed) {
           const feed = res[idx++]?.result as { answer: bigint } | undefined;
           if (feed?.answer != null) {
@@ -150,23 +168,17 @@ export function useXdcPortfolio() {
           }
         }
 
-        const supplyUsd = supplyTokens * priceUsd;
-        const debtUsd = (vDebtTokens + sDebtTokens) * priceUsd;
-
-        totalSupplyUsd += supplyUsd;
-        totalDebtUsd += debtUsd;
+        totalSupplyUsd += supplyTokens * priceUsd;
+        totalDebtUsd += (vDebtTokens + sDebtTokens) * priceUsd;
       }
 
-      console.log("totalSupplyUsd", totalSupplyUsd);
-      console.log("totalDebtUsd", totalDebtUsd);
       const netWorthUsd = totalSupplyUsd - totalDebtUsd;
       const netApyPct = computeNetApyPct(totalSupplyUsd, totalDebtUsd);
-      const rewardsUsd = 0; // plug your incentives later
+      const rewardsUsd = 0;
 
       return { netWorthUsd, netApyPct, rewardsUsd };
     },
   });
-  console.log("query", query.data);
 
   return {
     netWorthUsd: query.data?.netWorthUsd ?? null,

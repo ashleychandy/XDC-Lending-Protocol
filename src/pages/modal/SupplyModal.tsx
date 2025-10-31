@@ -35,8 +35,9 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
     chainId,
   });
 
-  const { step, handleSupply } = useSupply({
-    tokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+  const { handleSupply } = useSupply({
+    // tokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+    tokenAddress: "0x980b62da83eff3d4576c647993b0c1d7faf17c73",
     lendingPoolAddress: "0xBfC91D59fdAA134A4ED45f7B584cAf96D7792Eff",
   });
 
@@ -65,7 +66,9 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header justifyContent="space-between">
-                <Dialog.Title fontSize="22px">Supply XDC</Dialog.Title>
+                <Dialog.Title fontSize="22px">
+                  Supply {nativeBalance?.symbol}
+                </Dialog.Title>
                 <Dialog.CloseTrigger asChild pos="static">
                   <Icon size="xl" cursor="pointer">
                     <IoMdClose />
@@ -96,16 +99,15 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                           placeholder="0.00"
                           value={value}
                           onChange={(e) => {
-                            const input = e.currentTarget.value;
-                            if (/^\d*\.?\d*$/.test(input)) {
-                              setValue(input);
-                            }
+                            let input = e.currentTarget.value;
+                            if (input.startsWith(".")) input = "0" + input;
+                            if (/^\d*\.?\d*$/.test(input)) setValue(input);
                           }}
                         />
                       </InputGroup>
                       <Flex gap="8px" alignItems="center">
                         <Image src={xdcIcon} width="24px" height="24px"></Image>
-                        <Heading>XDC</Heading>
+                        <Heading>{nativeBalance?.symbol}</Heading>
                       </Flex>
                     </Flex>
                     <Flex justifyContent="space-between" alignItems="center">
@@ -177,7 +179,9 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                   // onClick={onClickSupply}
                   onClick={() => handleSupply(value)}
                 >
-                  {value.trim() === "" ? "Enter an amount" : "Supply XDC"}
+                  {value.trim() === ""
+                    ? "Enter an amount"
+                    : `Supply ${nativeBalance?.symbol}`}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>
