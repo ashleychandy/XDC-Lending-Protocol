@@ -21,6 +21,10 @@ import xdcIcon from "../../assets/images/xdc-icon.webp";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  tokenSymbol: "weth" | "usdc";
+  amount: string;
+  setAmount: (value: string) => void;
+  onClickWithdraw: () => void;
 }
 
 const WithdrawModal: React.FC<Props> = ({ isOpen, onClose }) => {

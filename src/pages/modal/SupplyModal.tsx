@@ -16,12 +16,14 @@ import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
 import xdcIcon from "../../assets/images/xdc-icon.webp";
-import { useSupply } from "@/hooks/supply/useSupply";
 import { useAccount, useBalance } from "wagmi";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  tokenSymbol: "weth" | "usdc";
+  amount: string;
+  setAmount: (value: string) => void;
   onClickSupply: () => void;
 }
 
@@ -33,12 +35,6 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
   const { data: nativeBalance } = useBalance({
     address,
     chainId,
-  });
-
-  const { handleSupply } = useSupply({
-    // tokenAddress: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-    tokenAddress: "0x980b62da83eff3d4576c647993b0c1d7faf17c73",
-    lendingPoolAddress: "0xBfC91D59fdAA134A4ED45f7B584cAf96D7792Eff",
   });
 
   const endElement = value ? (
@@ -176,8 +172,8 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                   disabled={value.trim() === ""}
                   w="100%"
                   fontSize="18px"
-                  // onClick={onClickSupply}
-                  onClick={() => handleSupply(value)}
+                  onClick={onClickSupply}
+                  // onClick={() => handleSupply(value)}
                 >
                   {value.trim() === ""
                     ? "Enter an amount"
