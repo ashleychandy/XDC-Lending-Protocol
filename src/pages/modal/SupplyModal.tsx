@@ -12,36 +12,146 @@ import {
   InputGroup,
   Portal,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
-import xdcIcon from "../../assets/images/xdc-icon.webp";
+import ethIcon from "../../assets/images/eth.svg";
+import wethIcon from "../../assets/images/weth.svg";
+import usdcIcon from "../../assets/images/usdc.svg";
 import { useAccount, useBalance } from "wagmi";
+import { TOKENS } from "@/chains/arbitrum/arbHelper";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  tokenSymbol: "weth" | "usdc";
+  tokenSymbol: "weth" | "usdc" | "eth";
   amount: string;
   setAmount: (value: string) => void;
   onClickSupply: () => void;
+  supplyApy?: string;
 }
 
-const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
-  const [value, setValue] = useState("");
+const SupplyModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  tokenSymbol,
+  amount,
+  setAmount,
+  onClickSupply,
+  supplyApy = "0.00",
+}) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const { address, chainId } = useAccount();
+  const { address } = useAccount();
 
-  const { data: nativeBalance } = useBalance({
+  // Get ETH balance for native ETH
+  const { data: ethBalance } = useBalance({
     address,
-    chainId,
   });
 
-  const endElement = value ? (
+  // Get token balances
+  const { balance: wethBalance } = useTokenBalance(
+    TOKENS.weth.address,
+    TOKENS.weth.decimals
+  );
+  const { balance: usdcBalance } = useTokenBalance(
+    TOKENS.usdc.address,
+    TOKENS.usdc.decimals
+  );
+
+  // Get account data for health factor
+  const accountData = useUserAccountData();
+
+  // Separate display token from contract token
+  // Display: Show what user selected (ETH or WETH)
+  // Contract: Use WETH for both ETH and WETH
+  const displayToken = tokenSymbol; // Keep original selection for display
+  const contractToken = tokenSymbol === "eth" ? "weth" : tokenSymbol; // Convert ETH to WETH for contracts
+
+  // Token configuration based on DISPLAY token (what user sees)
+  const getTokenConfig = () => {
+    switch (displayToken) {
+      case "eth":
+        return {
+          name: "ETH",
+          symbol: "ETH",
+          icon: ethIcon,
+          balance: ethBalance?.formatted || "0",
+          decimals: 18,
+        };
+      case "weth":
+        return {
+          name: "WETH",
+          symbol: "WETH",
+          icon: wethIcon,
+          balance: wethBalance,
+          decimals: TOKENS.weth.decimals,
+        };
+      case "usdc":
+        return {
+          name: "USDC",
+          symbol: "USDC",
+          icon: usdcIcon,
+          balance: usdcBalance,
+          decimals: TOKENS.usdc.decimals,
+        };
+      default:
+        return {
+          name: "ETH",
+          symbol: "ETH",
+          icon: ethIcon,
+          balance: "0",
+          decimals: 18,
+        };
+    }
+  };
+
+  const tokenConfig = getTokenConfig();
+
+  // Calculate dollar value (placeholder - you can integrate with price oracle)
+  const getDollarValue = () => {
+    if (!amount || amount === "0") return "0.00";
+    const ethPrice = 2500; // Replace with dynamic price
+    const usdcPrice = 1;
+
+    const amountNum = parseFloat(amount);
+    // Both ETH and WETH use same price
+    if (displayToken === "eth" || displayToken === "weth") {
+      return (amountNum * ethPrice).toFixed(2);
+    } else {
+      return (amountNum * usdcPrice).toFixed(2);
+    }
+  };
+
+  // Calculate new health factor after supply
+  const getNewHealthFactor = () => {
+    const currentHF = parseFloat(accountData.healthFactor);
+    if (currentHF > 1000) return "∞";
+
+    // This is a simplified calculation
+    // Real calculation would need to account for the exact collateral value added
+    const amountNum = parseFloat(amount || "0");
+    if (amountNum === 0) return currentHF.toFixed(2);
+
+    // Approximate increase (actual calculation is more complex)
+    const increase = amountNum * 0.1; // Placeholder
+    return (currentHF + increase).toFixed(2);
+  };
+
+  const healthFactorValue = parseFloat(accountData.healthFactor);
+  const healthFactorColor =
+    healthFactorValue < 1.5
+      ? "red.600"
+      : healthFactorValue < 2
+      ? "orange.500"
+      : "green.600";
+
+  const endElement = amount ? (
     <CloseButton
       size="xs"
       onClick={() => {
-        setValue("");
+        setAmount("");
         inputRef.current?.focus();
       }}
       me="-2"
@@ -63,7 +173,7 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
             <Dialog.Content>
               <Dialog.Header justifyContent="space-between">
                 <Dialog.Title fontSize="22px">
-                  Supply {nativeBalance?.symbol}
+                  Supply {tokenConfig.symbol}
                 </Dialog.Title>
                 <Dialog.CloseTrigger asChild pos="static">
                   <Icon size="xl" cursor="pointer">
@@ -93,25 +203,33 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                           p="0"
                           fontSize="20px"
                           placeholder="0.00"
-                          value={value}
+                          value={amount}
                           onChange={(e) => {
                             let input = e.currentTarget.value;
                             if (input.startsWith(".")) input = "0" + input;
-                            if (/^\d*\.?\d*$/.test(input)) setValue(input);
+                            if (/^\d*\.?\d*$/.test(input)) setAmount(input);
                           }}
                         />
                       </InputGroup>
                       <Flex gap="8px" alignItems="center">
-                        <Image src={xdcIcon} width="24px" height="24px"></Image>
-                        <Heading>{nativeBalance?.symbol}</Heading>
+                        <Image
+                          src={tokenConfig.icon}
+                          width="24px"
+                          height="24px"
+                        />
+                        <Heading size="md">{tokenConfig.symbol}</Heading>
                       </Flex>
                     </Flex>
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Box>$ 0</Box>
+                      <Box fontSize="sm" color="gray.600">
+                        $ {getDollarValue()}
+                      </Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px">
+                        <Box fontSize="13px" color="gray.600">
                           Wallet balance{" "}
-                          {Number(nativeBalance?.formatted).toFixed(2)}
+                          {parseFloat(tokenConfig.balance).toFixed(
+                            tokenConfig.decimals === 6 ? 2 : 4
+                          )}
                         </Box>
 
                         <Button
@@ -120,13 +238,20 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          onClick={() =>
-                            setValue(
-                              Number(nativeBalance?.formatted).toFixed(
-                                4
-                              ) as string
-                            )
-                          }
+                          colorScheme="blue"
+                          onClick={() => {
+                            const maxAmount = parseFloat(tokenConfig.balance);
+                            // Leave a small amount for gas if it's native ETH
+                            const finalAmount =
+                              displayToken === "eth"
+                                ? Math.max(0, maxAmount - 0.01)
+                                : maxAmount;
+                            setAmount(
+                              finalAmount.toFixed(
+                                tokenConfig.decimals === 6 ? 2 : 6
+                              )
+                            );
+                          }}
                         >
                           MAX
                         </Button>
@@ -142,42 +267,68 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                       alignItems="center"
                       mb="15px"
                     >
-                      <Box>Supply APY</Box>
-                      <Box>0 %</Box>
+                      <Box fontSize="sm">Supply APY</Box>
+                      <Box fontSize="sm" fontWeight="semibold">
+                        {supplyApy}%
+                      </Box>
                     </Flex>
                     <Flex
                       justifyContent="space-between"
                       alignItems="center"
                       mb="15px"
                     >
-                      <Box>Collateralization</Box>
-                      <Box color="green.600">Enabled</Box>
+                      <Box fontSize="sm">Collateralization</Box>
+                      <Box
+                        color="green.600"
+                        fontSize="sm"
+                        fontWeight="semibold"
+                      >
+                        Enabled
+                      </Box>
                     </Flex>
                     <Flex justifyContent="space-between" gap="7px">
-                      <Box>Health factor</Box>
+                      <Box fontSize="sm">Health factor</Box>
                       <Box textAlign="right">
-                        <Box color="green.600">3.30K</Box>
-                        <Box fontSize="12px">{`Liquidation at < 1.0`}</Box>
+                        <Flex
+                          gap="5px"
+                          alignItems="center"
+                          justifyContent="end"
+                        >
+                          <Box color="gray.500" fontSize="sm">
+                            {healthFactorValue > 1000
+                              ? "∞"
+                              : healthFactorValue.toFixed(2)}
+                          </Box>
+                          <Box fontSize="sm">→</Box>
+                          <Box color={healthFactorColor} fontWeight="semibold">
+                            {getNewHealthFactor()}
+                          </Box>
+                        </Flex>
+                        <Box fontSize="12px" color="gray.500">
+                          {`Liquidation at < 1.0`}
+                        </Box>
                       </Box>
                     </Flex>
                   </Box>
                 </Box>
-                <Flex mt="20px" alignItems="center">
+                <Flex mt="20px" alignItems="center" gap="5px" color="gray.600">
                   <MdLocalGasStation size="16px" />
-                  <Box>{`< $ 0.01`}</Box>
+                  <Box fontSize="sm">{`< $0.01`}</Box>
                 </Flex>
               </Dialog.Body>
               <Dialog.Footer>
                 <Button
-                  disabled={value.trim() === ""}
+                  disabled={
+                    !amount || amount.trim() === "" || parseFloat(amount) === 0
+                  }
                   w="100%"
                   fontSize="18px"
                   onClick={onClickSupply}
-                  // onClick={() => handleSupply(value)}
+                  colorScheme="blue"
                 >
-                  {value.trim() === ""
+                  {!amount || amount.trim() === "" || parseFloat(amount) === 0
                     ? "Enter an amount"
-                    : `Supply ${nativeBalance?.symbol}`}
+                    : `Supply ${tokenConfig.symbol}`}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>
