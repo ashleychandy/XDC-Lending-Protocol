@@ -20,7 +20,7 @@ import usdcIcon from "../../assets/images/usdc.svg";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  tokenSymbol: "weth" | "usdc";
+  tokenSymbol: "weth" | "usdc" | "eth";
   amount: string;
   setAmount: (value: string) => void;
   onClickBorrow: () => void;

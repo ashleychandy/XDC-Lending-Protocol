@@ -46,7 +46,9 @@ const Dashboard = () => {
   const [isWithdrawModal, setIsWithdrawModal] = useState<boolean>(false);
 
   const { address, isConnected } = useAccount();
-  const [selectedToken, setSelectedToken] = useState<"weth" | "usdc">("weth");
+  const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
+    "weth"
+  );
   const [amount, setAmount] = useState("");
 
   // Get native ETH balance
@@ -231,7 +233,7 @@ const Dashboard = () => {
 
   const handleSupply = async () => {
     if (!address || !amount) return;
-    const token = TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
     try {
       await supplyHook.approve(token.address, amount, token.decimals);
       setTimeout(async () => {
@@ -246,7 +248,7 @@ const Dashboard = () => {
 
   const handleBorrow = async () => {
     if (!address || !amount) return;
-    const token = TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
     try {
       await borrowHook.borrow(token.address, amount, token.decimals, address);
       setIsBorrowDoneModal(true);
@@ -258,7 +260,7 @@ const Dashboard = () => {
 
   const handleWithdraw = async () => {
     if (!address || !amount) return;
-    const token = TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
     try {
       await withdrawHook.withdraw(
         token.address,
@@ -274,7 +276,7 @@ const Dashboard = () => {
 
   const handleRepay = async () => {
     if (!address || !amount) return;
-    const token = TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
     try {
       await repayHook.approve(token.address, amount, token.decimals);
       setTimeout(async () => {
@@ -288,22 +290,25 @@ const Dashboard = () => {
 
   // Open modals with selected token
   const openSupplyModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
-    // Convert ETH to WETH for contract interaction
-    setSelectedToken(tokenSymbol === "eth" ? "weth" : tokenSymbol);
+    setSelectedToken(tokenSymbol);
     setIsSupplyModal(true);
   };
 
-  const openWithdrawModal = (tokenSymbol: "weth" | "usdc") => {
-    setSelectedToken(tokenSymbol);
+  const openWithdrawModal = (
+    name: string,
+    tokenSymbol: "weth" | "usdc" | "eth"
+  ) => {
+    const finalToken = name === "ETH" ? "eth" : tokenSymbol;
+    setSelectedToken(finalToken);
     setIsWithdrawModal(true);
   };
 
-  const openBorrowModal = (tokenSymbol: "weth" | "usdc") => {
+  const openBorrowModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
     setSelectedToken(tokenSymbol);
     setIsBorrowModal(true);
   };
 
-  const openRepayModal = (tokenSymbol: "weth" | "usdc") => {
+  const openRepayModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
     setSelectedToken(tokenSymbol);
     setIsRepayModal(true);
   };
@@ -374,7 +379,10 @@ const Dashboard = () => {
         {isSupplyModal && (
           <SupplyModal
             isOpen={isSupplyModal}
-            onClose={() => setIsSupplyModal(false)}
+            onClose={() => {
+              setIsSupplyModal(false);
+              setAmount("");
+            }}
             tokenSymbol={selectedToken}
             amount={amount}
             setAmount={setAmount}
@@ -382,6 +390,11 @@ const Dashboard = () => {
               handleSupply();
               setIsSupplyModal(false);
             }}
+            supplyApy={
+              selectedToken === "weth"
+                ? wethReserveData.supplyApy
+                : usdcReserveData.supplyApy
+            }
           />
         )}
         {isSupplyDoneModal && (
@@ -567,7 +580,7 @@ const Dashboard = () => {
                                   size="sm"
                                   onClick={() =>
                                     openSupplyModal(
-                                      item.symbol as "weth" | "usdc"
+                                      item.symbol as "weth" | "usdc" | "eth"
                                     )
                                   }
                                 >
@@ -576,11 +589,12 @@ const Dashboard = () => {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() =>
+                                  onClick={() => {
                                     openWithdrawModal(
-                                      item.symbol as "weth" | "usdc"
-                                    )
-                                  }
+                                      item.name,
+                                      item.symbol as "weth" | "usdc" | "eth"
+                                    );
+                                  }}
                                 >
                                   Withdraw
                                 </Button>
@@ -749,7 +763,7 @@ const Dashboard = () => {
                                   size="sm"
                                   onClick={() =>
                                     openBorrowModal(
-                                      item.symbol as "weth" | "usdc"
+                                      item.symbol as "weth" | "usdc" | "eth"
                                     )
                                   }
                                 >
@@ -760,7 +774,7 @@ const Dashboard = () => {
                                   variant="outline"
                                   onClick={() =>
                                     openRepayModal(
-                                      item.symbol as "weth" | "usdc"
+                                      item.symbol as "weth" | "usdc" | "eth"
                                     )
                                   }
                                 >
@@ -831,7 +845,7 @@ const Dashboard = () => {
                                 size="sm"
                                 onClick={() =>
                                   openBorrowModal(
-                                    item.symbol as "weth" | "usdc"
+                                    item.symbol as "weth" | "usdc" | "eth"
                                   )
                                 }
                                 disabled={
