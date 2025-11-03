@@ -2,67 +2,17 @@ import React from "react";
 import { RainbowKitProvider, getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { type Chain, http } from "viem";
+import { http } from "viem";
+import { xdc, xdcTestnet, arbitrumSepolia } from "wagmi/chains";
 
-// XDC Mainnet
-const xdcMainnet: Chain = {
-  id: 50,
-  name: "XDC Mainnet",
-  nativeCurrency: {
-    name: "XDC",
-    symbol: "XDC",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://rpc.xinfin.network"],
-    },
-    public: {
-      http: ["https://rpc.xinfin.network"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "XDC Explorer",
-      url: "https://explorer.xinfin.network",
-    },
-  },
-  testnet: false,
-};
-
-// XDC Apothem Testnet
-const xdcTestnet: Chain = {
-  id: 51,
-  name: "XDC Apothem Testnet",
-  nativeCurrency: {
-    name: "TXDC",
-    symbol: "TXDC",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://rpc.apothem.network"],
-    },
-    public: {
-      http: ["https://rpc.apothem.network"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Apothem Explorer",
-      url: "https://apothem.network",
-    },
-  },
-  testnet: true,
-};
-
-const config = getDefaultConfig({
+export const config = getDefaultConfig({
   appName: "XDC Lending Protocol",
   projectId: "YOUR_PROJECT_ID",
-  chains: [xdcMainnet, xdcTestnet],
+  chains: [xdc, xdcTestnet, arbitrumSepolia],
   transports: {
-    [xdcMainnet.id]: http(),
+    [xdc.id]: http(),
     [xdcTestnet.id]: http(),
+    [arbitrumSepolia.id]: http(),
   },
 });
 
@@ -72,7 +22,7 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider initialChain={xdcMainnet}>
+        <RainbowKitProvider initialChain={arbitrumSepolia}>
           {children}
         </RainbowKitProvider>
       </QueryClientProvider>

@@ -16,16 +16,26 @@ import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
 import xdcIcon from "../../assets/images/xdc-icon.webp";
+import { useAccount, useBalance } from "wagmi";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  tokenSymbol: "weth" | "usdc";
+  amount: string;
+  setAmount: (value: string) => void;
   onClickSupply: () => void;
 }
 
 const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const { address, chainId } = useAccount();
+
+  const { data: nativeBalance } = useBalance({
+    address,
+    chainId,
+  });
 
   const endElement = value ? (
     <CloseButton
@@ -52,7 +62,9 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header justifyContent="space-between">
-                <Dialog.Title fontSize="22px">Supply XDC</Dialog.Title>
+                <Dialog.Title fontSize="22px">
+                  Supply {nativeBalance?.symbol}
+                </Dialog.Title>
                 <Dialog.CloseTrigger asChild pos="static">
                   <Icon size="xl" cursor="pointer">
                     <IoMdClose />
@@ -83,22 +95,24 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                           placeholder="0.00"
                           value={value}
                           onChange={(e) => {
-                            const input = e.currentTarget.value;
-                            if (/^\d*\.?\d*$/.test(input)) {
-                              setValue(input);
-                            }
+                            let input = e.currentTarget.value;
+                            if (input.startsWith(".")) input = "0" + input;
+                            if (/^\d*\.?\d*$/.test(input)) setValue(input);
                           }}
                         />
                       </InputGroup>
                       <Flex gap="8px" alignItems="center">
                         <Image src={xdcIcon} width="24px" height="24px"></Image>
-                        <Heading>XDC</Heading>
+                        <Heading>{nativeBalance?.symbol}</Heading>
                       </Flex>
                     </Flex>
                     <Flex justifyContent="space-between" alignItems="center">
                       <Box>$ 0</Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px">Wallet balance 0.6185892</Box>
+                        <Box fontSize="13px">
+                          Wallet balance{" "}
+                          {Number(nativeBalance?.formatted).toFixed(2)}
+                        </Box>
 
                         <Button
                           variant="plain"
@@ -106,6 +120,13 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
+                          onClick={() =>
+                            setValue(
+                              Number(nativeBalance?.formatted).toFixed(
+                                4
+                              ) as string
+                            )
+                          }
                         >
                           MAX
                         </Button>
@@ -152,8 +173,11 @@ const SupplyModal: React.FC<Props> = ({ isOpen, onClose, onClickSupply }) => {
                   w="100%"
                   fontSize="18px"
                   onClick={onClickSupply}
+                  // onClick={() => handleSupply(value)}
                 >
-                  {value.trim() === "" ? "Enter an amount" : "Supply XDC"}
+                  {value.trim() === ""
+                    ? "Enter an amount"
+                    : `Supply ${nativeBalance?.symbol}`}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>

@@ -16,7 +16,12 @@ const Header = () => {
       bg="bg.panel"
       borderBottomWidth="1px"
     >
-      <Flex gap="4" justify="space-between" alignItems="center">
+      <Flex
+        gap="4"
+        justify="space-between"
+        alignItems="center"
+        direction={{ base: "column", lg: "row" }}
+      >
         <Flex gap="10" justify="space-between" alignItems="center">
           <Box w="80px">
             {colorMode === "dark" ? (
