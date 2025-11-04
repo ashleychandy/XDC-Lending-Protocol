@@ -6,12 +6,9 @@ import {
   Heading,
   HStack,
   Icon,
-  Image,
   Portal,
 } from "@chakra-ui/react";
 import { IoMdClose } from "react-icons/io";
-import { IoWalletOutline } from "react-icons/io5";
-import xdcIcon from "../../assets/images/xdc-icon.webp";
 import { FaCheck } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
 import { useAccount } from "wagmi";
@@ -24,7 +21,7 @@ interface Props {
   txHash?: `0x${string}`;
 }
 
-const SupplyDoneModal: React.FC<Props> = ({
+const RepayDoneModal: React.FC<Props> = ({
   isOpen,
   onClose,
   amount,
@@ -38,7 +35,6 @@ const SupplyDoneModal: React.FC<Props> = ({
     const explorerUrl = `${chain.blockExplorers.default.url}/tx/${txHash}`;
     window.open(explorerUrl, "_blank");
   };
-
   return (
     <HStack wrap="wrap" gap="4">
       <Dialog.Root
@@ -79,28 +75,9 @@ const SupplyDoneModal: React.FC<Props> = ({
                     All done
                   </Heading>
                   <Box>
-                    You Supplied {amount || "0.00"} {tokenSymbol?.toUpperCase()}
+                    You repaid {amount || "0.00"} {tokenSymbol?.toUpperCase()}
                   </Box>
                 </Box>
-                {/* <Box m="15px">
-                  <Box p="12px" bg="bg.muted" borderRadius="6px">
-                    <Image
-                      src={xdcIcon}
-                      width="32px"
-                      height="32px"
-                      m="0 auto 10px"
-                    ></Image>
-                    <Box mb="10px">
-                      Add aToken to wallet to track your balance.
-                    </Box>
-                    <Button size="sm">
-                      <Icon size="md">
-                        <IoWalletOutline />
-                      </Icon>
-                      Add to wallet
-                    </Button>
-                  </Box>
-                </Box> */}
               </Dialog.Body>
               <Dialog.Footer flexDirection="column" gap="8px">
                 <Button
@@ -111,7 +88,7 @@ const SupplyDoneModal: React.FC<Props> = ({
                   disabled={!txHash}
                 >
                   Review tx details
-                  <Icon size="md">
+                  <Icon size="md" ml="6px">
                     <FiExternalLink />
                   </Icon>
                 </Button>
@@ -129,4 +106,4 @@ const SupplyDoneModal: React.FC<Props> = ({
   );
 };
 
-export default SupplyDoneModal;
+export default RepayDoneModal;

@@ -10,17 +10,32 @@ import {
   Portal,
 } from "@chakra-ui/react";
 import { IoMdClose } from "react-icons/io";
-import { IoWalletOutline } from "react-icons/io5";
-import usdcIcon from "../../assets/images/usdc.svg";
 import { FaCheck } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
+import { useAccount } from "wagmi";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  amount: string;
+  tokenSymbol: string;
+  txHash?: `0x${string}`;
 }
 
-const BorrowDoneModal: React.FC<Props> = ({ isOpen, onClose }) => {
+const BorrowDoneModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  amount,
+  tokenSymbol,
+  txHash,
+}) => {
+  const { chain } = useAccount();
+
+  const handleOpenExplorer = () => {
+    if (!txHash || !chain?.blockExplorers?.default?.url) return;
+    const explorerUrl = `${chain.blockExplorers.default.url}/tx/${txHash}`;
+    window.open(explorerUrl, "_blank");
+  };
   return (
     <HStack wrap="wrap" gap="4">
       <Dialog.Root
@@ -60,9 +75,11 @@ const BorrowDoneModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   <Heading size="xl" mb="7px">
                     All done
                   </Heading>
-                  <Box>You Borrowed 1000.00 USDC</Box>
+                  <Box>
+                    You Borrowed {amount || "0.00"} {tokenSymbol?.toUpperCase()}
+                  </Box>
                 </Box>
-                <Box m="15px">
+                {/* <Box m="15px">
                   <Box p="12px" bg="bg.muted" borderRadius="6px">
                     <Image
                       src={usdcIcon}
@@ -80,12 +97,18 @@ const BorrowDoneModal: React.FC<Props> = ({ isOpen, onClose }) => {
                       Add to wallet
                     </Button>
                   </Box>
-                </Box>
+                </Box> */}
               </Dialog.Body>
               <Dialog.Footer flexDirection="column" gap="8px">
-                <Button variant="subtle" w="100%" fontSize="16px">
+                <Button
+                  variant="subtle"
+                  w="100%"
+                  fontSize="16px"
+                  onClick={handleOpenExplorer}
+                  disabled={!txHash}
+                >
                   Review tx details
-                  <Icon size="md">
+                  <Icon size="md" ml="6px">
                     <FiExternalLink />
                   </Icon>
                 </Button>

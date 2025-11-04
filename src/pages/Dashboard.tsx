@@ -35,7 +35,11 @@ import { useReserveData } from "@/hooks/useReserveData";
 import { useUserReserveData } from "@/hooks/useUserReserveData";
 import { formatUnits } from "viem";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
-import { formatValue } from "@/helpers/formatValue";
+import { formatUsdValue, formatValue } from "@/helpers/formatValue";
+import WithdrawDoneModal from "./modal/WithdrawDoneModal";
+import { useTransactionFlow } from "@/hooks/useTransactionFlow";
+import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import RepayDoneModal from "./modal/RepayDoneModal";
 
 const Dashboard = () => {
   const [isSupplyModal, setIsSupplyModal] = useState<boolean>(false);
@@ -43,7 +47,10 @@ const Dashboard = () => {
   const [isBorrowModal, setIsBorrowModal] = useState<boolean>(false);
   const [isBorrowDoneModal, setIsBorrowDoneModal] = useState<boolean>(false);
   const [isRepayModal, setIsRepayModal] = useState<boolean>(false);
+  const [isRepayDoneModal, setIsRepayDoneModal] = useState<boolean>(false);
   const [isWithdrawModal, setIsWithdrawModal] = useState<boolean>(false);
+  const [isWithdrawDoneModal, setIsWithdrawDoneModal] =
+    useState<boolean>(false);
 
   const { address, isConnected } = useAccount();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
@@ -124,7 +131,7 @@ const Dashboard = () => {
       name: "ETH",
       symbol: "weth",
       balance: formatValue(parseFloat(wethSupplied)),
-      dollarBalance: `$${formatValue(parseFloat(wethSupplied) * ethPrice)}`,
+      dollarBalance: `${formatUsdValue(parseFloat(wethSupplied) * ethPrice)}`,
       apy: `${parseFloat(wethReserveData.supplyApy)}%`,
       img: ethIcon,
       isCollateral: true,
@@ -135,7 +142,7 @@ const Dashboard = () => {
       name: "USDC",
       symbol: "usdc",
       balance: formatValue(parseFloat(usdcSupplied)),
-      dollarBalance: `$${formatValue(parseFloat(usdcSupplied) * usdcPrice)}`,
+      dollarBalance: `${formatUsdValue(parseFloat(usdcSupplied) * usdcPrice)}`,
       apy: `${parseFloat(usdcReserveData.supplyApy)}%`,
       img: usdcIcon,
       isCollateral: true,
@@ -157,16 +164,6 @@ const Dashboard = () => {
     },
     {
       id: 2,
-      name: "WETH",
-      symbol: "weth",
-      balance: formatValue(parseFloat(wethBalance)),
-      apy: `${wethReserveData.supplyApy}%`,
-      img: wethIcon,
-      canBeCollateral: true,
-      walletBalance: wethBalance,
-    },
-    {
-      id: 3,
       name: "USDC",
       symbol: "usdc",
       balance: formatValue(parseFloat(usdcBalance)),
@@ -175,29 +172,39 @@ const Dashboard = () => {
       canBeCollateral: true,
       walletBalance: usdcBalance,
     },
+    {
+      id: 3,
+      name: "WETH",
+      symbol: "weth",
+      balance: formatValue(parseFloat(wethBalance)),
+      apy: `${wethReserveData.supplyApy}%`,
+      img: wethIcon,
+      canBeCollateral: true,
+      walletBalance: wethBalance,
+    },
   ];
 
   // Your Borrows - based on debt
   const yourBorrows = [
     {
       id: 1,
-      name: "ETH",
-      symbol: "weth",
-      debt: formatValue(parseFloat(wethBorrowed)),
-      dollarDebt: `$${formatValue(parseFloat(wethBorrowed) * ethPrice)}`,
-      apy: `${wethReserveData.borrowApy}%`,
-      img: ethIcon,
-      actualAmount: wethUserData.borrowedAmount,
-    },
-    {
-      id: 2,
       name: "USDC",
       symbol: "usdc",
       debt: formatValue(parseFloat(usdcBorrowed)),
-      dollarDebt: `$${formatValue(parseFloat(usdcBorrowed) * usdcPrice)}`,
+      dollarDebt: `${formatUsdValue(parseFloat(usdcBorrowed) * usdcPrice)}`,
       apy: `${usdcReserveData.borrowApy}%`,
       img: usdcIcon,
       actualAmount: usdcUserData.borrowedAmount,
+    },
+    {
+      id: 2,
+      name: "ETH",
+      symbol: "weth",
+      debt: formatValue(parseFloat(wethBorrowed)),
+      dollarDebt: `${formatUsdValue(parseFloat(wethBorrowed) * ethPrice)}`,
+      apy: `${wethReserveData.borrowApy}%`,
+      img: ethIcon,
+      actualAmount: wethUserData.borrowedAmount,
     },
   ].filter((item) => item.actualAmount > BigInt(0));
 
@@ -210,7 +217,7 @@ const Dashboard = () => {
       available: formatValue(
         parseFloat(accountData.availableBorrows) / ethPrice
       ),
-      dollarAvailable: `$${formatValue(
+      dollarAvailable: `${formatUsdValue(
         parseFloat(accountData.availableBorrows)
       )}`,
       apy: `${wethReserveData.borrowApy}%`,
@@ -223,7 +230,7 @@ const Dashboard = () => {
       available: formatValue(
         parseFloat(accountData.availableBorrows) / usdcPrice
       ),
-      dollarAvailable: `$${formatValue(
+      dollarAvailable: `${formatUsdValue(
         parseFloat(accountData.availableBorrows)
       )}`,
       apy: `${usdcReserveData.borrowApy}%`,
@@ -238,25 +245,45 @@ const Dashboard = () => {
       await supplyHook.approve(token.address, amount, token.decimals);
       setTimeout(async () => {
         await supplyHook.supply(token.address, amount, token.decimals, address);
-        setIsSupplyDoneModal(true);
-        setAmount("");
       }, 2000);
     } catch (err) {
       console.error("Supply error:", err);
     }
   };
 
+  useTransactionFlow({
+    hash: supplyHook.hash,
+    onSuccess: () => {
+      setIsSupplyModal(false);
+      setIsSupplyDoneModal(true);
+    },
+    onError: (err) => {
+      console.log("error in supply transaction", err);
+      setAmount("");
+    },
+  });
+
   const handleBorrow = async () => {
     if (!address || !amount) return;
     const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
     try {
       await borrowHook.borrow(token.address, amount, token.decimals, address);
-      setIsBorrowDoneModal(true);
-      setAmount("");
     } catch (err) {
       console.error("Borrow error:", err);
     }
   };
+
+  useTransactionFlow({
+    hash: borrowHook.hash,
+    onSuccess: () => {
+      setIsBorrowModal(false);
+      setIsBorrowDoneModal(true);
+    },
+    onError: (err) => {
+      console.log("error in borrow transaction", err);
+      setAmount("");
+    },
+  });
 
   const handleWithdraw = async () => {
     if (!address || !amount) return;
@@ -268,11 +295,22 @@ const Dashboard = () => {
         token.decimals,
         address
       );
-      setAmount("");
     } catch (err) {
       console.error("Withdraw error:", err);
     }
   };
+
+  useTransactionFlow({
+    hash: withdrawHook.hash,
+    onSuccess: () => {
+      setIsWithdrawModal(false);
+      setIsWithdrawDoneModal(true);
+    },
+    onError: (err) => {
+      console.log("error in withdraw transaction", err);
+      setAmount("");
+    },
+  });
 
   const handleRepay = async () => {
     if (!address || !amount) return;
@@ -281,12 +319,23 @@ const Dashboard = () => {
       await repayHook.approve(token.address, amount, token.decimals);
       setTimeout(async () => {
         await repayHook.repay(token.address, amount, token.decimals, address);
-        setAmount("");
       }, 2000);
     } catch (err) {
       console.error("Repay error:", err);
     }
   };
+
+  useTransactionFlow({
+    hash: repayHook.hash,
+    onSuccess: () => {
+      setIsRepayModal(false);
+      setIsRepayDoneModal(true);
+    },
+    onError: (err) => {
+      console.log("error in repay transaction", err);
+      setAmount("");
+    },
+  });
 
   // Open modals with selected token
   const openSupplyModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
@@ -317,17 +366,13 @@ const Dashboard = () => {
   const netWorth =
     parseFloat(accountData.totalCollateral) - parseFloat(accountData.totalDebt);
   const healthFactorValue = parseFloat(accountData.healthFactor);
-  const healthFactorColor =
-    healthFactorValue < 1.5
-      ? "red.600"
-      : healthFactorValue < 2
-      ? "orange.500"
-      : "green.600";
+  const healthFactorColor = getHealthFactorColor(healthFactorValue);
   const borrowPowerUsed =
     parseFloat(accountData.totalCollateral) > 0
       ? (
           (parseFloat(accountData.totalDebt) /
-            parseFloat(accountData.totalCollateral)) *
+            (parseFloat(accountData.totalCollateral) *
+              (parseFloat(accountData.ltv) / 100))) *
           100
         ).toFixed(2)
       : "0.00";
@@ -388,64 +433,138 @@ const Dashboard = () => {
             setAmount={setAmount}
             onClickSupply={() => {
               handleSupply();
-              setIsSupplyModal(false);
             }}
             supplyApy={
               selectedToken === "weth"
                 ? wethReserveData.supplyApy
                 : usdcReserveData.supplyApy
             }
+            isPending={supplyHook.isPending}
+            isConfirming={supplyHook.isConfirming}
           />
         )}
         {isSupplyDoneModal && (
           <SupplyDoneModal
             isOpen={isSupplyDoneModal}
-            onClose={() => setIsSupplyDoneModal(false)}
+            onClose={() => {
+              setIsSupplyDoneModal(false);
+              setAmount("");
+            }}
+            amount={amount}
+            tokenSymbol={selectedToken.toUpperCase()}
+            txHash={supplyHook.hash as `0x${string}`}
           />
         )}
         {isWithdrawModal && (
           <WithdrawModal
             isOpen={isWithdrawModal}
-            onClose={() => setIsWithdrawModal(false)}
+            onClose={() => {
+              setIsWithdrawModal(false);
+              setAmount("");
+            }}
             tokenSymbol={selectedToken}
             amount={amount}
             setAmount={setAmount}
             onClickWithdraw={() => {
               handleWithdraw();
-              setIsWithdrawModal(false);
             }}
+            suppliedBalance={
+              selectedToken === "eth" || selectedToken === "weth"
+                ? wethSupplied
+                : usdcSupplied
+            }
+            ethPrice={ethPrice}
+            usdcPrice={usdcPrice}
+            isPending={withdrawHook.isPending}
+            isConfirming={withdrawHook.isConfirming}
+          />
+        )}
+        {isWithdrawDoneModal && (
+          <WithdrawDoneModal
+            isOpen={isWithdrawDoneModal}
+            onClose={() => {
+              setIsWithdrawDoneModal(false);
+              setAmount("");
+            }}
+            amount={amount}
+            tokenSymbol={selectedToken.toUpperCase()}
+            txHash={withdrawHook.hash as `0x${string}`}
           />
         )}
         {isBorrowModal && (
           <BorrowModal
             isOpen={isBorrowModal}
-            onClose={() => setIsBorrowModal(false)}
+            onClose={() => {
+              setIsBorrowModal(false);
+              setAmount("");
+            }}
             tokenSymbol={selectedToken}
             amount={amount}
             setAmount={setAmount}
             onClickBorrow={() => {
               handleBorrow();
-              setIsBorrowModal(false);
             }}
+            borrowedBalance={
+              selectedToken === "eth" || selectedToken === "weth"
+                ? formatValue(
+                    parseFloat(accountData.availableBorrows) / ethPrice
+                  )
+                : formatValue(
+                    parseFloat(accountData.availableBorrows) / usdcPrice
+                  )
+            }
+            ethPrice={ethPrice}
+            usdcPrice={usdcPrice}
+            isPending={borrowHook.isPending}
+            isConfirming={borrowHook.isConfirming}
           />
         )}
         {isBorrowDoneModal && (
           <BorrowDoneModal
             isOpen={isBorrowDoneModal}
-            onClose={() => setIsBorrowDoneModal(false)}
+            onClose={() => {
+              setIsBorrowDoneModal(false);
+              setAmount("");
+            }}
+            amount={amount}
+            tokenSymbol={selectedToken.toUpperCase()}
+            txHash={borrowHook.hash as `0x${string}`}
           />
         )}
         {isRepayModal && (
           <RepayModal
             isOpen={isRepayModal}
-            onClose={() => setIsRepayModal(false)}
+            onClose={() => {
+              setIsRepayModal(false);
+              setAmount("");
+            }}
             tokenSymbol={selectedToken}
             amount={amount}
             setAmount={setAmount}
             onClickRepay={() => {
               handleRepay();
-              setIsRepayModal(false);
             }}
+            borrowedAmount={
+              selectedToken === "eth" || selectedToken === "weth"
+                ? wethBorrowed
+                : usdcBorrowed
+            }
+            ethPrice={ethPrice}
+            usdcPrice={usdcPrice}
+            isPending={repayHook.isPending}
+            isConfirming={repayHook.isConfirming}
+          />
+        )}
+        {isRepayDoneModal && (
+          <RepayDoneModal
+            isOpen={isRepayDoneModal}
+            onClose={() => {
+              setIsRepayDoneModal(false);
+              setAmount("");
+            }}
+            amount={amount}
+            tokenSymbol={selectedToken.toUpperCase()}
+            txHash={repayHook.hash as `0x${string}`}
           />
         )}
 
@@ -470,8 +589,8 @@ const Dashboard = () => {
             </Heading>
           </Flex>
           <Flex direction="column">
-            <Box>LTV</Box>
-            <Heading size="2xl">{accountData.ltv}%</Heading>
+            <Box>Available Rewards</Box>
+            <Heading size="2xl">$0</Heading>
           </Flex>
         </Flex>
 
@@ -543,7 +662,7 @@ const Dashboard = () => {
                       <Table.Body>
                         {yourSupplies.map((item) => (
                           <Table.Row key={item.id}>
-                            <Table.Cell w="25%" border="none">
+                            <Table.Cell w="25%">
                               <Flex gap="10px" alignItems="center">
                                 <Image
                                   src={item.img}
@@ -553,7 +672,7 @@ const Dashboard = () => {
                                 <Box>{item.name}</Box>
                               </Flex>
                             </Table.Cell>
-                            <Table.Cell w="20%" border="none">
+                            <Table.Cell w="20%">
                               <Flex direction="column">
                                 <Box fontSize="sm">{item.balance}</Box>
                                 <Box fontSize="xs" color="gray.500">
@@ -561,10 +680,10 @@ const Dashboard = () => {
                                 </Box>
                               </Flex>
                             </Table.Cell>
-                            <Table.Cell w="13%" border="none" fontSize="sm">
+                            <Table.Cell w="13%" fontSize="sm">
                               {item.apy}
                             </Table.Cell>
-                            <Table.Cell w="12%" border="none">
+                            <Table.Cell w="12%">
                               <Switch.Root
                                 colorPalette="green"
                                 defaultChecked={item.isCollateral}
@@ -574,7 +693,7 @@ const Dashboard = () => {
                                 <Switch.Control />
                               </Switch.Root>
                             </Table.Cell>
-                            <Table.Cell w="30%" border="none">
+                            <Table.Cell w="30%">
                               <Flex gap="5px" justify="flex-end">
                                 <Button
                                   size="sm"
@@ -637,7 +756,7 @@ const Dashboard = () => {
                     <Table.Body>
                       {assetsToSupply.map((item) => (
                         <Table.Row key={item.id}>
-                          <Table.Cell w="30%" border="none">
+                          <Table.Cell w="30%">
                             <Flex gap="10px" alignItems="center">
                               <Image
                                 src={item.img}
@@ -647,20 +766,20 @@ const Dashboard = () => {
                               <Box>{item.name}</Box>
                             </Flex>
                           </Table.Cell>
-                          <Table.Cell w="25%" border="none">
+                          <Table.Cell w="25%">
                             <Box fontSize="sm">{item.balance}</Box>
                           </Table.Cell>
-                          <Table.Cell w="15%" border="none" fontSize="sm">
+                          <Table.Cell w="15%" fontSize="sm">
                             {item.apy}
                           </Table.Cell>
-                          <Table.Cell w="12%" border="none">
+                          <Table.Cell w="12%">
                             {item.canBeCollateral && (
                               <Icon size="md" color="green.600">
                                 <FaCheck />
                               </Icon>
                             )}
                           </Table.Cell>
-                          <Table.Cell w="18%" border="none">
+                          <Table.Cell w="18%">
                             <Button
                               size="sm"
                               onClick={() =>
@@ -740,13 +859,13 @@ const Dashboard = () => {
                       <Table.Body>
                         {yourBorrows.map((item) => (
                           <Table.Row key={item.id}>
-                            <Table.Cell w="30%" border="none">
+                            <Table.Cell w="30%">
                               <Flex gap="10px" alignItems="center">
                                 <Image src={item.img} w="28px" h="28px" />
                                 <Box>{item.name}</Box>
                               </Flex>
                             </Table.Cell>
-                            <Table.Cell w="25%" border="none">
+                            <Table.Cell w="25%">
                               <Flex direction="column">
                                 <Box fontSize="sm">{item.debt}</Box>
                                 <Box fontSize="xs" color="gray.500">
@@ -754,10 +873,10 @@ const Dashboard = () => {
                                 </Box>
                               </Flex>
                             </Table.Cell>
-                            <Table.Cell w="15%" border="none" fontSize="sm">
+                            <Table.Cell w="15%" fontSize="sm">
                               {item.apy}
                             </Table.Cell>
-                            <Table.Cell w="30%" border="none">
+                            <Table.Cell w="30%">
                               <Flex justify="flex-end" gap="5px">
                                 <Button
                                   size="sm"
@@ -818,7 +937,7 @@ const Dashboard = () => {
                     <Table.Body>
                       {assetsToBorrow.map((item) => (
                         <Table.Row key={item.id}>
-                          <Table.Cell w="30%" border="none">
+                          <Table.Cell w="30%">
                             <Flex gap="10px" alignItems="center">
                               <Image
                                 src={item.img}
@@ -828,7 +947,7 @@ const Dashboard = () => {
                               <Box>{item.name}</Box>
                             </Flex>
                           </Table.Cell>
-                          <Table.Cell w="25%" border="none">
+                          <Table.Cell w="25%">
                             <Flex direction="column">
                               <Box fontSize="sm">{item.available}</Box>
                               <Box fontSize="xs" color="gray.500">
@@ -836,10 +955,10 @@ const Dashboard = () => {
                               </Box>
                             </Flex>
                           </Table.Cell>
-                          <Table.Cell w="18%" border="none" fontSize="sm">
+                          <Table.Cell w="18%" fontSize="sm">
                             {item.apy}
                           </Table.Cell>
-                          <Table.Cell w="27%" border="none">
+                          <Table.Cell w="27%">
                             <Flex justify="flex-end" gap="5px">
                               <Button
                                 size="sm"
@@ -873,7 +992,7 @@ const Dashboard = () => {
             alignItems="center"
             justifyContent="center"
             p="20px"
-            h="62vh"
+            h="60vh"
             bg="bg.muted"
             borderRadius="5px"
           >
