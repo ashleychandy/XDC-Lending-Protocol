@@ -22,6 +22,8 @@ import { useAccount, useBalance } from "wagmi";
 import { TOKENS } from "@/chains/arbitrum/arbHelper";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
+import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import { formatValue } from "@/helpers/formatValue";
 
 interface Props {
   isOpen: boolean;
@@ -31,6 +33,8 @@ interface Props {
   setAmount: (value: string) => void;
   onClickSupply: () => void;
   supplyApy?: string;
+  isPending?: boolean;
+  isConfirming?: boolean;
 }
 
 const SupplyModal: React.FC<Props> = ({
@@ -41,6 +45,8 @@ const SupplyModal: React.FC<Props> = ({
   setAmount,
   onClickSupply,
   supplyApy = "0.00",
+  isPending,
+  isConfirming,
 }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { address } = useAccount();
@@ -140,12 +146,7 @@ const SupplyModal: React.FC<Props> = ({
   };
 
   const healthFactorValue = parseFloat(accountData.healthFactor);
-  const healthFactorColor =
-    healthFactorValue < 1.5
-      ? "red.600"
-      : healthFactorValue < 2
-      ? "orange.500"
-      : "green.600";
+  const healthFactorColor = getHealthFactorColor(healthFactorValue);
 
   const endElement = amount ? (
     <CloseButton
@@ -227,9 +228,7 @@ const SupplyModal: React.FC<Props> = ({
                       <Flex alignItems="center" gap="5px">
                         <Box fontSize="13px" color="gray.600">
                           Wallet balance{" "}
-                          {parseFloat(tokenConfig.balance).toFixed(
-                            tokenConfig.decimals === 6 ? 2 : 4
-                          )}
+                          {formatValue(parseFloat(tokenConfig.balance))}
                         </Box>
 
                         <Button
@@ -319,7 +318,11 @@ const SupplyModal: React.FC<Props> = ({
               <Dialog.Footer>
                 <Button
                   disabled={
-                    !amount || amount.trim() === "" || parseFloat(amount) === 0
+                    !amount ||
+                    amount.trim() === "" ||
+                    parseFloat(amount) === 0 ||
+                    isPending ||
+                    isConfirming
                   }
                   w="100%"
                   fontSize="18px"

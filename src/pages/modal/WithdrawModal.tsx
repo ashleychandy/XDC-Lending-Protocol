@@ -19,6 +19,9 @@ import { MdLocalGasStation } from "react-icons/md";
 import ethIcon from "../../assets/images/eth.svg";
 import wethIcon from "../../assets/images/weth.svg";
 import usdcIcon from "../../assets/images/usdc.svg";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
+import { formatValue } from "@/helpers/formatValue";
+import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
 
 interface Props {
   isOpen: boolean;
@@ -27,6 +30,11 @@ interface Props {
   amount: string;
   setAmount: (value: string) => void;
   onClickWithdraw: () => void;
+  suppliedBalance?: string;
+  ethPrice?: number;
+  usdcPrice?: number;
+  isPending?: boolean;
+  isConfirming?: boolean;
 }
 
 const WithdrawModal: React.FC<Props> = ({
@@ -36,20 +44,102 @@ const WithdrawModal: React.FC<Props> = ({
   amount,
   setAmount,
   onClickWithdraw,
+  suppliedBalance = "0",
+  ethPrice = 2500,
+  usdcPrice = 1,
+  isPending,
+  isConfirming,
 }) => {
-  console.log("symbol", tokenSymbol);
-
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [isChecked, setIsChecked] = useState<boolean>(true);
+  const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
 
-  // 🪙 Token metadata map
-  const tokenData = {
-    weth: { label: isChecked ? "ETH" : "WETH", icon: wethIcon },
-    usdc: { label: "USDC", icon: usdcIcon },
-    eth: { label: "ETH", icon: ethIcon },
+  // Get account data for health factor
+  const accountData = useUserAccountData();
+
+  // Token configuration
+  const getTokenConfig = () => {
+    // If WETH/ETH and unwrap is enabled, show ETH
+    if ((tokenSymbol === "weth" || tokenSymbol === "eth") && unwrapToNative) {
+      return {
+        name: "ETH",
+        symbol: "ETH",
+        icon: ethIcon,
+        decimals: 18,
+        price: ethPrice,
+      };
+    }
+    // If WETH and unwrap is disabled, show WETH
+    if (tokenSymbol === "weth" && !unwrapToNative) {
+      return {
+        name: "WETH",
+        symbol: "WETH",
+        icon: wethIcon,
+        decimals: 18,
+        price: ethPrice,
+      };
+    }
+    // For ETH selection, always show based on toggle
+    if (tokenSymbol === "eth") {
+      return {
+        name: unwrapToNative ? "ETH" : "WETH",
+        symbol: unwrapToNative ? "ETH" : "WETH",
+        icon: unwrapToNative ? ethIcon : wethIcon,
+        decimals: 18,
+        price: ethPrice,
+      };
+    }
+    // USDC
+    return {
+      name: "USDC",
+      symbol: "USDC",
+      icon: usdcIcon,
+      decimals: 6,
+      price: usdcPrice,
+    };
   };
 
-  const currentToken = tokenData[tokenSymbol];
+  const tokenConfig = getTokenConfig();
+
+  // Calculate dollar value
+  const getDollarValue = () => {
+    if (!amount || amount === "0") return "0.00";
+    const amountNum = parseFloat(amount);
+    return (amountNum * tokenConfig.price).toFixed(2);
+  };
+
+  // Calculate remaining supply after withdrawal
+  const getRemainingSupply = () => {
+    const supplied = parseFloat(suppliedBalance);
+    const withdrawAmount = parseFloat(amount || "0");
+    const remaining = Math.max(0, supplied - withdrawAmount);
+    return formatValue(remaining);
+  };
+
+  // Calculate new health factor after withdrawal
+  const getNewHealthFactor = () => {
+    const currentHF = parseFloat(accountData.healthFactor);
+    if (currentHF > 1000) return "∞";
+
+    const withdrawAmount = parseFloat(amount || "0");
+    if (withdrawAmount === 0) return currentHF.toFixed(2);
+
+    // Simplified calculation: withdrawing collateral decreases health factor
+    const collateralValue = withdrawAmount * tokenConfig.price;
+    const currentCollateral = parseFloat(accountData.totalCollateral);
+    const currentDebt = parseFloat(accountData.totalDebt);
+
+    if (currentDebt === 0) return "∞";
+
+    const newCollateral = Math.max(0, currentCollateral - collateralValue);
+    const liquidationThreshold =
+      parseFloat(accountData.currentLiquidationThreshold) / 100;
+    const newHF = (newCollateral * liquidationThreshold) / currentDebt;
+
+    return newHF > 1000 ? "∞" : newHF.toFixed(2);
+  };
+
+  const healthFactorValue = parseFloat(accountData.healthFactor);
+  const newHealthFactorValue = parseFloat(getNewHealthFactor());
 
   const endElement = amount ? (
     <CloseButton
@@ -61,6 +151,10 @@ const WithdrawModal: React.FC<Props> = ({
       me="-2"
     />
   ) : undefined;
+
+  // Check if withdrawal would make health factor too low
+  const isWithdrawalRisky =
+    newHealthFactorValue < 1.5 && newHealthFactorValue !== Infinity;
 
   return (
     <HStack wrap="wrap" gap="4">
@@ -77,7 +171,7 @@ const WithdrawModal: React.FC<Props> = ({
             <Dialog.Content>
               <Dialog.Header justifyContent="space-between">
                 <Dialog.Title fontSize="22px">
-                  Withdraw {currentToken.label}
+                  Withdraw {tokenConfig.symbol}
                 </Dialog.Title>
                 <Dialog.CloseTrigger asChild pos="static">
                   <Icon size="xl" cursor="pointer">
@@ -88,8 +182,10 @@ const WithdrawModal: React.FC<Props> = ({
 
               <Dialog.Body>
                 {/* Amount input */}
-                <Box mb="20px">
-                  <Box mb="7px">Amount</Box>
+                <Box mb="15px">
+                  <Box mb="7px" fontSize="sm" fontWeight="medium">
+                    Amount
+                  </Box>
                   <Box
                     p="6px 12px"
                     border="1px solid #eaebef"
@@ -111,7 +207,8 @@ const WithdrawModal: React.FC<Props> = ({
                           placeholder="0.00"
                           value={amount}
                           onChange={(e) => {
-                            const input = e.currentTarget.value;
+                            let input = e.currentTarget.value;
+                            if (input.startsWith(".")) input = "0" + input;
                             if (/^\d*\.?\d*$/.test(input)) {
                               setAmount(input);
                             }
@@ -120,26 +217,34 @@ const WithdrawModal: React.FC<Props> = ({
                       </InputGroup>
                       <Flex gap="8px" alignItems="center">
                         <Image
-                          src={currentToken.icon}
+                          src={tokenConfig.icon}
                           width="24px"
                           height="24px"
-                          alt={currentToken.label}
+                          alt={tokenConfig.symbol}
                         />
-                        <Heading>{currentToken.label}</Heading>
+                        <Heading size="md">{tokenConfig.symbol}</Heading>
                       </Flex>
                     </Flex>
 
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Box>$ 0</Box>
+                      <Box fontSize="sm" color="gray.600">
+                        $ {getDollarValue()}
+                      </Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px">Supply balance 0.6185892</Box>
+                        <Box fontSize="13px" color="gray.600">
+                          Supply balance{" "}
+                          {formatValue(parseFloat(suppliedBalance))}
+                        </Box>
                         <Button
                           variant="plain"
                           p="0"
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          onClick={() => setAmount("0.6185892")}
+                          colorScheme="blue"
+                          onClick={() => {
+                            setAmount(formatValue(parseFloat(suppliedBalance)));
+                          }}
                         >
                           MAX
                         </Button>
@@ -148,63 +253,132 @@ const WithdrawModal: React.FC<Props> = ({
                   </Box>
                 </Box>
 
-                {/* Optional unwrap switch for WETH/XDC */}
-                {tokenSymbol === "weth" || tokenSymbol === "eth" ? (
-                  <Box mb="20px">
+                {/* Unwrap toggle for WETH/ETH */}
+                {(tokenSymbol === "weth" || tokenSymbol === "eth") && (
+                  <Box mb="15px" p="12px" bg="gray.50" borderRadius="6px">
                     <Switch.Root
                       colorPalette="green"
-                      checked={isChecked}
-                      onCheckedChange={(e) => setIsChecked(e.checked)}
+                      checked={unwrapToNative}
+                      onCheckedChange={(e) => setUnwrapToNative(e.checked)}
+                      size="sm"
                     >
                       <Switch.HiddenInput />
                       <Switch.Control />
-                      <Switch.Label>
-                        Unwrap {tokenSymbol === "eth" ? "WETH" : "WXDC"} (to
-                        withdraw {tokenSymbol === "eth" ? "ETH" : "XDC"})
+                      <Switch.Label fontSize="sm">
+                        Unwrap WETH (to withdraw ETH)
                       </Switch.Label>
                     </Switch.Root>
                   </Box>
-                ) : null}
+                )}
 
                 {/* Transaction overview */}
                 <Box>
-                  <Box mb="7px">Transaction overview</Box>
+                  <Box mb="7px" fontSize="sm" fontWeight="medium">
+                    Transaction overview
+                  </Box>
                   <Box p="12px" border="1px solid #eaebef" borderRadius="6px">
                     <Flex
                       justifyContent="space-between"
                       alignItems="center"
                       mb="15px"
                     >
-                      <Box>Remaining APY</Box>
-                      <Box>0.5000000 {currentToken.label}</Box>
+                      <Box fontSize="sm">Remaining supply</Box>
+                      <Box fontSize="sm" fontWeight="semibold">
+                        {getRemainingSupply()} {tokenConfig.symbol}
+                      </Box>
                     </Flex>
                     <Flex justifyContent="space-between" gap="7px">
-                      <Box>Health factor</Box>
+                      <Box fontSize="sm">Health factor</Box>
                       <Box textAlign="right">
-                        <Box color="green.600">3.30K</Box>
-                        <Box fontSize="12px">{`Liquidation at < 1.0`}</Box>
+                        <Flex
+                          gap="5px"
+                          alignItems="center"
+                          justifyContent="flex-end"
+                        >
+                          <Box
+                            color={getHealthFactorColor(healthFactorValue)}
+                            fontSize="sm"
+                            fontWeight="semibold"
+                          >
+                            {healthFactorValue > 1000
+                              ? "∞"
+                              : healthFactorValue.toFixed(2)}
+                          </Box>
+                          <Box fontSize="sm">→</Box>
+                          <Box
+                            color={getHealthFactorColor(newHealthFactorValue)}
+                            fontWeight="semibold"
+                          >
+                            {getNewHealthFactor()}
+                          </Box>
+                        </Flex>
+                        <Box fontSize="12px" color="gray.500" mt="2px">
+                          {`Liquidation at < 1.0`}
+                        </Box>
                       </Box>
                     </Flex>
                   </Box>
                 </Box>
 
+                {/* Warning if risky withdrawal */}
+                {/* {isWithdrawalRisky && parseFloat(amount) > 0 && (
+                  <Box
+                    mt="15px"
+                    p="10px"
+                    bg="orange.50"
+                    border="1px solid"
+                    borderColor="orange.300"
+                    borderRadius="6px"
+                  >
+                    <Flex gap="8px" alignItems="flex-start">
+                      <Box color="orange.600" fontWeight="bold" fontSize="lg">
+                        ⚠️
+                      </Box>
+                      <Box>
+                        <Box
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="orange.700"
+                        >
+                          Low health factor
+                        </Box>
+                        <Box fontSize="xs" color="orange.600" mt="2px">
+                          Withdrawing this amount will significantly reduce your
+                          health factor. Your position may be at risk of
+                          liquidation.
+                        </Box>
+                      </Box>
+                    </Flex>
+                  </Box>
+                )} */}
+
                 {/* Gas cost */}
-                <Flex mt="20px" alignItems="center" gap="4px">
+                <Flex mt="20px" alignItems="center" gap="5px" color="gray.600">
                   <MdLocalGasStation size="16px" />
-                  <Box>{`< $ 0.01`}</Box>
+                  <Box fontSize="sm">{`< $0.01`}</Box>
                 </Flex>
               </Dialog.Body>
 
               <Dialog.Footer>
                 <Button
-                  disabled={amount.trim() === ""}
+                  disabled={
+                    !amount ||
+                    amount.trim() === "" ||
+                    parseFloat(amount) === 0 ||
+                    parseFloat(amount) > parseFloat(suppliedBalance) ||
+                    isPending ||
+                    isConfirming
+                  }
                   w="100%"
                   fontSize="18px"
                   onClick={onClickWithdraw}
+                  colorScheme={isWithdrawalRisky ? "orange" : "blue"}
                 >
-                  {amount.trim() === ""
+                  {!amount || amount.trim() === "" || parseFloat(amount) === 0
                     ? "Enter an amount"
-                    : `Withdraw ${currentToken.label}`}
+                    : parseFloat(amount) > parseFloat(suppliedBalance)
+                    ? "Insufficient balance"
+                    : `Withdraw ${tokenConfig.symbol}`}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>

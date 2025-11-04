@@ -6,15 +6,13 @@ import {
   Heading,
   HStack,
   Icon,
-  Image,
   Portal,
 } from "@chakra-ui/react";
 import { IoMdClose } from "react-icons/io";
-import { IoWalletOutline } from "react-icons/io5";
-import xdcIcon from "../../assets/images/xdc-icon.webp";
 import { FaCheck } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
 import { useAccount } from "wagmi";
+import React from "react";
 
 interface Props {
   isOpen: boolean;
@@ -24,7 +22,7 @@ interface Props {
   txHash?: `0x${string}`;
 }
 
-const SupplyDoneModal: React.FC<Props> = ({
+const WithdrawDoneModal: React.FC<Props> = ({
   isOpen,
   onClose,
   amount,
@@ -60,6 +58,7 @@ const SupplyDoneModal: React.FC<Props> = ({
                   </Icon>
                 </Dialog.CloseTrigger>
               </Dialog.Header>
+
               <Dialog.Body textAlign="center" pb="0">
                 <Box mb="20px">
                   <Flex
@@ -75,33 +74,16 @@ const SupplyDoneModal: React.FC<Props> = ({
                       <FaCheck />
                     </Icon>
                   </Flex>
+
                   <Heading size="xl" mb="7px">
                     All done
                   </Heading>
                   <Box>
-                    You Supplied {amount || "0.00"} {tokenSymbol?.toUpperCase()}
+                    You withdrew {amount || "0.00"} {tokenSymbol?.toUpperCase()}
                   </Box>
                 </Box>
-                {/* <Box m="15px">
-                  <Box p="12px" bg="bg.muted" borderRadius="6px">
-                    <Image
-                      src={xdcIcon}
-                      width="32px"
-                      height="32px"
-                      m="0 auto 10px"
-                    ></Image>
-                    <Box mb="10px">
-                      Add aToken to wallet to track your balance.
-                    </Box>
-                    <Button size="sm">
-                      <Icon size="md">
-                        <IoWalletOutline />
-                      </Icon>
-                      Add to wallet
-                    </Button>
-                  </Box>
-                </Box> */}
               </Dialog.Body>
+
               <Dialog.Footer flexDirection="column" gap="8px">
                 <Button
                   variant="subtle"
@@ -111,10 +93,11 @@ const SupplyDoneModal: React.FC<Props> = ({
                   disabled={!txHash}
                 >
                   Review tx details
-                  <Icon size="md">
+                  <Icon size="md" ml="6px">
                     <FiExternalLink />
                   </Icon>
                 </Button>
+
                 <Dialog.ActionTrigger asChild>
                   <Button w="100%" fontSize="16px" mb="30px">
                     Ok, Close
@@ -129,4 +112,4 @@ const SupplyDoneModal: React.FC<Props> = ({
   );
 };
 
-export default SupplyDoneModal;
+export default WithdrawDoneModal;
