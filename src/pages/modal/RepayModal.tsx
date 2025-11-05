@@ -103,7 +103,7 @@ const RepayModal: React.FC<Props> = ({
 
   // Calculate dollar value
   const getDollarValue = () => {
-    if (!amount || amount === "0") return "$0";
+    if (!amount || amount === "0") return "$0.00";
     const amountNum = parseFloat(amount);
     return formatUsdValue(amountNum * tokenConfig.price);
   };
@@ -247,11 +247,9 @@ const RepayModal: React.FC<Props> = ({
                     </Flex>
 
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Box fontSize="sm" color="gray.600">
-                        {getDollarValue()}
-                      </Box>
+                      <Box fontSize="sm">{getDollarValue()}</Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px" color="gray.600">
+                        <Box fontSize="13px">
                           Wallet balance{" "}
                           {formatValue(parseFloat(tokenConfig.walletBalance))}
                         </Box>
@@ -318,15 +316,11 @@ const RepayModal: React.FC<Props> = ({
                           justifyContent="flex-end"
                         >
                           <Flex alignItems="flex-end">
-                            <Box fontSize="xs" color="gray.500">
-                              {getBorrowedAmountUsd()}
-                            </Box>
+                            <Box fontSize="xs">{getBorrowedAmountUsd()}</Box>
                           </Flex>
                           <Box fontSize="sm">→</Box>
                           <Flex alignItems="flex-end">
-                            <Box fontSize="xs" color="gray.500">
-                              {getRemainingDebtUsd()}
-                            </Box>
+                            <Box fontSize="xs">{getRemainingDebtUsd()}</Box>
                           </Flex>
                         </Flex>
                       </Box>
@@ -356,7 +350,7 @@ const RepayModal: React.FC<Props> = ({
                             {getNewHealthFactor()}
                           </Box>
                         </Flex>
-                        <Box fontSize="12px" color="gray.500" mt="2px">
+                        <Box fontSize="12px" mt="2px">
                           {`Liquidation at < 1.0`}
                         </Box>
                       </Box>
@@ -453,7 +447,7 @@ const RepayModal: React.FC<Props> = ({
                 )} */}
 
                 {/* Gas cost */}
-                <Flex mt="20px" alignItems="center" gap="5px" color="gray.600">
+                <Flex mt="20px" alignItems="center" gap="5px">
                   <MdLocalGasStation size="16px" />
                   <Box fontSize="sm">{`< $0.01`}</Box>
                 </Flex>

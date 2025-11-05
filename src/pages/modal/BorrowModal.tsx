@@ -20,7 +20,7 @@ import ethIcon from "../../assets/images/eth.svg";
 import wethIcon from "../../assets/images/weth.svg";
 import usdcIcon from "../../assets/images/usdc.svg";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { formatValue } from "@/helpers/formatValue";
+import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
 
 interface Props {
@@ -102,9 +102,9 @@ const BorrowModal: React.FC<Props> = ({
 
   // Calculate dollar value
   const getDollarValue = () => {
-    if (!amount || amount === "0") return "0.00";
+    if (!amount || amount === "0") return "$0.00";
     const amountNum = parseFloat(amount);
-    return (amountNum * tokenConfig.price).toFixed(2);
+    return formatUsdValue(amountNum * tokenConfig.price);
   };
 
   // Calculate new health factor after borrow
@@ -219,11 +219,9 @@ const BorrowModal: React.FC<Props> = ({
                     </Flex>
 
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Box fontSize="sm" color="gray.600">
-                        $ {getDollarValue()}
-                      </Box>
+                      <Box fontSize="sm">{getDollarValue()}</Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px" color="gray.600">
+                        <Box fontSize="13px">
                           Available {formatValue(parseFloat(borrowedBalance))}
                         </Box>
                         <Button
@@ -246,7 +244,7 @@ const BorrowModal: React.FC<Props> = ({
 
                 {/* Unwrap toggle for WETH/ETH */}
                 {(tokenSymbol === "weth" || tokenSymbol === "eth") && (
-                  <Box mb="15px" p="12px" bg="gray.50" borderRadius="6px">
+                  <Box mb="15px" p="12px" borderRadius="6px">
                     <Switch.Root
                       colorPalette="green"
                       checked={unwrapToNative}
@@ -293,7 +291,7 @@ const BorrowModal: React.FC<Props> = ({
                             {getNewHealthFactor()}
                           </Box>
                         </Flex>
-                        <Box fontSize="12px" color="gray.500" mt="2px">
+                        <Box fontSize="12px" mt="2px">
                           {`Liquidation at < 1.0`}
                         </Box>
                       </Box>
@@ -302,7 +300,7 @@ const BorrowModal: React.FC<Props> = ({
                 </Box>
 
                 {/* Gas cost */}
-                <Flex mt="20px" alignItems="center" gap="5px" color="gray.600">
+                <Flex mt="20px" alignItems="center" gap="5px">
                   <MdLocalGasStation size="16px" />
                   <Box fontSize="sm">{`< $0.01`}</Box>
                 </Flex>

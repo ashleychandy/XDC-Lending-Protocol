@@ -14,6 +14,7 @@ import { useAccount, useBalance } from "wagmi";
 import xdcIcon from "../assets/images/xdc-icon.webp";
 import usdcIcon from "../assets/images/usdc.svg";
 import ethIcon from "../assets/images/eth.svg";
+import arbIcon from "../assets/images/arbitrum.svg";
 import wethIcon from "../assets/images/weth.svg";
 import notFoundImg from "../assets/images/not-found.png";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -40,6 +41,7 @@ import WithdrawDoneModal from "./modal/WithdrawDoneModal";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
 import RepayDoneModal from "./modal/RepayDoneModal";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [isSupplyModal, setIsSupplyModal] = useState<boolean>(false);
@@ -52,6 +54,7 @@ const Dashboard = () => {
   const [isWithdrawDoneModal, setIsWithdrawDoneModal] =
     useState<boolean>(false);
 
+  const navigate = useNavigate();
   const { address, isConnected } = useAccount();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     "weth"
@@ -439,6 +442,8 @@ const Dashboard = () => {
                 ? wethReserveData.supplyApy
                 : usdcReserveData.supplyApy
             }
+            ethPrice={ethPrice}
+            usdcPrice={usdcPrice}
             isPending={supplyHook.isPending}
             isConfirming={supplyHook.isConfirming}
           />
@@ -569,7 +574,7 @@ const Dashboard = () => {
         )}
 
         <Flex gap="2" alignItems="center" mb="15px">
-          <Image src={ethIcon} width="32px" height="32px" />
+          <Image src={arbIcon} width="32px" height="32px" />
           <Heading size="3xl">Arbitrum Sepolia Market</Heading>
         </Flex>
 
@@ -675,9 +680,7 @@ const Dashboard = () => {
                             <Table.Cell w="20%">
                               <Flex direction="column">
                                 <Box fontSize="sm">{item.balance}</Box>
-                                <Box fontSize="xs" color="gray.500">
-                                  {item.dollarBalance}
-                                </Box>
+                                <Box fontSize="xs">{item.dollarBalance}</Box>
                               </Flex>
                             </Table.Cell>
                             <Table.Cell w="13%" fontSize="sm">
@@ -742,21 +745,21 @@ const Dashboard = () => {
                   <Table.Root size="sm">
                     <Table.Header>
                       <Table.Row>
-                        <Table.ColumnHeader w="30%">Assets</Table.ColumnHeader>
-                        <Table.ColumnHeader w="25%">
+                        <Table.ColumnHeader w="23%">Assets</Table.ColumnHeader>
+                        <Table.ColumnHeader w="23%">
                           Wallet Balance
                         </Table.ColumnHeader>
                         <Table.ColumnHeader w="15%">APY</Table.ColumnHeader>
                         <Table.ColumnHeader w="12%">
                           Can be collateral
                         </Table.ColumnHeader>
-                        <Table.ColumnHeader w="18%"></Table.ColumnHeader>
+                        <Table.ColumnHeader w="27%"></Table.ColumnHeader>
                       </Table.Row>
                     </Table.Header>
                     <Table.Body>
                       {assetsToSupply.map((item) => (
                         <Table.Row key={item.id}>
-                          <Table.Cell w="30%">
+                          <Table.Cell w="23%">
                             <Flex gap="10px" alignItems="center">
                               <Image
                                 src={item.img}
@@ -766,7 +769,7 @@ const Dashboard = () => {
                               <Box>{item.name}</Box>
                             </Flex>
                           </Table.Cell>
-                          <Table.Cell w="25%">
+                          <Table.Cell w="23%">
                             <Box fontSize="sm">{item.balance}</Box>
                           </Table.Cell>
                           <Table.Cell w="15%" fontSize="sm">
@@ -779,18 +782,31 @@ const Dashboard = () => {
                               </Icon>
                             )}
                           </Table.Cell>
-                          <Table.Cell w="18%">
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                openSupplyModal(
-                                  item.symbol as "weth" | "usdc" | "eth"
-                                )
-                              }
-                              disabled={parseFloat(item.walletBalance) === 0}
-                            >
-                              Supply
-                            </Button>
+                          <Table.Cell w="27%">
+                            <Flex justify="flex-end" gap="5px">
+                              <Button
+                                size="sm"
+                                onClick={() =>
+                                  openSupplyModal(
+                                    item.symbol as "weth" | "usdc" | "eth"
+                                  )
+                                }
+                                disabled={parseFloat(item.walletBalance) === 0}
+                              >
+                                Supply
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  navigate(
+                                    `/asset-details?token=${item.symbol}`
+                                  )
+                                }
+                              >
+                                Details
+                              </Button>
+                            </Flex>
                           </Table.Cell>
                         </Table.Row>
                       ))}
@@ -868,9 +884,7 @@ const Dashboard = () => {
                             <Table.Cell w="25%">
                               <Flex direction="column">
                                 <Box fontSize="sm">{item.debt}</Box>
-                                <Box fontSize="xs" color="gray.500">
-                                  {item.dollarDebt}
-                                </Box>
+                                <Box fontSize="xs">{item.dollarDebt}</Box>
                               </Flex>
                             </Table.Cell>
                             <Table.Cell w="15%" fontSize="sm">
@@ -950,9 +964,7 @@ const Dashboard = () => {
                           <Table.Cell w="25%">
                             <Flex direction="column">
                               <Box fontSize="sm">{item.available}</Box>
-                              <Box fontSize="xs" color="gray.500">
-                                {item.dollarAvailable}
-                              </Box>
+                              <Box fontSize="xs">{item.dollarAvailable}</Box>
                             </Flex>
                           </Table.Cell>
                           <Table.Cell w="18%" fontSize="sm">
@@ -973,7 +985,15 @@ const Dashboard = () => {
                               >
                                 Borrow
                               </Button>
-                              <Button size="sm" variant="outline">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  navigate(
+                                    `/asset-details?token=${item.symbol}`
+                                  )
+                                }
+                              >
                                 Details
                               </Button>
                             </Flex>

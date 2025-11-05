@@ -23,7 +23,7 @@ import { TOKENS } from "@/chains/arbitrum/arbHelper";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
-import { formatValue } from "@/helpers/formatValue";
+import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 
 interface Props {
   isOpen: boolean;
@@ -33,6 +33,8 @@ interface Props {
   setAmount: (value: string) => void;
   onClickSupply: () => void;
   supplyApy?: string;
+  ethPrice?: number;
+  usdcPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
 }
@@ -45,6 +47,8 @@ const SupplyModal: React.FC<Props> = ({
   setAmount,
   onClickSupply,
   supplyApy = "0.00",
+  ethPrice = 2500,
+  usdcPrice = 1,
   isPending,
   isConfirming,
 }) => {
@@ -85,6 +89,7 @@ const SupplyModal: React.FC<Props> = ({
           icon: ethIcon,
           balance: ethBalance?.formatted || "0",
           decimals: 18,
+          price: ethPrice,
         };
       case "weth":
         return {
@@ -93,6 +98,7 @@ const SupplyModal: React.FC<Props> = ({
           icon: wethIcon,
           balance: wethBalance,
           decimals: TOKENS.weth.decimals,
+          price: ethPrice,
         };
       case "usdc":
         return {
@@ -101,6 +107,7 @@ const SupplyModal: React.FC<Props> = ({
           icon: usdcIcon,
           balance: usdcBalance,
           decimals: TOKENS.usdc.decimals,
+          price: usdcPrice,
         };
       default:
         return {
@@ -109,6 +116,7 @@ const SupplyModal: React.FC<Props> = ({
           icon: ethIcon,
           balance: "0",
           decimals: 18,
+          price: ethPrice,
         };
     }
   };
@@ -117,17 +125,9 @@ const SupplyModal: React.FC<Props> = ({
 
   // Calculate dollar value (placeholder - you can integrate with price oracle)
   const getDollarValue = () => {
-    if (!amount || amount === "0") return "0.00";
-    const ethPrice = 2500; // Replace with dynamic price
-    const usdcPrice = 1;
-
+    if (!amount || amount === "0") return "$0.00";
     const amountNum = parseFloat(amount);
-    // Both ETH and WETH use same price
-    if (displayToken === "eth" || displayToken === "weth") {
-      return (amountNum * ethPrice).toFixed(2);
-    } else {
-      return (amountNum * usdcPrice).toFixed(2);
-    }
+    return formatUsdValue(amountNum * tokenConfig.price);
   };
 
   // Calculate new health factor after supply
@@ -222,11 +222,9 @@ const SupplyModal: React.FC<Props> = ({
                       </Flex>
                     </Flex>
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Box fontSize="sm" color="gray.600">
-                        $ {getDollarValue()}
-                      </Box>
+                      <Box fontSize="sm">{getDollarValue()}</Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px" color="gray.600">
+                        <Box fontSize="13px">
                           Wallet balance{" "}
                           {formatValue(parseFloat(tokenConfig.balance))}
                         </Box>
@@ -245,11 +243,7 @@ const SupplyModal: React.FC<Props> = ({
                               displayToken === "eth"
                                 ? Math.max(0, maxAmount - 0.01)
                                 : maxAmount;
-                            setAmount(
-                              finalAmount.toFixed(
-                                tokenConfig.decimals === 6 ? 2 : 6
-                              )
-                            );
+                            setAmount(formatValue(finalAmount));
                           }}
                         >
                           MAX
@@ -293,7 +287,7 @@ const SupplyModal: React.FC<Props> = ({
                           alignItems="center"
                           justifyContent="end"
                         >
-                          <Box color="gray.500" fontSize="sm">
+                          <Box fontSize="sm">
                             {healthFactorValue > 1000
                               ? "∞"
                               : healthFactorValue.toFixed(2)}
@@ -303,14 +297,12 @@ const SupplyModal: React.FC<Props> = ({
                             {getNewHealthFactor()}
                           </Box>
                         </Flex>
-                        <Box fontSize="12px" color="gray.500">
-                          {`Liquidation at < 1.0`}
-                        </Box>
+                        <Box fontSize="12px">{`Liquidation at < 1.0`}</Box>
                       </Box>
                     </Flex>
                   </Box>
                 </Box>
-                <Flex mt="20px" alignItems="center" gap="5px" color="gray.600">
+                <Flex mt="20px" alignItems="center" gap="5px">
                   <MdLocalGasStation size="16px" />
                   <Box fontSize="sm">{`< $0.01`}</Box>
                 </Flex>
