@@ -1,3 +1,4 @@
+import AssetDetails from "@/pages/asset/AssetDetails";
 import Dashboard from "@/pages/Dashboard";
 import Governance from "@/pages/Governance";
 import Home from "@/pages/Home";
@@ -10,6 +11,7 @@ export const routes = (
     <Route index element={<Home />} />
     <Route path="/home" element={<Home />} />
     <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/asset-details" element={<AssetDetails />} />
     <Route path="/market" element={<Market />} />
     <Route path="/governance" element={<Governance />} />
     <Route path="/savings" element={<Savings />} />
