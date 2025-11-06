@@ -9,22 +9,82 @@ import {
   Image,
   Tabs,
   useBreakpointValue,
+  Spinner,
 } from "@chakra-ui/react";
 import arbIcon from "../../assets/images/arbitrum.svg";
-import wethIcon from "../../assets/images/weth.svg";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { IoMdArrowBack } from "react-icons/io";
 import { FiExternalLink } from "react-icons/fi";
 import { IoWalletOutline } from "react-icons/io5";
 import AssetInfo from "./AssetInfo";
 import AssetOverview from "./AssetOverview";
+import {
+  useAssetDetails,
+  formatCurrency,
+  formatPercentage,
+} from "@/hooks/useAssetDetails";
+import { useAccount } from "wagmi";
 
 const AssetDetails = () => {
   const isTabLayout = useBreakpointValue({ base: true, xl: false });
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
-
+  const token = searchParams.get("token") || "eth";
   const navigate = useNavigate();
+
+  const {
+    tokenInfo,
+    reserveSize,
+    availableLiquidity,
+    utilizationRate,
+    oraclePrice,
+    isLoading,
+  } = useAssetDetails(token);
+
+  const { chain } = useAccount();
+
+  const handleOpenExplorer = () => {
+    if (!tokenInfo.address || !chain?.blockExplorers?.default?.url) return;
+    const explorerUrl = `${chain.blockExplorers.default.url}/address/${tokenInfo.address}`;
+    window.open(explorerUrl, "_blank");
+  };
+
+  const addToWallet = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        await window.ethereum.request({
+          method: "wallet_watchAsset",
+          params: {
+            type: "ERC20",
+            options: {
+              address: tokenInfo.address,
+              symbol: tokenInfo.symbol,
+              decimals: tokenInfo.decimals,
+              image: tokenInfo.icon,
+            },
+          },
+        });
+      } catch (error) {
+        console.error("Error adding token to wallet:", error);
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Container
+        maxW="container.xl"
+        px={{ base: 4, md: 6 }}
+        py={4}
+        h="100vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Spinner size="xl" />
+      </Container>
+    );
+  }
+
   return (
     <Container
       maxW={{
@@ -49,14 +109,25 @@ const AssetDetails = () => {
             <Heading size="lg">Arbitrum Sepolia Market</Heading>
           </Flex>
         </Flex>
-        <Flex alignItems="center" gap="32px" mb="40px">
+
+        <Flex
+          alignItems="center"
+          gap={{ base: "15px", md: "32px" }}
+          mb="40px"
+          flexWrap="wrap"
+        >
           <Flex gap="3" alignItems="center">
-            <Image src={wethIcon} width="40px" height="40px" />
+            <Image
+              src={tokenInfo.icon}
+              width="40px"
+              height="40px"
+              alt={tokenInfo.symbol}
+            />
             <Flex direction="column">
-              <Heading size="md">WETH</Heading>
+              <Heading size="md">{tokenInfo.symbol}</Heading>
               <Flex gap="2" alignItems="center">
                 <Heading size="xl" fontWeight="700">
-                  Wrapped ETH
+                  {tokenInfo.fullName}
                 </Heading>
                 <Button
                   width="24px"
@@ -65,6 +136,8 @@ const AssetDetails = () => {
                   p="5px"
                   variant="surface"
                   borderRadius="50%"
+                  onClick={handleOpenExplorer}
+                  title="View on Explorer"
                 >
                   <Icon size="sm">
                     <FiExternalLink />
@@ -77,6 +150,8 @@ const AssetDetails = () => {
                   p="5px"
                   variant="surface"
                   borderRadius="50%"
+                  onClick={addToWallet}
+                  title="Add to Wallet"
                 >
                   <Icon size="sm">
                     <IoWalletOutline />
@@ -85,24 +160,37 @@ const AssetDetails = () => {
               </Flex>
             </Flex>
           </Flex>
-          <Box as="hr" borderWidth="1px" height="42px" />
-          <Flex direction="column">
-            <Box>Reserve Size</Box>
-            <Heading size="2xl">$ 8.53M</Heading>
-          </Flex>
-          <Flex direction="column">
-            <Box>Available liquidity</Box>
-            <Heading size="2xl">$ 10,449.67</Heading>
-          </Flex>
-          <Flex direction="column">
-            <Box>Utilization Rate</Box>
-            <Heading size="2xl">99.88 %</Heading>
-          </Flex>
-          <Flex direction="column">
-            <Box>Oracle price</Box>
-            <Heading size="2xl">$ 3,346.25</Heading>
+
+          <Box
+            as="hr"
+            borderWidth="1px"
+            height="42px"
+            display={{ base: "none", md: "block" }}
+          />
+
+          <Flex gap={{ base: "15px", md: "32px" }} flexWrap="wrap" flex="1">
+            <Flex direction="column">
+              <Box fontSize="sm">Reserve Size</Box>
+              <Heading size="2xl">{formatCurrency(reserveSize)}</Heading>
+            </Flex>
+
+            <Flex direction="column">
+              <Box fontSize="sm">Available liquidity</Box>
+              <Heading size="2xl">{formatCurrency(availableLiquidity)}</Heading>
+            </Flex>
+
+            <Flex direction="column">
+              <Box fontSize="sm">Utilization Rate</Box>
+              <Heading size="2xl">{formatPercentage(utilizationRate)}</Heading>
+            </Flex>
+
+            <Flex direction="column">
+              <Box fontSize="sm">Oracle price</Box>
+              <Heading size="2xl">${oraclePrice.toFixed(2)}</Heading>
+            </Flex>
           </Flex>
         </Flex>
+
         {isTabLayout ? (
           <Tabs.Root defaultValue="overview" variant="plain" w="100%">
             <Tabs.List bg="bg.inverted" w="50%" rounded="l3" p="1" mb="15px">
@@ -116,17 +204,17 @@ const AssetDetails = () => {
             </Tabs.List>
 
             <Tabs.Content value="overview">
-              <AssetOverview token={token!} />
+              <AssetOverview token={token} />
             </Tabs.Content>
 
             <Tabs.Content value="info">
-              <AssetInfo token={token!} />
+              <AssetInfo token={token} />
             </Tabs.Content>
           </Tabs.Root>
         ) : (
           <Flex gap="4" direction={{ base: "column", xl: "row" }}>
-            <AssetOverview token={token!} />
-            <AssetInfo token={token!} />
+            <AssetOverview token={token} />
+            <AssetInfo token={token} />
           </Flex>
         )}
       </Box>
