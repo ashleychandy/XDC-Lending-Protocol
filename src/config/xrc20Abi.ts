@@ -27,18 +27,3 @@ export const xrc20Abi = [
     outputs: [{ name: "remaining", type: "uint256" }],
   },
 ] as const;
-
-export const lendingPoolAbi = [
-  {
-    type: "function",
-    name: "supply",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "asset", type: "address" },
-      { name: "amount", type: "uint256" },
-      { name: "onBehalfOf", type: "address" },
-      { name: "referralCode", type: "uint16" },
-    ],
-    outputs: [],
-  },
-] as const;

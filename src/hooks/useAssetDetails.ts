@@ -34,6 +34,20 @@ const TOKEN_METADATA = {
   },
 } as const;
 
+function decodeReserveConfiguration(configuration: bigint) {
+  const BORROW_CAP_START = 80n;
+  const SUPPLY_CAP_START = 116n;
+  const CAP_MASK = (1n << 36n) - 1n; // 36 bits for each cap
+
+  const borrowCap = Number((configuration >> BORROW_CAP_START) & CAP_MASK);
+  const supplyCap = Number((configuration >> SUPPLY_CAP_START) & CAP_MASK);
+
+  return {
+    borrowCap,
+    supplyCap,
+  };
+}
+
 export function useAssetDetails(tokenSymbol: string) {
   const token =
     TOKEN_METADATA[tokenSymbol?.toLowerCase() as keyof typeof TOKEN_METADATA] ||
@@ -168,6 +182,11 @@ export function useAssetDetails(tokenSymbol: string) {
     },
   });
 
+  // Decode supply and borrow caps from configuration
+  const caps = reserveData?.configuration
+    ? decodeReserveConfiguration(reserveData.configuration)
+    : { borrowCap: 0, supplyCap: 0 };
+
   // Calculate metrics
   const RAY = BigInt(10 ** 27);
   const SECONDS_PER_YEAR = 31_536_000;
@@ -218,6 +237,17 @@ export function useAssetDetails(tokenSymbol: string) {
   const supplyApy = rateToApy(reserveData?.currentLiquidityRate as bigint);
   const borrowApy = rateToApy(reserveData?.currentVariableBorrowRate as bigint);
 
+  // Calculate cap percentages for progress circles
+  const supplyCapPercentage =
+    caps.supplyCap > 0
+      ? Math.min((totalSupplied / caps.supplyCap) * 100, 100)
+      : 0;
+
+  const borrowCapPercentage =
+    caps.borrowCap > 0
+      ? Math.min((totalBorrowed / caps.borrowCap) * 100, 100)
+      : 0;
+
   return {
     // Token metadata
     tokenInfo: {
@@ -243,6 +273,16 @@ export function useAssetDetails(tokenSymbol: string) {
     totalBorrowedUsd: totalBorrowed * oraclePrice,
     stableDebt,
     variableDebt,
+
+    // Caps and percentages
+    supplyCap: caps.supplyCap,
+    supplyCapUsd: caps.supplyCap * oraclePrice,
+    supplyCapPercentage,
+    borrowCap: caps.borrowCap,
+    borrowCapUsd: caps.borrowCap * oraclePrice,
+    borrowCapPercentage,
+    hasSupplyCap: caps.supplyCap > 0,
+    hasBorrowCap: caps.borrowCap > 0,
 
     // APY
     supplyApy,

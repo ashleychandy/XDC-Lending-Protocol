@@ -3,7 +3,9 @@ import {
   Box,
   Flex,
   Heading,
+  Icon,
   ProgressCircle,
+  SimpleGrid,
   Spinner,
 } from "@chakra-ui/react";
 import React from "react";
@@ -15,6 +17,13 @@ import {
   formatPercentage,
   formatTokenAmount,
 } from "@/hooks/useAssetDetails";
+import { BiInfinite } from "react-icons/bi";
+import { useAssetChartData } from "@/hooks/useAssetChartData";
+import {
+  APYHistoryChart,
+  SupplyBorrowDistribution,
+  UtilizationChart,
+} from "./AssetCharts";
 
 // Helper function to format BPS values (e.g., 8050 -> "80.50%")
 const formatBps = (bps: bigint): string => {
@@ -36,11 +45,27 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
     totalSuppliedUsd,
     totalBorrowed,
     totalBorrowedUsd,
+    supplyCap,
+    supplyCapUsd,
+    supplyCapPercentage,
+    borrowCap,
+    borrowCapUsd,
+    borrowCapPercentage,
+    hasSupplyCap,
+    hasBorrowCap,
     supplyApy,
     borrowApy,
     reserveData,
     isLoading,
+    availableLiquidityInTokens,
   } = useAssetDetails(token || "weth");
+
+  const { historicalData, interestRateParams } = useAssetChartData(
+    supplyApy,
+    borrowApy,
+    utilizationRate,
+    reserveData?.interestRateStrategyAddress as `0x${string}` | undefined
+  );
 
   const config = reserveData?.configuration || 0n;
   const ltv = config & 0xffffn;
@@ -48,7 +73,7 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
   const liquidationBonus = (config >> 32n) & 0xffffn;
   const liquidationPenalty =
     liquidationBonus > 10000n ? liquidationBonus - 10000n : 0n;
-  const reserveFactor = (config >> 56n) & 0xffffn;
+  const reserveFactor = (config >> 64n) & 0xffffn;
 
   const supplyInfo = [
     {
@@ -110,31 +135,63 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
             </Heading>
             <Flex direction="column" gap="30px" w="100%">
               <Flex gap="15px" alignItems="center">
-                <ProgressCircle.Root size="xl" value={utilizationRate}>
-                  <ProgressCircle.Circle css={{ "--size": "80px" }}>
-                    <ProgressCircle.Track
-                      stroke="gray.100"
-                      css={{ "--thickness": "5px" }}
-                    />
-                    <ProgressCircle.Range
-                      stroke="green.600"
-                      css={{ "--thickness": "5px" }}
-                    />
-                  </ProgressCircle.Circle>
-                  <AbsoluteCenter>
-                    <ProgressCircle.ValueText>
-                      {formatPercentage(utilizationRate)}
-                    </ProgressCircle.ValueText>
-                  </AbsoluteCenter>
-                </ProgressCircle.Root>
+                {hasSupplyCap ? (
+                  <ProgressCircle.Root size="xl" value={supplyCapPercentage}>
+                    <ProgressCircle.Circle css={{ "--size": "80px" }}>
+                      <ProgressCircle.Track
+                        stroke="gray.100"
+                        css={{ "--thickness": "5px" }}
+                      />
+                      <ProgressCircle.Range
+                        stroke="green.600"
+                        css={{ "--thickness": "5px" }}
+                      />
+                    </ProgressCircle.Circle>
+                    <AbsoluteCenter>
+                      <ProgressCircle.ValueText>
+                        {formatPercentage(supplyCapPercentage)}
+                      </ProgressCircle.ValueText>
+                    </AbsoluteCenter>
+                  </ProgressCircle.Root>
+                ) : (
+                  <Box
+                    w="80px"
+                    h="80px"
+                    borderRadius="full"
+                    border="5px solid"
+                    borderColor="gray.100"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    bg="white"
+                    boxShadow="sm"
+                  >
+                    <Icon fontSize="30px" color="gray.400">
+                      <BiInfinite />
+                    </Icon>
+                  </Box>
+                )}
                 <Flex direction="column">
                   <Box>Total supplied</Box>
                   <Heading size="lg">
-                    {`${formatTokenAmount(totalSupplied)} of 0.00`}
+                    {hasSupplyCap
+                      ? `${formatTokenAmount(
+                          totalSupplied
+                        )} of ${formatTokenAmount(supplyCap)}`
+                      : formatTokenAmount(totalSupplied)}
                   </Heading>
                   <Box fontSize="13px">
-                    {formatCurrency(totalSuppliedUsd)} of $0.00
+                    {hasSupplyCap
+                      ? `${formatCurrency(
+                          totalSuppliedUsd
+                        )} of ${formatCurrency(supplyCapUsd)}`
+                      : formatCurrency(totalSuppliedUsd)}
                   </Box>
+                  {!hasSupplyCap && (
+                    <Box fontSize="12px" color="gray.500" mt={1}>
+                      No supply cap
+                    </Box>
+                  )}
                 </Flex>
                 <Box as="hr" borderWidth="1px" height="32px" />
                 <Flex direction="column">
@@ -182,31 +239,63 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
             </Heading>
             <Flex direction="column" gap="30px" w="100%">
               <Flex gap="15px" alignItems="center">
-                <ProgressCircle.Root size="xl" value={utilizationRate}>
-                  <ProgressCircle.Circle css={{ "--size": "80px" }}>
-                    <ProgressCircle.Track
-                      stroke="gray.100"
-                      css={{ "--thickness": "5px" }}
-                    />
-                    <ProgressCircle.Range
-                      stroke="green.600"
-                      css={{ "--thickness": "5px" }}
-                    />
-                  </ProgressCircle.Circle>
-                  <AbsoluteCenter>
-                    <ProgressCircle.ValueText>
-                      {formatPercentage(utilizationRate)}
-                    </ProgressCircle.ValueText>
-                  </AbsoluteCenter>
-                </ProgressCircle.Root>
+                {hasBorrowCap ? (
+                  <ProgressCircle.Root size="xl" value={borrowCapPercentage}>
+                    <ProgressCircle.Circle css={{ "--size": "80px" }}>
+                      <ProgressCircle.Track
+                        stroke="gray.100"
+                        css={{ "--thickness": "5px" }}
+                      />
+                      <ProgressCircle.Range
+                        stroke="green.600"
+                        css={{ "--thickness": "5px" }}
+                      />
+                    </ProgressCircle.Circle>
+                    <AbsoluteCenter>
+                      <ProgressCircle.ValueText>
+                        {formatPercentage(borrowCapPercentage)}
+                      </ProgressCircle.ValueText>
+                    </AbsoluteCenter>
+                  </ProgressCircle.Root>
+                ) : (
+                  <Box
+                    w="80px"
+                    h="80px"
+                    borderRadius="full"
+                    border="5px solid"
+                    borderColor="gray.100"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    bg="white"
+                    boxShadow="sm"
+                  >
+                    <Icon fontSize="30px" color="gray.400">
+                      <BiInfinite />
+                    </Icon>
+                  </Box>
+                )}
                 <Flex direction="column">
                   <Box>Total borrowed</Box>
                   <Heading size="lg">
-                    {`${formatTokenAmount(totalBorrowed)} of 0.00`}
+                    {hasBorrowCap
+                      ? `${formatTokenAmount(
+                          totalBorrowed
+                        )} of ${formatTokenAmount(borrowCap)}`
+                      : formatTokenAmount(totalBorrowed)}
                   </Heading>
                   <Box fontSize="13px">
-                    {formatCurrency(totalBorrowedUsd)} of $0.00
+                    {hasBorrowCap
+                      ? `${formatCurrency(
+                          totalBorrowedUsd
+                        )} of ${formatCurrency(borrowCapUsd)}`
+                      : formatCurrency(totalBorrowedUsd)}
                   </Box>
+                  {!hasBorrowCap && (
+                    <Box fontSize="12px" color="gray.500" mt={1}>
+                      No borrow cap
+                    </Box>
+                  )}
                 </Flex>
                 <Box as="hr" borderWidth="1px" height="32px" />
                 <Flex direction="column">
@@ -218,8 +307,8 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                 <Box as="hr" borderWidth="1px" height="32px" />
                 <Flex direction="column">
                   <Box>Borrow cap</Box>
-                  <Heading size="lg">0.00</Heading>
-                  <Box fontSize="13px">$0.00</Box>
+                  <Heading size="lg">{formatTokenAmount(borrowCap)}</Heading>
+                  <Box fontSize="13px">{formatCurrency(borrowCapUsd)}</Box>
                 </Flex>
               </Flex>
               <Box mb="10px">
@@ -342,6 +431,20 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
             </Flex>
           </Flex>
         </Flex>
+        {/* <SimpleGrid columns={{ base: 1, lg: 2 }} gap={6} mb={8}>
+          <APYHistoryChart data={historicalData} />
+          <UtilizationChart
+            data={historicalData}
+            currentUtilization={utilizationRate}
+          />
+        </SimpleGrid>
+        <Box mb={8}>
+          <SupplyBorrowDistribution
+            totalSupplied={totalSupplied}
+            totalBorrowed={totalBorrowed}
+            availableLiquidity={availableLiquidityInTokens}
+          />
+        </Box> */}
       </Box>
     </Box>
   );
