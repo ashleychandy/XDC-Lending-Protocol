@@ -1,11 +1,12 @@
+// theme/landingSystem.ts
 import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react";
 
-const customConfig = defineConfig({
+const landingConfig = defineConfig({
   theme: {
     tokens: {
       fonts: {
         heading: {
-          value: `"Inter", sans-serif`,
+          value: `"Space Grotesk", sans-serif`,
         },
         body: {
           value: `"Inter", sans-serif`,
@@ -51,4 +52,4 @@ const customConfig = defineConfig({
   },
 });
 
-export const system = createSystem(defaultConfig, customConfig);
+export const landingSystem = createSystem(defaultConfig, landingConfig);

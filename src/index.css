@@ -11,3 +11,51 @@ body {
 tr:last-child > td {
   border: none;
 }
+
+.landing-page {
+  color: #fff;
+}
+.landing-page p {
+  color: #ffffffa6;
+}
+.landing-page .secondary-btn {
+  box-shadow: 0px 6px 18px 0px #06b6d41f;
+  border: 1px solid #ffffff0f;
+  background: #ffffff01;
+  border-radius: 10px;
+  color: #ffffffa6;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: "Inter", sans-serif;
+}
+
+.landing-page .primary-btn,
+.landing-btn button {
+  background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%) !important;
+  border: 2px solid #000000 !important;
+  box-shadow: 0px 6px 24px 0px #06b6d41f !important;
+  border-radius: 14px !important;
+  color: #051225 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  font-family: "Inter", sans-serif !important;
+}
+
+.landing-page .primary-color {
+  background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%) !important;
+}
+
+.landing-page .box2 {
+  color: #e6eef8;
+  background: #ffffff05;
+  border: 1px solid #ffffff05;
+}
+.landing-page .box {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border: 1px solid #ffffff0f;
+  backdrop-filter: blur(8px);
+}
