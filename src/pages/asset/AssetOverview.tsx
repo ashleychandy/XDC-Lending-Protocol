@@ -18,12 +18,12 @@ import {
   formatTokenAmount,
 } from "@/hooks/useAssetDetails";
 import { BiInfinite } from "react-icons/bi";
-import { useAssetChartData } from "@/hooks/useAssetChartData";
+/* import { useAssetChartData } from "@/hooks/useAssetChartData";
 import {
   APYHistoryChart,
   SupplyBorrowDistribution,
   UtilizationChart,
-} from "./AssetCharts";
+} from "./AssetCharts"; */
 
 // Helper function to format BPS values (e.g., 8050 -> "80.50%")
 const formatBps = (bps: bigint): string => {
@@ -60,12 +60,12 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
     availableLiquidityInTokens,
   } = useAssetDetails(token || "weth");
 
-  const { historicalData, interestRateParams } = useAssetChartData(
+  /* const { historicalData, interestRateParams } = useAssetChartData(
     supplyApy,
     borrowApy,
     utilizationRate,
     reserveData?.interestRateStrategyAddress as `0x${string}` | undefined
-  );
+  ); */
 
   const config = reserveData?.configuration || 0n;
   const ltv = config & 0xffffn;
