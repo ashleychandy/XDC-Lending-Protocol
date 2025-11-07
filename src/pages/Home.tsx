@@ -1,27 +1,8 @@
+import React from "react";
 import { Container, Box, Flex, Heading, Image } from "@chakra-ui/react";
-import React, { useEffect } from "react";
 import xdcIcon from "../assets/images/xdc-icon.webp";
-import { useAccount } from "wagmi";
-import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-  const { isConnected } = useAccount();
-  const navigate = useNavigate();
-  /* const getData = async () => {
-    const response = await apiAction.getData();
-    console.log("response", response);
-  };
-
-  useEffect(() => {
-    getData();
-  }, []); */
-
-  useEffect(() => {
-    if (isConnected) {
-      navigate("/dashboard");
-    }
-  }, [isConnected]);
-
   return (
     <Container maxW="container.xl" h="100%">
       <Box h="100%" p="30px 0">
