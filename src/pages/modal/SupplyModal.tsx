@@ -136,17 +136,44 @@ const SupplyModal: React.FC<Props> = ({
 
   // Calculate new health factor after supply
   const getNewHealthFactor = () => {
-    const currentHF = parseFloat(accountData.healthFactor);
-    if (currentHF > 1000) return "∞";
-
-    // This is a simplified calculation
-    // Real calculation would need to account for the exact collateral value added
     const amountNum = parseFloat(amount || "0");
-    if (amountNum === 0) return currentHF.toFixed(2);
+    if (amountNum === 0) {
+      const currentHF = parseFloat(accountData.healthFactor);
+      return currentHF > 1000 ? "∞" : currentHF.toFixed(2);
+    }
 
-    // Approximate increase (actual calculation is more complex)
-    const increase = amountNum * 0.1; // Placeholder
-    return (currentHF + increase).toFixed(2);
+    const supplyValueUsd = amountNum * tokenConfig.price;
+    const currentCollateralUsd = parseFloat(accountData.totalCollateral);
+    const currentDebtUsd = parseFloat(accountData.totalDebt);
+    // avgLiquidationThreshold is already in percentage (e.g., 80 for 80%)
+    const avgLiquidationThreshold = parseFloat(
+      accountData.currentLiquidationThreshold
+    );
+
+    // If no debt, health factor is infinite
+    if (currentDebtUsd === 0 || currentDebtUsd < 0.01) {
+      return "∞";
+    }
+
+    // Assume asset has 80% liquidation threshold
+    // In production, this should be fetched from reserve configuration
+    const assetLiquidationThreshold = 80; // 80%
+
+    // Calculate new weighted average liquidation threshold
+    const newTotalCollateral = currentCollateralUsd + supplyValueUsd;
+    const newAvgLiquidationThreshold =
+      newTotalCollateral > 0
+        ? (currentCollateralUsd * avgLiquidationThreshold +
+            supplyValueUsd * assetLiquidationThreshold) /
+          newTotalCollateral
+        : avgLiquidationThreshold;
+
+    // Calculate new health factor
+    // HF = (collateral * liquidationThreshold%) / debt
+    const healthFactor =
+      (newTotalCollateral * newAvgLiquidationThreshold) / 100 / currentDebtUsd;
+
+    return healthFactor > 1000 ? "∞" : healthFactor.toFixed(2);
   };
 
   const healthFactorValue = parseFloat(accountData.healthFactor);

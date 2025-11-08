@@ -93,7 +93,7 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     tokens: {
       weth: {
         address: "0x36c3461aa4Ad40153bbb666fCb4A94FBB81246f2", // WXDC on testnet
-        symbol: "WXDC",
+        symbol: "WETH",
         decimals: 18,
         aToken: "0x09Fa3c5452Ad7da2B0041B2E92b1caDCA8aA15Fc",
         variableDebtToken: "0xC47EEfAd9c7Fe28FB1829cA5ec731a88050AD788",

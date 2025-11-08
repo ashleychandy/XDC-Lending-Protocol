@@ -3,7 +3,7 @@ import arbitrumIcon from "@/assets/images/arbitrum.svg";
 import ethIcon from "@/assets/images/eth.svg";
 import usdcIcon from "@/assets/images/usdc.svg";
 import wethIcon from "@/assets/images/weth.svg";
-import xdcIcon from "@/assets/images/xdc-network-logo.svg";
+import xdcIcon from "@/assets/images/xdc-icon.webp";
 
 /**
  * Token logo mapping by symbol

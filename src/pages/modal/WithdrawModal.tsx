@@ -124,25 +124,55 @@ const WithdrawModal: React.FC<Props> = ({
 
   // Calculate new health factor after withdrawal
   const getNewHealthFactor = () => {
-    const currentHF = parseFloat(accountData.healthFactor);
-    if (currentHF > 1000) return "∞";
-
     const withdrawAmount = parseFloat(amount || "0");
-    if (withdrawAmount === 0) return currentHF.toFixed(2);
+    if (withdrawAmount === 0) {
+      const currentHF = parseFloat(accountData.healthFactor);
+      return currentHF > 1000 ? "∞" : currentHF.toFixed(2);
+    }
 
-    // Simplified calculation: withdrawing collateral decreases health factor
-    const collateralValue = withdrawAmount * tokenConfig.price;
-    const currentCollateral = parseFloat(accountData.totalCollateral);
-    const currentDebt = parseFloat(accountData.totalDebt);
+    const withdrawValueUsd = withdrawAmount * tokenConfig.price;
+    const currentCollateralUsd = parseFloat(accountData.totalCollateral);
+    const currentDebtUsd = parseFloat(accountData.totalDebt);
+    const avgLiquidationThreshold = parseFloat(
+      accountData.currentLiquidationThreshold
+    );
 
-    if (currentDebt === 0) return "∞";
+    const newTotalCollateral = Math.max(
+      0,
+      currentCollateralUsd - withdrawValueUsd
+    );
 
-    const newCollateral = Math.max(0, currentCollateral - collateralValue);
-    const liquidationThreshold =
-      parseFloat(accountData.currentLiquidationThreshold) / 100;
-    const newHF = (newCollateral * liquidationThreshold) / currentDebt;
+    // If no debt, health factor is infinite
+    if (currentDebtUsd === 0 || currentDebtUsd < 0.01) {
+      return "∞";
+    }
 
-    return newHF > 1000 ? "∞" : newHF.toFixed(2);
+    // If withdrawing all collateral but still have debt, HF = 0
+    if (newTotalCollateral === 0) {
+      return "0.00";
+    }
+
+    // Assume asset has 80% liquidation threshold
+    // In production, this should be fetched from reserve configuration
+    const assetLiquidationThreshold = 80; // 80%
+
+    // Calculate new weighted average liquidation threshold
+    // When withdrawing, we need to recalculate based on remaining collateral
+    const remainingCollateralValue =
+      currentCollateralUsd * avgLiquidationThreshold -
+      withdrawValueUsd * assetLiquidationThreshold;
+
+    const newAvgLiquidationThreshold =
+      newTotalCollateral > 0
+        ? remainingCollateralValue / newTotalCollateral
+        : avgLiquidationThreshold;
+
+    // Calculate new health factor
+    // HF = (collateral * liquidationThreshold%) / debt
+    const healthFactor =
+      (newTotalCollateral * newAvgLiquidationThreshold) / 100 / currentDebtUsd;
+
+    return healthFactor > 1000 ? "∞" : healthFactor.toFixed(2);
   };
 
   const healthFactorValue = parseFloat(accountData.healthFactor);

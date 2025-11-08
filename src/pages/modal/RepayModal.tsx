@@ -135,24 +135,33 @@ const RepayModal: React.FC<Props> = ({
 
   // Calculate new health factor after repayment
   const getNewHealthFactor = () => {
-    const currentHF = parseFloat(accountData.healthFactor);
-
     const repayAmount = parseFloat(amount || "0");
-    if (repayAmount === 0) return currentHF > 1000 ? "∞" : currentHF.toFixed(2);
+    if (repayAmount === 0) {
+      const currentHF = parseFloat(accountData.healthFactor);
+      return currentHF > 1000 ? "∞" : currentHF.toFixed(2);
+    }
 
-    // Calculate new health factor with reduced debt
-    const repayValue = repayAmount * tokenConfig.price;
-    const currentCollateral = parseFloat(accountData.totalCollateral);
-    const currentDebt = parseFloat(accountData.totalDebt);
-    const liquidationThreshold =
-      parseFloat(accountData.currentLiquidationThreshold) / 100;
+    const repayValueUsd = repayAmount * tokenConfig.price;
+    const currentCollateralUsd = parseFloat(accountData.totalCollateral);
+    const currentDebtUsd = parseFloat(accountData.totalDebt);
+    // avgLiquidationThreshold is already in percentage (e.g., 80 for 80%)
+    const avgLiquidationThreshold = parseFloat(
+      accountData.currentLiquidationThreshold
+    );
 
-    const newDebt = Math.max(0, currentDebt - repayValue);
+    const newTotalDebt = Math.max(0, currentDebtUsd - repayValueUsd);
 
-    if (newDebt === 0) return "∞";
+    // If repaying all debt, health factor is infinite
+    if (newTotalDebt === 0 || newTotalDebt < 0.01) {
+      return "∞";
+    }
 
-    const newHF = (currentCollateral * liquidationThreshold) / newDebt;
-    return newHF > 1000 ? "∞" : newHF.toFixed(2);
+    // Calculate new health factor
+    // HF = (collateral * liquidationThreshold%) / debt
+    const healthFactor =
+      (currentCollateralUsd * avgLiquidationThreshold) / 100 / newTotalDebt;
+
+    return healthFactor > 1000 ? "∞" : healthFactor.toFixed(2);
   };
 
   const healthFactorValue = parseFloat(accountData.healthFactor);

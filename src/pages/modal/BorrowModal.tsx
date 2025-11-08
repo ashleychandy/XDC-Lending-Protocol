@@ -116,25 +116,32 @@ const BorrowModal: React.FC<Props> = ({
 
   // Calculate new health factor after borrow
   const getNewHealthFactor = () => {
-    const currentHF = parseFloat(accountData.healthFactor);
-    if (currentHF > 1000) return "∞";
-
     const borrowAmount = parseFloat(amount || "0");
-    if (borrowAmount === 0) return currentHF.toFixed(2);
+    if (borrowAmount === 0) {
+      const currentHF = parseFloat(accountData.healthFactor);
+      return currentHF > 1000 ? "∞" : currentHF.toFixed(2);
+    }
 
-    // Simplified calculation: borrowing collateral decreases health factor
-    const collateralValue = borrowAmount * tokenConfig.price;
-    const currentCollateral = parseFloat(accountData.totalCollateral);
-    const currentDebt = parseFloat(accountData.totalDebt);
+    const borrowValueUsd = borrowAmount * tokenConfig.price;
+    const currentCollateralUsd = parseFloat(accountData.totalCollateral);
+    const currentDebtUsd = parseFloat(accountData.totalDebt);
+    // avgLiquidationThreshold is already in percentage (e.g., 80 for 80%)
+    const avgLiquidationThreshold = parseFloat(
+      accountData.currentLiquidationThreshold
+    );
 
-    if (currentDebt === 0) return "∞";
+    const newTotalDebt = currentDebtUsd + borrowValueUsd;
 
-    const newCollateral = Math.max(0, currentCollateral - collateralValue);
-    const liquidationThreshold =
-      parseFloat(accountData.currentLiquidationThreshold) / 100;
-    const newHF = (newCollateral * liquidationThreshold) / currentDebt;
+    // Calculate new health factor
+    // HF = (collateral * liquidationThreshold%) / debt
+    if (newTotalDebt === 0 || newTotalDebt < 0.01) {
+      return "∞";
+    }
 
-    return newHF > 1000 ? "∞" : newHF.toFixed(2);
+    const healthFactor =
+      (currentCollateralUsd * avgLiquidationThreshold) / 100 / newTotalDebt;
+
+    return healthFactor > 1000 ? "∞" : healthFactor.toFixed(2);
   };
 
   const healthFactorValue = parseFloat(accountData.healthFactor);

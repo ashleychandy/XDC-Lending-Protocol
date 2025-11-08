@@ -2,8 +2,8 @@ import { ColorModeButton, useColorMode } from "@/components/ui/color-mode";
 import { Box, Flex } from "@chakra-ui/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { NavLink } from "react-router";
+import xdcDarkLogo from "../assets/images/xdc-icon.webp";
 import xdcLightLogo from "../assets/images/xdc-network-logo-white.svg";
-import xdcDarkLogo from "../assets/images/xdc-network-logo.svg";
 
 const Header = () => {
   const { colorMode } = useColorMode();

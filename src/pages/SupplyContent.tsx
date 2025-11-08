@@ -174,6 +174,17 @@ const SupplyContent = () => {
     },
   });
 
+  useTransactionFlow({
+    hash: collateralHook.hash,
+    onSuccess: () => {
+      console.log("Collateral setting updated successfully");
+      // Data will automatically refresh due to wagmi's query invalidation
+    },
+    onError: (err) => {
+      console.error("Error updating collateral setting:", err);
+    },
+  });
+
   const openSupplyModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
     setSelectedToken(tokenSymbol);
     setIsSupplyModal(true);
@@ -198,7 +209,7 @@ const SupplyContent = () => {
       dollarBalance: `${formatUsdValue(parseFloat(wethSupplied) * ethPrice)}`,
       apy: `${parseFloat(wethReserveData.supplyApy)}%`,
       img: wrappedTokenLogo,
-      isCollateral: true,
+      isCollateral: wethUserData.isUsingAsCollateral,
       actualAmount: wethUserData.suppliedAmount,
     },
     {
@@ -209,7 +220,7 @@ const SupplyContent = () => {
       dollarBalance: `${formatUsdValue(parseFloat(usdcSupplied) * usdcPrice)}`,
       apy: `${parseFloat(usdcReserveData.supplyApy)}%`,
       img: usdcIcon,
-      isCollateral: true,
+      isCollateral: usdcUserData.isUsingAsCollateral,
       actualAmount: usdcUserData.suppliedAmount,
     },
   ].filter((item) => (item.actualAmount as bigint) > BigInt(0));
