@@ -1,4 +1,10 @@
 import {
+  formatCurrency,
+  formatPercentage,
+  useAssetDetails,
+} from "@/hooks/useAssetDetails";
+import { landingSystem } from "@/landingSystem";
+import {
   Box,
   Button,
   ChakraProvider,
@@ -8,16 +14,12 @@ import {
   Image,
   SimpleGrid,
 } from "@chakra-ui/react";
-import LandingHeader from "./LandingHeader";
-import { landingSystem } from "@/landingSystem";
+import { useNavigate } from "react-router-dom";
 import section1Img from "../../assets/images/landing/section1Img.png";
-import {
-  formatCurrency,
-  formatPercentage,
-  useAssetDetails,
-} from "@/hooks/useAssetDetails";
+import LandingHeader from "./LandingHeader";
 
 const LandingPage = () => {
+  const navigate = useNavigate();
   const {
     availableLiquidity: wethLiquidity,
     utilizationRate: usdcUtilizationRate,
@@ -65,8 +67,20 @@ const LandingPage = () => {
                 by the community.
               </Box>
               <Flex alignItems={"center"} gap={"20px"} mb={"40px"}>
-                <Button className="primary-btn">Launch xVault</Button>
-                <Button className="secondary-btn">How it works</Button>
+                <Button
+                  className="primary-btn"
+                  onClick={() => navigate("/dashboard")}
+                >
+                  Get Started
+                </Button>
+                <Button
+                  className="secondary-btn"
+                  onClick={() =>
+                    window.open("https://docs.xdc.network/", "_blank")
+                  }
+                >
+                  How it works
+                </Button>
               </Flex>
               <Flex alignItems={"center"} gap={"15px"}>
                 <Box p="10px" className="box" borderRadius={"14px"} w={"50%"}>

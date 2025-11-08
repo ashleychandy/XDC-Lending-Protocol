@@ -2,6 +2,7 @@ import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useChainConfig } from "@/hooks/useChainConfig";
+import { useCollateral } from "@/hooks/useCollateral";
 import { useReserveData } from "@/hooks/useReserveData";
 import { useSupply } from "@/hooks/useSupply";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
@@ -52,6 +53,7 @@ const SupplyContent = () => {
   const navigate = useNavigate();
   const supplyHook = useSupply();
   const withdrawHook = useWithdraw();
+  const collateralHook = useCollateral();
   const { address } = useAccount();
   const accountData = useUserAccountData();
 
@@ -146,6 +148,17 @@ const SupplyContent = () => {
       );
     } catch (err) {
       console.error("Withdraw error:", err);
+    }
+  };
+
+  const handleCollateralToggle = async (
+    assetAddress: `0x${string}`,
+    useAsCollateral: boolean
+  ) => {
+    try {
+      await collateralHook.setCollateral(assetAddress, useAsCollateral);
+    } catch (err) {
+      console.error("Collateral toggle error:", err);
     }
   };
 
@@ -347,15 +360,23 @@ const SupplyContent = () => {
           </Flex>
         )}
         {yourSupplies.length !== 0 ? (
-          <Box p="15px">
+          <Box p="15px" overflowX="auto">
             <Table.Root size="sm">
               <Table.Header>
                 <Table.Row>
-                  <Table.ColumnHeader w="25%">Asset</Table.ColumnHeader>
-                  <Table.ColumnHeader w="20%">Balance</Table.ColumnHeader>
-                  <Table.ColumnHeader w="13%">APY</Table.ColumnHeader>
-                  <Table.ColumnHeader w="12%">Collateral</Table.ColumnHeader>
-                  <Table.ColumnHeader w="30%"></Table.ColumnHeader>
+                  <Table.ColumnHeader w="25%" minW="100px">
+                    Asset
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader w="20%" minW="100px">
+                    Balance
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader w="13%" minW="60px">
+                    APY
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader w="12%" minW="80px">
+                    Collateral
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader w="30%" minW="150px"></Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -381,6 +402,15 @@ const SupplyContent = () => {
                         colorPalette="green"
                         defaultChecked={item.isCollateral}
                         size="sm"
+                        onCheckedChange={(e) =>
+                          handleCollateralToggle(
+                            item.symbol === "weth"
+                              ? tokens.weth.address
+                              : tokens.usdc.address,
+                            e.checked
+                          )
+                        }
+                        disabled={collateralHook.isPending}
                       >
                         <Switch.HiddenInput />
                         <Switch.Control />
@@ -431,17 +461,23 @@ const SupplyContent = () => {
         <Heading size="xl" p="16px 24px">
           Assets to supply
         </Heading>
-        <Box p="15px">
+        <Box p="15px" overflowX="auto">
           <Table.Root size="sm">
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader w="23%">Assets</Table.ColumnHeader>
-                <Table.ColumnHeader w="23%">Wallet Balance</Table.ColumnHeader>
-                <Table.ColumnHeader w="15%">APY</Table.ColumnHeader>
-                <Table.ColumnHeader w="12%">
+                <Table.ColumnHeader w="23%" minW="100px">
+                  Assets
+                </Table.ColumnHeader>
+                <Table.ColumnHeader w="23%" minW="100px">
+                  Wallet Balance
+                </Table.ColumnHeader>
+                <Table.ColumnHeader w="15%" minW="60px">
+                  APY
+                </Table.ColumnHeader>
+                <Table.ColumnHeader w="12%" minW="80px">
                   Can be collateral
                 </Table.ColumnHeader>
-                <Table.ColumnHeader w="27%"></Table.ColumnHeader>
+                <Table.ColumnHeader w="27%" minW="150px"></Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>

@@ -1,9 +1,9 @@
-import { Box, Flex, Container } from "@chakra-ui/react";
-import Header from "@/pages/Header";
 import Footer from "@/pages/Footer";
-import { Routes, useLocation, useNavigate } from "react-router-dom";
+import Header from "@/pages/Header";
 import { routes } from "@/routes/routes";
+import { Box, Flex } from "@chakra-ui/react";
 import { useEffect } from "react";
+import { Routes, useLocation, useNavigate } from "react-router-dom";
 import { useAccount } from "wagmi";
 
 const Layout = () => {
@@ -14,10 +14,9 @@ const Layout = () => {
   const isNoLayout = noLayoutRoutes.includes(location.pathname);
 
   useEffect(() => {
-    if (isConnected) {
+    // Only auto-redirect on initial connection, not when navigating manually
+    if (isConnected && location.pathname === "/") {
       navigate("/dashboard");
-    } else {
-      navigate("/");
     }
   }, [isConnected]);
 

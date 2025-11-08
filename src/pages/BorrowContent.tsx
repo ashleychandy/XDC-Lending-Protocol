@@ -317,14 +317,20 @@ function BorrowContent() {
           </Flex>
         )}
         {yourBorrows.length !== 0 ? (
-          <Box p="15px">
+          <Box p="15px" overflowX="auto">
             <Table.Root size="sm">
               <Table.Header>
                 <Table.Row>
-                  <Table.ColumnHeader w="30%">Asset</Table.ColumnHeader>
-                  <Table.ColumnHeader w="25%">Debt</Table.ColumnHeader>
-                  <Table.ColumnHeader w="15%">APY</Table.ColumnHeader>
-                  <Table.ColumnHeader w="30%"></Table.ColumnHeader>
+                  <Table.ColumnHeader w="30%" minW="100px">
+                    Asset
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader w="25%" minW="100px">
+                    Debt
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader w="15%" minW="60px">
+                    APY
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader w="30%" minW="150px"></Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -389,14 +395,20 @@ function BorrowContent() {
         <Heading size="xl" p="16px 24px">
           Assets to borrow
         </Heading>
-        <Box p="15px">
+        <Box p="15px" overflowX="auto">
           <Table.Root size="sm">
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader w="30%">Asset</Table.ColumnHeader>
-                <Table.ColumnHeader w="25%">Available</Table.ColumnHeader>
-                <Table.ColumnHeader w="18%">APY, variable</Table.ColumnHeader>
-                <Table.ColumnHeader w="27%"></Table.ColumnHeader>
+                <Table.ColumnHeader w="30%" minW="100px">
+                  Asset
+                </Table.ColumnHeader>
+                <Table.ColumnHeader w="25%" minW="100px">
+                  Available
+                </Table.ColumnHeader>
+                <Table.ColumnHeader w="18%" minW="80px">
+                  APY, variable
+                </Table.ColumnHeader>
+                <Table.ColumnHeader w="27%" minW="150px"></Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>

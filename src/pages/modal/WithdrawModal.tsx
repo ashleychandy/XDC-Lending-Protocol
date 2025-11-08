@@ -19,9 +19,7 @@ import {
 import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
-import ethIcon from "../../assets/images/eth.svg";
 import usdcIcon from "../../assets/images/usdc.svg";
-import wethIcon from "../../assets/images/weth.svg";
 
 interface Props {
   isOpen: boolean;
@@ -53,27 +51,32 @@ const WithdrawModal: React.FC<Props> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
 
+  // Get chain config for dynamic tokens
+  const { tokens, network } = useChainConfig();
+  const nativeTokenSymbol = network.nativeToken.symbol;
+  const wrappedTokenSymbol = tokens.weth.symbol;
+
   // Get account data for health factor
   const accountData = useUserAccountData();
 
   // Token configuration
   const getTokenConfig = () => {
-    // If WETH/ETH and unwrap is enabled, show ETH
+    // If WETH/ETH and unwrap is enabled, show native token
     if ((tokenSymbol === "weth" || tokenSymbol === "eth") && unwrapToNative) {
       return {
-        name: "ETH",
-        symbol: "ETH",
-        icon: ethIcon,
+        name: nativeTokenSymbol,
+        symbol: nativeTokenSymbol,
+        icon: getTokenLogo(nativeTokenSymbol),
         decimals: 18,
         price: ethPrice,
       };
     }
-    // If WETH and unwrap is disabled, show WETH
+    // If WETH and unwrap is disabled, show wrapped token
     if (tokenSymbol === "weth" && !unwrapToNative) {
       return {
-        name: "WETH",
-        symbol: "WETH",
-        icon: wethIcon,
+        name: wrappedTokenSymbol,
+        symbol: wrappedTokenSymbol,
+        icon: getTokenLogo(wrappedTokenSymbol),
         decimals: 18,
         price: ethPrice,
       };
@@ -81,9 +84,11 @@ const WithdrawModal: React.FC<Props> = ({
     // For ETH selection, always show based on toggle
     if (tokenSymbol === "eth") {
       return {
-        name: unwrapToNative ? "ETH" : "WETH",
-        symbol: unwrapToNative ? "ETH" : "WETH",
-        icon: unwrapToNative ? ethIcon : wethIcon,
+        name: unwrapToNative ? nativeTokenSymbol : wrappedTokenSymbol,
+        symbol: unwrapToNative ? nativeTokenSymbol : wrappedTokenSymbol,
+        icon: unwrapToNative
+          ? getTokenLogo(nativeTokenSymbol)
+          : getTokenLogo(wrappedTokenSymbol),
         decimals: 18,
         price: ethPrice,
       };

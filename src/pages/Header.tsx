@@ -1,10 +1,9 @@
-import React from "react";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import xdcDarkLogo from "../assets/images/xdc-network-logo.svg";
-import xdcLightLogo from "../assets/images/xdc-network-logo-white.svg";
-import { NavLink } from "react-router";
-import { Box, Flex } from "@chakra-ui/react";
 import { ColorModeButton, useColorMode } from "@/components/ui/color-mode";
+import { Box, Flex } from "@chakra-ui/react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { NavLink } from "react-router";
+import xdcLightLogo from "../assets/images/xdc-network-logo-white.svg";
+import xdcDarkLogo from "../assets/images/xdc-network-logo.svg";
 
 const Header = () => {
   const { colorMode } = useColorMode();
@@ -23,14 +22,17 @@ const Header = () => {
         direction={{ base: "column", lg: "row" }}
       >
         <Flex gap="10" justify="space-between" alignItems="center">
-          <Box w="80px">
-            {colorMode === "dark" ? (
-              <img src={xdcLightLogo} alt="XDC-Logo-Light" />
-            ) : (
-              <img src={xdcDarkLogo} alt="XDC-Logo-Dark" />
-            )}
-          </Box>
+          <NavLink to="/">
+            <Box w="80px" cursor="pointer">
+              {colorMode === "dark" ? (
+                <img src={xdcLightLogo} alt="XDC-Logo-Light" />
+              ) : (
+                <img src={xdcDarkLogo} alt="XDC-Logo-Dark" />
+              )}
+            </Box>
+          </NavLink>
           <Flex gap="4" justify="space-between" alignItems="center">
+            <NavLink to="/">Home</NavLink>
             <NavLink to="/dashboard">Dashboard</NavLink>
             <NavLink to="/market">Markets</NavLink>
             <NavLink to="/governance">Governance</NavLink>

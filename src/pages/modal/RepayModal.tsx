@@ -20,7 +20,6 @@ import {
 import { useRef } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
-import ethIcon from "../../assets/images/eth.svg";
 import usdcIcon from "../../assets/images/usdc.svg";
 
 interface Props {
@@ -50,8 +49,12 @@ const RepayModal: React.FC<Props> = ({
   isPending = false,
   isConfirming = false,
 }) => {
-  const { tokens } = useChainConfig();
+  const { tokens, network } = useChainConfig();
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Get native token info
+  const nativeTokenSymbol = network.nativeToken.symbol;
+  const wrappedTokenSymbol = tokens.weth.symbol;
 
   // Get account data for health factor
   const accountData = useUserAccountData();
@@ -72,9 +75,9 @@ const RepayModal: React.FC<Props> = ({
       case "eth":
       case "weth":
         return {
-          name: "ETH",
-          symbol: "ETH",
-          icon: ethIcon,
+          name: wrappedTokenSymbol,
+          symbol: wrappedTokenSymbol,
+          icon: getTokenLogo(wrappedTokenSymbol),
           decimals: 18,
           price: ethPrice,
           walletBalance: wethBalance,
@@ -90,9 +93,9 @@ const RepayModal: React.FC<Props> = ({
         };
       default:
         return {
-          name: "ETH",
-          symbol: "ETH",
-          icon: ethIcon,
+          name: wrappedTokenSymbol,
+          symbol: wrappedTokenSymbol,
+          icon: getTokenLogo(wrappedTokenSymbol),
           decimals: 18,
           price: ethPrice,
           walletBalance: wethBalance,

@@ -1,3 +1,4 @@
+import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
 import { useChainConfig } from "@/hooks/useChainConfig";
@@ -21,9 +22,7 @@ import { useRef } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
 import { useAccount, useBalance } from "wagmi";
-import ethIcon from "../../assets/images/eth.svg";
 import usdcIcon from "../../assets/images/usdc.svg";
-import wethIcon from "../../assets/images/weth.svg";
 
 interface Props {
   isOpen: boolean;
@@ -52,9 +51,13 @@ const SupplyModal: React.FC<Props> = ({
   isPending,
   isConfirming,
 }) => {
-  const { tokens } = useChainConfig();
+  const { tokens, network } = useChainConfig();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { address } = useAccount();
+
+  // Get native token info
+  const nativeTokenSymbol = network.nativeToken.symbol;
+  const wrappedTokenSymbol = tokens.weth.symbol;
 
   // Get ETH balance for native ETH
   const { data: ethBalance } = useBalance({
@@ -85,18 +88,18 @@ const SupplyModal: React.FC<Props> = ({
     switch (displayToken) {
       case "eth":
         return {
-          name: "ETH",
-          symbol: "ETH",
-          icon: ethIcon,
+          name: nativeTokenSymbol,
+          symbol: nativeTokenSymbol,
+          icon: getTokenLogo(nativeTokenSymbol),
           balance: ethBalance?.formatted || "0",
           decimals: 18,
           price: ethPrice,
         };
       case "weth":
         return {
-          name: "WETH",
-          symbol: "WETH",
-          icon: wethIcon,
+          name: wrappedTokenSymbol,
+          symbol: wrappedTokenSymbol,
+          icon: getTokenLogo(wrappedTokenSymbol),
           balance: wethBalance,
           decimals: tokens.weth.decimals,
           price: ethPrice,
@@ -112,9 +115,9 @@ const SupplyModal: React.FC<Props> = ({
         };
       default:
         return {
-          name: "ETH",
-          symbol: "ETH",
-          icon: ethIcon,
+          name: nativeTokenSymbol,
+          symbol: nativeTokenSymbol,
+          icon: getTokenLogo(nativeTokenSymbol),
           balance: "0",
           decimals: 18,
           price: ethPrice,

@@ -144,8 +144,12 @@ export function useAssetDetails(tokenSymbol: string) {
   });
 
   // Decode supply and borrow caps from configuration
-  const caps = reserveData?.configuration
-    ? decodeReserveConfiguration(reserveData.configuration)
+  // Configuration is a nested tuple with a 'data' field
+  const configData = reserveData?.configuration
+    ? (reserveData.configuration as any).data || reserveData.configuration
+    : 0n;
+  const caps = configData
+    ? decodeReserveConfiguration(BigInt(configData))
     : { borrowCap: 0, supplyCap: 0 };
 
   // Calculate metrics
@@ -195,8 +199,12 @@ export function useAssetDetails(tokenSymbol: string) {
       : 0;
 
   // Supply APY
-  const supplyApy = rateToApy(reserveData?.currentLiquidityRate as bigint);
-  const borrowApy = rateToApy(reserveData?.currentVariableBorrowRate as bigint);
+  const supplyApy = reserveData?.currentLiquidityRate
+    ? rateToApy(reserveData.currentLiquidityRate as bigint)
+    : "0.00";
+  const borrowApy = reserveData?.currentVariableBorrowRate
+    ? rateToApy(reserveData.currentVariableBorrowRate as bigint)
+    : "0.00";
 
   // Calculate cap percentages for progress circles
   const supplyCapPercentage =

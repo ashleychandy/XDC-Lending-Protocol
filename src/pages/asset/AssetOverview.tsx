@@ -52,7 +52,11 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
     isLoading,
   } = useAssetDetails(token || "weth");
 
-  const config = reserveData?.configuration || 0n;
+  // Configuration is a nested tuple with a 'data' field
+  const configData = reserveData?.configuration
+    ? (reserveData.configuration as any).data || reserveData.configuration
+    : 0n;
+  const config = BigInt(configData || 0);
   const ltv = config & 0xffffn;
   const liquidationThreshold = (config >> 16n) & 0xffffn;
   const liquidationBonus = (config >> 32n) & 0xffffn;
@@ -187,7 +191,7 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                 </Flex>
               </Flex>
               <Box mb="10px">
-                <Flex alignItems="center" gap="10px" mb="10px">
+                <Flex alignItems="center" gap="10px" mb="10px" flexWrap="wrap">
                   <Box fontSize="14px">Collateral usage</Box>
                   <Flex alignItems="center" gap="5px" color="green.600">
                     <FaCheck />
@@ -196,7 +200,11 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                     </Box>
                   </Flex>
                 </Flex>
-                <Flex alignItems="stretch" gap="10px">
+                <Flex
+                  alignItems="stretch"
+                  gap="10px"
+                  flexWrap={{ base: "wrap", md: "nowrap" }}
+                >
                   {supplyInfo.map((x, i) => {
                     return (
                       <Flex
@@ -205,11 +213,16 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                         justifyContent="center"
                         borderWidth="1px"
                         key={i}
-                        w="33.33%"
+                        w={{ base: "100%", sm: "48%", md: "33.33%" }}
                         borderRadius="8px"
                       >
-                        <Box>{x.title}</Box>
-                        <Box>{x.value}</Box>
+                        <Box fontSize={{ base: "xs", md: "sm" }}>{x.title}</Box>
+                        <Box
+                          fontSize={{ base: "sm", md: "md" }}
+                          fontWeight="600"
+                        >
+                          {x.value}
+                        </Box>
                       </Flex>
                     );
                   })}
@@ -300,7 +313,11 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                 <Box fontSize="14px" mb="10px">
                   Collector Info
                 </Box>
-                <Flex alignItems="stretch" gap="10px">
+                <Flex
+                  alignItems="stretch"
+                  gap="10px"
+                  flexWrap={{ base: "wrap", md: "nowrap" }}
+                >
                   {borrowInfo.map((x, i) => {
                     return (
                       <Flex
@@ -309,11 +326,16 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                         justifyContent="center"
                         borderWidth="1px"
                         key={i}
-                        w="33.33%"
+                        w={{ base: "100%", sm: "48%", md: "33.33%" }}
                         borderRadius="8px"
                       >
-                        <Box>{x.title}</Box>
-                        <Box>{x.value}</Box>
+                        <Box fontSize={{ base: "xs", md: "sm" }}>{x.title}</Box>
+                        <Box
+                          fontSize={{ base: "sm", md: "md" }}
+                          fontWeight="600"
+                        >
+                          {x.value}
+                        </Box>
                       </Flex>
                     );
                   })}
@@ -343,7 +365,11 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                     </Box>
                   </Flex>
                 </Flex>
-                <Flex alignItems="stretch" gap="10px">
+                <Flex
+                  alignItems="stretch"
+                  gap="10px"
+                  flexWrap={{ base: "wrap", md: "nowrap" }}
+                >
                   {supplyInfo.map((x, i) => {
                     return (
                       <Flex
@@ -352,18 +378,23 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                         justifyContent="center"
                         borderWidth="1px"
                         key={i}
-                        w="33.33%"
+                        w={{ base: "100%", sm: "48%", md: "33.33%" }}
                         borderRadius="8px"
                       >
-                        <Box>{x.title}</Box>
-                        <Box>{x.value}</Box>
+                        <Box fontSize={{ base: "xs", md: "sm" }}>{x.title}</Box>
+                        <Box
+                          fontSize={{ base: "sm", md: "md" }}
+                          fontWeight="600"
+                        >
+                          {x.value}
+                        </Box>
                       </Flex>
                     );
                   })}
                 </Flex>
               </Box>
               <Box mb="10px">
-                <Flex alignItems="center" gap="10px" mb="10px">
+                <Flex alignItems="center" gap="10px" mb="10px" flexWrap="wrap">
                   <Box fontSize="14px">weETH/wstETH ETH Correlated</Box>
                   <Flex alignItems="center" gap="5px" color="red.500">
                     <RxCross2 />
@@ -378,7 +409,11 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                     </Box>
                   </Flex>
                 </Flex>
-                <Flex alignItems="stretch" gap="10px">
+                <Flex
+                  alignItems="stretch"
+                  gap="10px"
+                  flexWrap={{ base: "wrap", md: "nowrap" }}
+                >
                   {supplyInfo.map((x, i) => {
                     return (
                       <Flex
@@ -387,11 +422,16 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
                         justifyContent="center"
                         borderWidth="1px"
                         key={i}
-                        w="33.33%"
+                        w={{ base: "100%", sm: "48%", md: "33.33%" }}
                         borderRadius="8px"
                       >
-                        <Box>{x.title}</Box>
-                        <Box>{x.value}</Box>
+                        <Box fontSize={{ base: "xs", md: "sm" }}>{x.title}</Box>
+                        <Box
+                          fontSize={{ base: "sm", md: "md" }}
+                          fontWeight="600"
+                        >
+                          {x.value}
+                        </Box>
                       </Flex>
                     );
                   })}
