@@ -1,3 +1,8 @@
+import { formatUsdValue, formatValue } from "@/helpers/formatValue";
+import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
 import {
   Box,
   Button,
@@ -15,15 +20,10 @@ import {
 import { useRef } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
-import ethIcon from "../../assets/images/eth.svg";
-import wethIcon from "../../assets/images/weth.svg";
-import usdcIcon from "../../assets/images/usdc.svg";
 import { useAccount, useBalance } from "wagmi";
-import { TOKENS } from "@/chains/arbitrum/arbHelper";
-import { useTokenBalance } from "@/hooks/useTokenBalance";
-import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
-import { formatUsdValue, formatValue } from "@/helpers/formatValue";
+import ethIcon from "../../assets/images/eth.svg";
+import usdcIcon from "../../assets/images/usdc.svg";
+import wethIcon from "../../assets/images/weth.svg";
 
 interface Props {
   isOpen: boolean;
@@ -52,6 +52,7 @@ const SupplyModal: React.FC<Props> = ({
   isPending,
   isConfirming,
 }) => {
+  const { tokens } = useChainConfig();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { address } = useAccount();
 
@@ -62,12 +63,12 @@ const SupplyModal: React.FC<Props> = ({
 
   // Get token balances
   const { balance: wethBalance } = useTokenBalance(
-    TOKENS.weth.address,
-    TOKENS.weth.decimals
+    tokens.weth.address,
+    tokens.weth.decimals
   );
   const { balance: usdcBalance } = useTokenBalance(
-    TOKENS.usdc.address,
-    TOKENS.usdc.decimals
+    tokens.usdc.address,
+    tokens.usdc.decimals
   );
 
   // Get account data for health factor
@@ -97,7 +98,7 @@ const SupplyModal: React.FC<Props> = ({
           symbol: "WETH",
           icon: wethIcon,
           balance: wethBalance,
-          decimals: TOKENS.weth.decimals,
+          decimals: tokens.weth.decimals,
           price: ethPrice,
         };
       case "usdc":
@@ -106,7 +107,7 @@ const SupplyModal: React.FC<Props> = ({
           symbol: "USDC",
           icon: usdcIcon,
           balance: usdcBalance,
-          decimals: TOKENS.usdc.decimals,
+          decimals: tokens.usdc.decimals,
           price: usdcPrice,
         };
       default:

@@ -1,14 +1,15 @@
-import React from "react";
-import { Container, Box, Flex, Heading, Image } from "@chakra-ui/react";
-import xdcIcon from "../assets/images/xdc-icon.webp";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { Box, Container, Flex, Heading, Image } from "@chakra-ui/react";
 
 const Home = () => {
+  const { network } = useChainConfig();
+
   return (
     <Container maxW="container.xl" h="100%">
       <Box h="100%" p="30px 0">
         <Flex gap="2" alignItems="center" mb="15px">
-          <Image src={xdcIcon} width="32px" height="32px" />
-          <Heading size="3xl">XDC Market</Heading>
+          <Image src={network.icon} width="32px" height="32px" />
+          <Heading size="3xl">{network.name} Market</Heading>
         </Flex>
         <Flex gap="6" alignItems="center">
           <Flex direction="column">

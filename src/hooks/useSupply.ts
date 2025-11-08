@@ -1,9 +1,10 @@
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { erc20Abi, parseUnits } from "viem";
-import { CONTRACTS } from "@/chains/arbitrum/arbHelper";
 import { poolAbi } from "@/config/poolAbi";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { erc20Abi, parseUnits } from "viem";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export function useSupply() {
+  const { contracts } = useChainConfig();
   const { data: hash, writeContract, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -20,7 +21,7 @@ export function useSupply() {
       address: tokenAddress as `0x${string}`,
       abi: erc20Abi,
       functionName: "approve",
-      args: [CONTRACTS.pool, amountInWei],
+      args: [contracts.pool, amountInWei],
     });
   };
 
@@ -33,7 +34,7 @@ export function useSupply() {
     const amountInWei = parseUnits(amount, decimals);
 
     return writeContract({
-      address: CONTRACTS.pool,
+      address: contracts.pool,
       abi: poolAbi,
       functionName: "supply",
       args: [

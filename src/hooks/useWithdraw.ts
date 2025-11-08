@@ -1,9 +1,10 @@
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseUnits, maxUint256 } from "viem";
-import { CONTRACTS } from "@/chains/arbitrum/arbHelper";
 import { poolAbi } from "@/config/poolAbi";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { maxUint256, parseUnits } from "viem";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export function useWithdraw() {
+  const { contracts } = useChainConfig();
   const { data: hash, writeContract, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
@@ -19,7 +20,7 @@ export function useWithdraw() {
     const amountInWei = withdrawAll ? maxUint256 : parseUnits(amount, decimals);
 
     return writeContract({
-      address: CONTRACTS.pool,
+      address: contracts.pool,
       abi: poolAbi,
       functionName: "withdraw",
       args: [

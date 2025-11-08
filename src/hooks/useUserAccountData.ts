@@ -1,16 +1,18 @@
-import { useReadContract, useAccount } from "wagmi";
-import { formatUnits } from "viem";
-import { CONTRACTS } from "@/chains/arbitrum/arbHelper";
 import { poolAbi } from "@/config/poolAbi";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { formatUnits } from "viem";
+import { useAccount, useReadContract } from "wagmi";
 
 export function useUserAccountData() {
+  const { contracts, network } = useChainConfig();
   const { address } = useAccount();
 
   const { data, isLoading, error, refetch } = useReadContract({
-    address: CONTRACTS.pool,
+    address: contracts.pool,
     abi: poolAbi,
     functionName: "getUserAccountData",
     args: address ? [address] : undefined,
+    chainId: network.chainId,
     query: {
       enabled: !!address,
     },

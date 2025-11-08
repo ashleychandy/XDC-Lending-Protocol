@@ -1,3 +1,8 @@
+import { formatUsdValue, formatValue } from "@/helpers/formatValue";
+import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
 import {
   Box,
   Button,
@@ -17,11 +22,6 @@ import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
 import ethIcon from "../../assets/images/eth.svg";
 import usdcIcon from "../../assets/images/usdc.svg";
-import { TOKENS } from "@/chains/arbitrum/arbHelper";
-import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { useTokenBalance } from "@/hooks/useTokenBalance";
-import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
-import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 
 interface Props {
   isOpen: boolean;
@@ -50,6 +50,7 @@ const RepayModal: React.FC<Props> = ({
   isPending = false,
   isConfirming = false,
 }) => {
+  const { tokens } = useChainConfig();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Get account data for health factor
@@ -57,12 +58,12 @@ const RepayModal: React.FC<Props> = ({
 
   // Get wallet balances for validation
   const { balance: wethBalance } = useTokenBalance(
-    TOKENS.weth.address,
-    TOKENS.weth.decimals
+    tokens.weth.address,
+    tokens.weth.decimals
   );
   const { balance: usdcBalance } = useTokenBalance(
-    TOKENS.usdc.address,
-    TOKENS.usdc.decimals
+    tokens.usdc.address,
+    tokens.usdc.decimals
   );
 
   // Token configuration
@@ -472,12 +473,12 @@ const RepayModal: React.FC<Props> = ({
                   {isPending || isConfirming
                     ? "Repaying..."
                     : !amount ||
-                      amount.trim() === "" ||
-                      parseFloat(amount) === 0
-                    ? "Enter an amount"
-                    : insufficientBalance
-                    ? "Insufficient balance"
-                    : `Repay ${tokenConfig.symbol}`}
+                        amount.trim() === "" ||
+                        parseFloat(amount) === 0
+                      ? "Enter an amount"
+                      : insufficientBalance
+                        ? "Insufficient balance"
+                        : `Repay ${tokenConfig.symbol}`}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>

@@ -1,38 +1,37 @@
 // src/hooks/useAssetDetails.ts
+import { erc20Abi, formatUnits } from "viem";
 import { useReadContract } from "wagmi";
-import { formatUnits } from "viem";
-import { CONTRACTS, TOKENS } from "@/chains/arbitrum/arbHelper";
-import { erc20Abi } from "viem";
 import usdcIcon from "../assets/images/usdc.svg";
 import wethIcon from "../assets/images/weth.svg";
+import { useChainConfig } from "./useChainConfig";
 
-// Token metadata - ETH maps to WETH
-const TOKEN_METADATA = {
-  eth: {
-    symbol: "WETH",
-    name: "Wrapped Ether",
-    fullName: "Wrapped Ether",
-    icon: wethIcon,
-    address: TOKENS.weth.address,
-    decimals: 18,
-  },
-  weth: {
-    symbol: "WETH",
-    name: "Wrapped Ether",
-    fullName: "Wrapped Ether",
-    icon: wethIcon,
-    address: TOKENS.weth.address,
-    decimals: 18,
-  },
-  usdc: {
-    symbol: "USDC",
-    name: "USD Coin",
-    fullName: "USD Coin",
-    icon: usdcIcon,
-    address: TOKENS.usdc.address,
-    decimals: 6,
-  },
-} as const;
+const getTokenMetadata = (tokens: any) =>
+  ({
+    eth: {
+      symbol: "WETH",
+      name: "Wrapped Ether",
+      fullName: "Wrapped Ether",
+      icon: wethIcon,
+      address: tokens.weth.address,
+      decimals: 18,
+    },
+    weth: {
+      symbol: "WETH",
+      name: "Wrapped Ether",
+      fullName: "Wrapped Ether",
+      icon: wethIcon,
+      address: tokens.weth.address,
+      decimals: 18,
+    },
+    usdc: {
+      symbol: "USDC",
+      name: "USD Coin",
+      fullName: "USD Coin",
+      icon: usdcIcon,
+      address: tokens.usdc.address,
+      decimals: 6,
+    },
+  }) as const;
 
 function decodeReserveConfiguration(configuration: bigint) {
   const BORROW_CAP_START = 80n;
@@ -49,13 +48,16 @@ function decodeReserveConfiguration(configuration: bigint) {
 }
 
 export function useAssetDetails(tokenSymbol: string) {
+  const { contracts, tokens, network } = useChainConfig();
+  const TOKEN_METADATA = getTokenMetadata(tokens);
+
   const token =
     TOKEN_METADATA[tokenSymbol?.toLowerCase() as keyof typeof TOKEN_METADATA] ||
     TOKEN_METADATA.weth;
 
   // Get reserve data from Aave Pool
   const { data: reserveData, isLoading: isLoadingReserve } = useReadContract({
-    address: CONTRACTS.pool,
+    address: contracts.pool,
     abi: [
       {
         inputs: [{ name: "asset", type: "address" }],
@@ -75,9 +77,6 @@ export function useAssetDetails(tokenSymbol: string) {
               { name: "stableDebtTokenAddress", type: "address" },
               { name: "variableDebtTokenAddress", type: "address" },
               { name: "interestRateStrategyAddress", type: "address" },
-              { name: "accruedToTreasury", type: "uint128" },
-              { name: "unbacked", type: "uint128" },
-              { name: "isolationModeTotalDebt", type: "uint128" },
             ],
             name: "",
             type: "tuple",
@@ -89,6 +88,7 @@ export function useAssetDetails(tokenSymbol: string) {
     ] as const,
     functionName: "getReserveData",
     args: [token.address as `0x${string}`],
+    chainId: network.chainId,
   });
 
   // Get aToken total supply (total supplied)
@@ -96,6 +96,7 @@ export function useAssetDetails(tokenSymbol: string) {
     address: reserveData?.aTokenAddress as `0x${string}`,
     abi: erc20Abi,
     functionName: "totalSupply",
+    chainId: network.chainId,
     query: {
       enabled: !!reserveData?.aTokenAddress,
     },
@@ -106,6 +107,7 @@ export function useAssetDetails(tokenSymbol: string) {
     address: reserveData?.stableDebtTokenAddress as `0x${string}`,
     abi: erc20Abi,
     functionName: "totalSupply",
+    chainId: network.chainId,
     query: {
       enabled: !!reserveData?.stableDebtTokenAddress,
     },
@@ -116,6 +118,7 @@ export function useAssetDetails(tokenSymbol: string) {
     address: reserveData?.variableDebtTokenAddress as `0x${string}`,
     abi: erc20Abi,
     functionName: "totalSupply",
+    chainId: network.chainId,
     query: {
       enabled: !!reserveData?.variableDebtTokenAddress,
     },
@@ -127,6 +130,7 @@ export function useAssetDetails(tokenSymbol: string) {
     abi: erc20Abi,
     functionName: "balanceOf",
     args: [reserveData?.aTokenAddress as `0x${string}`],
+    chainId: network.chainId,
     query: {
       enabled: !!reserveData?.aTokenAddress,
     },
@@ -134,7 +138,8 @@ export function useAssetDetails(tokenSymbol: string) {
 
   // Get asset price from oracle
   const { data: priceOracleAddress } = useReadContract({
-    address: CONTRACTS.pool,
+    address: contracts.pool,
+    chainId: network.chainId,
     abi: [
       {
         inputs: [],
@@ -159,6 +164,7 @@ export function useAssetDetails(tokenSymbol: string) {
       },
     ] as const,
     functionName: "getPriceOracle",
+    chainId: network.chainId,
     query: {
       enabled: !!priceOracleAddress,
     },
@@ -177,6 +183,7 @@ export function useAssetDetails(tokenSymbol: string) {
     ] as const,
     functionName: "getAssetPrice",
     args: [token.address as `0x${string}`],
+    chainId: network.chainId,
     query: {
       enabled: !!oracleAddress,
     },

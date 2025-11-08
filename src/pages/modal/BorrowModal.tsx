@@ -324,8 +324,8 @@ const BorrowModal: React.FC<Props> = ({
                   {!amount || amount.trim() === "" || parseFloat(amount) === 0
                     ? "Enter an amount"
                     : parseFloat(amount) > parseFloat(borrowedBalance)
-                    ? "Insufficient balance"
-                    : `Borrow ${tokenConfig.symbol}`}
+                      ? "Insufficient balance"
+                      : `Borrow ${tokenConfig.symbol}`}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>

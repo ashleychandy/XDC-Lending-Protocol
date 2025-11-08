@@ -1,26 +1,27 @@
-import React, { useState } from "react";
-import { Box, Button, Flex, Heading, Icon, Tabs } from "@chakra-ui/react";
-import { IoWalletOutline } from "react-icons/io5";
-import { useAccount, useBalance } from "wagmi";
-import { TOKENS } from "@/chains/arbitrum/arbHelper";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
-import { useTokenBalance } from "@/hooks/useTokenBalance";
-import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { useTransactionFlow } from "@/hooks/useTransactionFlow";
-import { useSupply } from "@/hooks/useSupply";
 import { useBorrow } from "@/hooks/useBorrow";
-import SupplyDoneModal from "../modal/SupplyDoneModal";
-import SupplyModal from "../modal/SupplyModal";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { useReserveData } from "@/hooks/useReserveData";
+import { useSupply } from "@/hooks/useSupply";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { useTransactionFlow } from "@/hooks/useTransactionFlow";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
+import { Box, Button, Flex, Heading, Icon, Tabs } from "@chakra-ui/react";
+import React, { useState } from "react";
+import { IoWalletOutline } from "react-icons/io5";
+import { useAccount, useBalance } from "wagmi";
 import BorrowDoneModal from "../modal/BorrowDoneModal";
 import BorrowModal from "../modal/BorrowModal";
+import SupplyDoneModal from "../modal/SupplyDoneModal";
+import SupplyModal from "../modal/SupplyModal";
 
 interface Props {
   token?: string;
 }
 
 const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
+  const { tokens } = useChainConfig();
   // Local tab state
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     token as "weth" | "usdc" | "eth"
@@ -38,17 +39,17 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
   // Balances
   const { data: ethBalance } = useBalance({ address });
   const { balance: wethBalance } = useTokenBalance(
-    TOKENS.weth.address,
-    TOKENS.weth.decimals
+    tokens.weth.address,
+    tokens.weth.decimals
   );
   const { balance: usdcBalance } = useTokenBalance(
-    TOKENS.usdc.address,
-    TOKENS.usdc.decimals
+    tokens.usdc.address,
+    tokens.usdc.decimals
   );
 
   // Prices
-  const { price: ethPrice } = useAssetPrice(TOKENS.weth.address);
-  const { price: usdcPrice } = useAssetPrice(TOKENS.usdc.address);
+  const { price: ethPrice } = useAssetPrice(tokens.weth.address);
+  const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
 
   // Derived data
   const borrowedEth = formatValue(
@@ -59,9 +60,9 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
   );
 
   // Get reserve data (APY, etc.) for each asset
-  const wethReserveData = useReserveData(TOKENS.weth.address);
+  const wethReserveData = useReserveData(tokens.weth.address);
   // console.log("wethReserveData", wethReserveData);
-  const usdcReserveData = useReserveData(TOKENS.usdc.address);
+  const usdcReserveData = useReserveData(tokens.usdc.address);
 
   // Token config — depends on selected tab, not prop
   const tokenConfig = {
@@ -87,7 +88,7 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
 
   const handleSupply = async () => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
     try {
       await supplyHook.approve(token.address, amount, token.decimals);
       setTimeout(async () => {
@@ -112,7 +113,7 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
 
   const handleBorrow = async () => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
     try {
       await borrowHook.borrow(token.address, amount, token.decimals, address);
     } catch (err) {

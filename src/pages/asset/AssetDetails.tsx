@@ -1,4 +1,9 @@
-import React from "react";
+import {
+  formatCurrency,
+  formatPercentage,
+  useAssetDetails,
+} from "@/hooks/useAssetDetails";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import {
   Box,
   Button,
@@ -7,25 +12,20 @@ import {
   Heading,
   Icon,
   Image,
+  Spinner,
   Tabs,
   useBreakpointValue,
-  Spinner,
 } from "@chakra-ui/react";
-import arbIcon from "../../assets/images/arbitrum.svg";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { IoMdArrowBack } from "react-icons/io";
 import { FiExternalLink } from "react-icons/fi";
+import { IoMdArrowBack } from "react-icons/io";
 import { IoWalletOutline } from "react-icons/io5";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAccount } from "wagmi";
 import AssetInfo from "./AssetInfo";
 import AssetOverview from "./AssetOverview";
-import {
-  useAssetDetails,
-  formatCurrency,
-  formatPercentage,
-} from "@/hooks/useAssetDetails";
-import { useAccount } from "wagmi";
 
 const AssetDetails = () => {
+  const { network } = useChainConfig();
   const isTabLayout = useBreakpointValue({ base: true, xl: false });
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "eth";
@@ -105,8 +105,8 @@ const AssetDetails = () => {
             Go Back
           </Button>
           <Flex gap="2" alignItems="center">
-            <Image src={arbIcon} width="20px" height="20px" />
-            <Heading size="lg">Arbitrum Sepolia Market</Heading>
+            <Image src={network.icon} width="20px" height="20px" />
+            <Heading size="lg">{network.name} Market</Heading>
           </Flex>
         </Flex>
 

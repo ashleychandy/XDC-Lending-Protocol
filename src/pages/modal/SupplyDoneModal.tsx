@@ -6,14 +6,11 @@ import {
   Heading,
   HStack,
   Icon,
-  Image,
   Portal,
 } from "@chakra-ui/react";
-import { IoMdClose } from "react-icons/io";
-import { IoWalletOutline } from "react-icons/io5";
-import xdcIcon from "../../assets/images/xdc-icon.webp";
 import { FaCheck } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 import { useAccount } from "wagmi";
 
 interface Props {

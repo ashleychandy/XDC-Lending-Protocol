@@ -1,25 +1,26 @@
-import React, { useState } from "react";
-import { Box, Heading, Flex, Table, Button, Image } from "@chakra-ui/react";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
-import usdcIcon from "../assets/images/usdc.svg";
-import ethIcon from "../assets/images/eth.svg";
+import { useAssetPrice } from "@/hooks/useAssetPrice";
+import { useBorrow } from "@/hooks/useBorrow";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { useRepay } from "@/hooks/useRepay";
+import { useReserveData } from "@/hooks/useReserveData";
+import { useTransactionFlow } from "@/hooks/useTransactionFlow";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
+import { useUserReserveData } from "@/hooks/useUserReserveData";
+import { Box, Button, Flex, Heading, Image, Table } from "@chakra-ui/react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
-import { TOKENS } from "@/chains/arbitrum/arbHelper";
-import { useUserReserveData } from "@/hooks/useUserReserveData";
-import { useReserveData } from "@/hooks/useReserveData";
-import { useAssetPrice } from "@/hooks/useAssetPrice";
-import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useAccount } from "wagmi";
-import { useBorrow } from "@/hooks/useBorrow";
-import { useRepay } from "@/hooks/useRepay";
-import RepayDoneModal from "./modal/RepayDoneModal";
-import RepayModal from "./modal/RepayModal";
+import ethIcon from "../assets/images/eth.svg";
+import usdcIcon from "../assets/images/usdc.svg";
 import BorrowDoneModal from "./modal/BorrowDoneModal";
 import BorrowModal from "./modal/BorrowModal";
+import RepayDoneModal from "./modal/RepayDoneModal";
+import RepayModal from "./modal/RepayModal";
 
 function BorrowContent() {
+  const { tokens } = useChainConfig();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     "weth"
   );
@@ -35,30 +36,30 @@ function BorrowContent() {
   const repayHook = useRepay();
   const accountData = useUserAccountData();
 
-  const { price: ethPrice } = useAssetPrice(TOKENS.weth.address);
-  const { price: usdcPrice } = useAssetPrice(TOKENS.usdc.address);
+  const { price: ethPrice } = useAssetPrice(tokens.weth.address);
+  const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
 
-  const wethReserveData = useReserveData(TOKENS.weth.address);
-  const usdcReserveData = useReserveData(TOKENS.usdc.address);
+  const wethReserveData = useReserveData(tokens.weth.address);
+  const usdcReserveData = useReserveData(tokens.usdc.address);
 
   const wethUserData = useUserReserveData(
-    TOKENS.weth.address,
+    tokens.weth.address,
     wethReserveData.aTokenAddress
   );
 
   const usdcUserData = useUserReserveData(
-    TOKENS.usdc.address,
+    tokens.usdc.address,
     usdcReserveData.aTokenAddress
   );
 
   const wethBorrowed = formatUnits(
     wethUserData.borrowedAmount,
-    TOKENS.weth.decimals
+    tokens.weth.decimals
   );
 
   const usdcBorrowed = formatUnits(
     usdcUserData.borrowedAmount,
-    TOKENS.usdc.decimals
+    tokens.usdc.decimals
   );
 
   const borrowPowerUsed =
@@ -88,7 +89,7 @@ function BorrowContent() {
 
   const handleBorrow = async () => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
     try {
       await borrowHook.borrow(token.address, amount, token.decimals, address);
     } catch (err) {
@@ -110,7 +111,7 @@ function BorrowContent() {
 
   const handleRepay = async () => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
     try {
       await repayHook.approve(token.address, amount, token.decimals);
       setTimeout(async () => {

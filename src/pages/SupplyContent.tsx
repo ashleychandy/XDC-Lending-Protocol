@@ -1,37 +1,38 @@
-import React, { useState } from "react";
+import { formatUsdValue, formatValue } from "@/helpers/formatValue";
+import { useAssetPrice } from "@/hooks/useAssetPrice";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { useReserveData } from "@/hooks/useReserveData";
+import { useSupply } from "@/hooks/useSupply";
+import { useTokenBalance } from "@/hooks/useTokenBalance";
+import { useTransactionFlow } from "@/hooks/useTransactionFlow";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
+import { useUserReserveData } from "@/hooks/useUserReserveData";
+import { useWithdraw } from "@/hooks/useWithdraw";
 import {
   Box,
-  Heading,
-  Flex,
-  Table,
-  Switch,
   Button,
+  Flex,
+  Heading,
   Icon,
   Image,
+  Switch,
+  Table,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import { FaCheck } from "react-icons/fa6";
-import { formatUsdValue, formatValue } from "@/helpers/formatValue";
-import usdcIcon from "../assets/images/usdc.svg";
-import ethIcon from "../assets/images/eth.svg";
-import wethIcon from "../assets/images/weth.svg";
-import { formatUnits } from "viem";
-import { TOKENS } from "@/chains/arbitrum/arbHelper";
-import { useUserReserveData } from "@/hooks/useUserReserveData";
-import { useReserveData } from "@/hooks/useReserveData";
-import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { useTokenBalance } from "@/hooks/useTokenBalance";
-import { useAccount, useBalance } from "wagmi";
-import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useNavigate } from "react-router-dom";
-import SupplyModal from "./modal/SupplyModal";
+import { formatUnits } from "viem";
+import { useAccount, useBalance } from "wagmi";
+import ethIcon from "../assets/images/eth.svg";
+import usdcIcon from "../assets/images/usdc.svg";
+import wethIcon from "../assets/images/weth.svg";
 import SupplyDoneModal from "./modal/SupplyDoneModal";
-import WithdrawModal from "./modal/WithdrawModal";
+import SupplyModal from "./modal/SupplyModal";
 import WithdrawDoneModal from "./modal/WithdrawDoneModal";
-import { useSupply } from "@/hooks/useSupply";
-import { useWithdraw } from "@/hooks/useWithdraw";
-import { useTransactionFlow } from "@/hooks/useTransactionFlow";
+import WithdrawModal from "./modal/WithdrawModal";
 
 const SupplyContent = () => {
+  const { tokens } = useChainConfig();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     "weth"
   );
@@ -48,44 +49,44 @@ const SupplyContent = () => {
   const { address } = useAccount();
   const accountData = useUserAccountData();
 
-  const wethReserveData = useReserveData(TOKENS.weth.address);
-  const usdcReserveData = useReserveData(TOKENS.usdc.address);
+  const wethReserveData = useReserveData(tokens.weth.address);
+  const usdcReserveData = useReserveData(tokens.usdc.address);
 
   const { data: ethBalance } = useBalance({
     address: address,
   });
 
   const { balance: wethBalance } = useTokenBalance(
-    TOKENS.weth.address,
-    TOKENS.weth.decimals
+    tokens.weth.address,
+    tokens.weth.decimals
   );
   const { balance: usdcBalance } = useTokenBalance(
-    TOKENS.usdc.address,
-    TOKENS.usdc.decimals
+    tokens.usdc.address,
+    tokens.usdc.decimals
   );
 
   const wethUserData = useUserReserveData(
-    TOKENS.weth.address,
+    tokens.weth.address,
     wethReserveData.aTokenAddress
   );
 
   const usdcUserData = useUserReserveData(
-    TOKENS.usdc.address,
+    tokens.usdc.address,
     usdcReserveData.aTokenAddress
   );
 
   const wethSupplied = formatUnits(
     wethUserData.suppliedAmount,
-    TOKENS.weth.decimals
+    tokens.weth.decimals
   );
 
   const usdcSupplied = formatUnits(
     usdcUserData.suppliedAmount,
-    TOKENS.usdc.decimals
+    tokens.usdc.decimals
   );
 
-  const { price: ethPrice } = useAssetPrice(TOKENS.weth.address);
-  const { price: usdcPrice } = useAssetPrice(TOKENS.usdc.address);
+  const { price: ethPrice } = useAssetPrice(tokens.weth.address);
+  const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
 
   const totalSuppliedUsd =
     parseFloat(wethSupplied) * ethPrice + parseFloat(usdcSupplied) * usdcPrice;
@@ -104,7 +105,7 @@ const SupplyContent = () => {
 
   const handleSupply = async () => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
     try {
       await supplyHook.approve(token.address, amount, token.decimals);
       setTimeout(async () => {
@@ -129,7 +130,7 @@ const SupplyContent = () => {
 
   const handleWithdraw = async () => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? TOKENS.weth : TOKENS[selectedToken];
+    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
     try {
       await withdrawHook.withdraw(
         token.address,

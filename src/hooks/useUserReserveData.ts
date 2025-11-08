@@ -1,10 +1,11 @@
-import { CONTRACTS } from "@/chains/arbitrum/arbHelper";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { useAccount, useReadContract } from "wagmi";
 
 export const useUserReserveData = (
   assetAddress: string,
   aTokenAddress: string
 ) => {
+  const { contracts, network } = useChainConfig();
   const { address } = useAccount();
 
   // Get aToken balance (supplied amount)
@@ -21,6 +22,7 @@ export const useUserReserveData = (
     ] as const,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
+    chainId: network.chainId,
     query: {
       enabled: !!address && !!aTokenAddress && aTokenAddress !== "",
     },
@@ -28,7 +30,8 @@ export const useUserReserveData = (
 
   // Get variable debt token balance (borrowed amount)
   const { data: reserveData } = useReadContract({
-    address: CONTRACTS.pool,
+    address: contracts.pool,
+    chainId: network.chainId,
     abi: [
       {
         inputs: [{ name: "asset", type: "address" }],
@@ -48,9 +51,6 @@ export const useUserReserveData = (
               { name: "stableDebtTokenAddress", type: "address" },
               { name: "variableDebtTokenAddress", type: "address" },
               { name: "interestRateStrategyAddress", type: "address" },
-              { name: "accruedToTreasury", type: "uint128" },
-              { name: "unbacked", type: "uint128" },
-              { name: "isolationModeTotalDebt", type: "uint128" },
             ],
             name: "",
             type: "tuple",
@@ -79,6 +79,7 @@ export const useUserReserveData = (
     ] as const,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
+    chainId: network.chainId,
     query: {
       enabled: !!address && !!variableDebtTokenAddress,
     },

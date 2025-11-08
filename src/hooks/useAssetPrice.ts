@@ -1,10 +1,11 @@
-import { CONTRACTS } from "@/chains/arbitrum/arbHelper";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { formatUnits } from "viem";
 import { useReadContract } from "wagmi";
 
 export const useAssetPrice = (assetAddress: string) => {
+  const { contracts, network } = useChainConfig();
   const { data: priceOracleAddress } = useReadContract({
-    address: CONTRACTS.pool,
+    address: contracts.pool,
     abi: [
       {
         inputs: [],
@@ -15,6 +16,7 @@ export const useAssetPrice = (assetAddress: string) => {
       },
     ] as const,
     functionName: "ADDRESSES_PROVIDER",
+    chainId: network.chainId,
   });
 
   const { data: oracleAddress } = useReadContract({
@@ -29,6 +31,7 @@ export const useAssetPrice = (assetAddress: string) => {
       },
     ] as const,
     functionName: "getPriceOracle",
+    chainId: network.chainId,
     query: {
       enabled: !!priceOracleAddress,
     },
@@ -47,6 +50,7 @@ export const useAssetPrice = (assetAddress: string) => {
     ] as const,
     functionName: "getAssetPrice",
     args: [assetAddress as `0x${string}`],
+    chainId: network.chainId,
     query: {
       enabled: !!oracleAddress && !!assetAddress,
     },

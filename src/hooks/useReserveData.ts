@@ -1,9 +1,11 @@
-import { CONTRACTS } from "@/chains/arbitrum/arbHelper";
+import { useChainConfig } from "@/hooks/useChainConfig";
 import { useReadContract } from "wagmi";
 
 export const useReserveData = (assetAddress: string) => {
+  const { contracts, network } = useChainConfig();
+
   const { data, isLoading, error } = useReadContract({
-    address: CONTRACTS.pool,
+    address: contracts.pool,
     abi: [
       {
         inputs: [{ name: "asset", type: "address" }],
@@ -23,9 +25,6 @@ export const useReserveData = (assetAddress: string) => {
               { name: "stableDebtTokenAddress", type: "address" },
               { name: "variableDebtTokenAddress", type: "address" },
               { name: "interestRateStrategyAddress", type: "address" },
-              { name: "accruedToTreasury", type: "uint128" },
-              { name: "unbacked", type: "uint128" },
-              { name: "isolationModeTotalDebt", type: "uint128" },
             ],
             name: "",
             type: "tuple",
@@ -37,9 +36,13 @@ export const useReserveData = (assetAddress: string) => {
     ] as const,
     functionName: "getReserveData",
     args: [assetAddress as `0x${string}`],
+    chainId: network.chainId,
   });
 
   if (!data) {
+    if (error) {
+      console.error("useReserveData error for", assetAddress, ":", error);
+    }
     return {
       supplyApy: "0.00",
       borrowApy: "0.00",

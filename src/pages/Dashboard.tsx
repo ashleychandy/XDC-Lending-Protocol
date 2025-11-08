@@ -1,33 +1,33 @@
-import { Box, Container, Flex, Heading, Image } from "@chakra-ui/react";
-import { useAccount } from "wagmi";
-import arbIcon from "../assets/images/arbitrum.svg";
-import { TOKENS } from "@/chains/arbitrum/arbHelper";
-import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { useReserveData } from "@/hooks/useReserveData";
-import { useUserReserveData } from "@/hooks/useUserReserveData";
-import { formatUnits } from "viem";
-import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
-import SupplyContent from "./SupplyContent";
+import { useAssetPrice } from "@/hooks/useAssetPrice";
+import { useChainConfig } from "@/hooks/useChainConfig";
+import { useReserveData } from "@/hooks/useReserveData";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
+import { useUserReserveData } from "@/hooks/useUserReserveData";
+import { Box, Container, Flex, Heading, Image } from "@chakra-ui/react";
+import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
 import BorrowContent from "./BorrowContent";
 import ConnectYourWalletContent from "./ConnectYourWalletContent";
+import SupplyContent from "./SupplyContent";
 
 const Dashboard = () => {
   const { isConnected } = useAccount();
+  const { tokens, network } = useChainConfig();
 
-  const wethReserveData = useReserveData(TOKENS.weth.address);
-  const usdcReserveData = useReserveData(TOKENS.usdc.address);
+  const wethReserveData = useReserveData(tokens.weth.address);
+  const usdcReserveData = useReserveData(tokens.usdc.address);
 
-  const { price: ethPrice } = useAssetPrice(TOKENS.weth.address);
-  const { price: usdcPrice } = useAssetPrice(TOKENS.usdc.address);
+  const { price: ethPrice } = useAssetPrice(tokens.weth.address);
+  const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
 
   const wethUserData = useUserReserveData(
-    TOKENS.weth.address,
+    tokens.weth.address,
     wethReserveData.aTokenAddress
   );
 
   const usdcUserData = useUserReserveData(
-    TOKENS.usdc.address,
+    tokens.usdc.address,
     usdcReserveData.aTokenAddress
   );
 
@@ -35,12 +35,12 @@ const Dashboard = () => {
 
   const wethSupplied = formatUnits(
     wethUserData.suppliedAmount,
-    TOKENS.weth.decimals
+    tokens.weth.decimals
   );
 
   const usdcSupplied = formatUnits(
     usdcUserData.suppliedAmount,
-    TOKENS.usdc.decimals
+    tokens.usdc.decimals
   );
 
   const netWorth =
@@ -77,8 +77,8 @@ const Dashboard = () => {
     >
       <Box h="100%" p="30px 0">
         <Flex gap="2" alignItems="center" mb="15px">
-          <Image src={arbIcon} width="32px" height="32px" />
-          <Heading size="3xl">Arbitrum Sepolia Market</Heading>
+          <Image src={network.icon} width="32px" height="32px" />
+          <Heading size="3xl">{network.name} Market</Heading>
         </Flex>
 
         <Flex gap="6" alignItems="center" mb="50px" flexWrap="wrap">

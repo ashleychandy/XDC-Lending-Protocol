@@ -375,8 +375,8 @@ const WithdrawModal: React.FC<Props> = ({
                   {!amount || amount.trim() === "" || parseFloat(amount) === 0
                     ? "Enter an amount"
                     : parseFloat(amount) > parseFloat(suppliedBalance)
-                    ? "Insufficient balance"
-                    : `Withdraw ${tokenConfig.symbol}`}
+                      ? "Insufficient balance"
+                      : `Withdraw ${tokenConfig.symbol}`}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>
