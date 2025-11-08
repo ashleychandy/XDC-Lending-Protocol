@@ -1,4 +1,5 @@
 import { arbitrumSepolia, xdc, xdcTestnet } from "wagmi/chains";
+import { getChainLogo } from "./tokenLogos";
 
 export interface ChainConfig {
   contracts: {
@@ -11,6 +12,7 @@ export interface ChainConfig {
     uiIncentiveDataProvider?: `0x${string}`;
   };
   tokens: {
+    // Wrapped native token (WXDC, WETH, etc.)
     weth: {
       address: `0x${string}`;
       symbol: string;
@@ -30,6 +32,11 @@ export interface ChainConfig {
     name: string;
     chainId: number;
     icon: string;
+    nativeToken: {
+      symbol: string;
+      name: string;
+      decimals: number;
+    };
   };
 }
 
@@ -47,8 +54,8 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     },
     tokens: {
       weth: {
-        address: "0x36c3461aa4Ad40153bbb666fCb4A94FBB81246f2",
-        symbol: "WETH",
+        address: "0x951857744785E80e2De051c32EE7b25f9c458C42", // WXDC on mainnet
+        symbol: "WXDC",
         decimals: 18,
         aToken: "0x09Fa3c5452Ad7da2B0041B2E92b1caDCA8aA15Fc",
         variableDebtToken: "0xC47EEfAd9c7Fe28FB1829cA5ec731a88050AD788",
@@ -64,7 +71,12 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     network: {
       name: "XDC Mainnet",
       chainId: 50,
-      icon: "/src/assets/images/xdc-icon.webp",
+      icon: getChainLogo(50),
+      nativeToken: {
+        symbol: "XDC",
+        name: "XDC Network",
+        decimals: 18,
+      },
     },
   },
   // XDC Apothem Testnet
@@ -80,8 +92,8 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     },
     tokens: {
       weth: {
-        address: "0x36c3461aa4Ad40153bbb666fCb4A94FBB81246f2",
-        symbol: "WETH",
+        address: "0x36c3461aa4Ad40153bbb666fCb4A94FBB81246f2", // WXDC on testnet
+        symbol: "WXDC",
         decimals: 18,
         aToken: "0x09Fa3c5452Ad7da2B0041B2E92b1caDCA8aA15Fc",
         variableDebtToken: "0xC47EEfAd9c7Fe28FB1829cA5ec731a88050AD788",
@@ -97,7 +109,12 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     network: {
       name: "XDC Apothem",
       chainId: 51,
-      icon: "/src/assets/images/xdc-icon.webp",
+      icon: getChainLogo(51),
+      nativeToken: {
+        symbol: "XDC",
+        name: "XDC Network",
+        decimals: 18,
+      },
     },
   },
   // Arbitrum Sepolia
@@ -129,7 +146,12 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     network: {
       name: "Arbitrum Sepolia",
       chainId: 421614,
-      icon: "/src/assets/images/arbitrum.svg",
+      icon: getChainLogo(421614),
+      nativeToken: {
+        symbol: "ETH",
+        name: "Ethereum",
+        decimals: 18,
+      },
     },
   },
 };

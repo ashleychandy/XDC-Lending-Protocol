@@ -1,3 +1,4 @@
+import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useChainConfig } from "@/hooks/useChainConfig";
@@ -23,19 +24,24 @@ import { FaCheck } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
-import ethIcon from "../assets/images/eth.svg";
 import usdcIcon from "../assets/images/usdc.svg";
-import wethIcon from "../assets/images/weth.svg";
 import SupplyDoneModal from "./modal/SupplyDoneModal";
 import SupplyModal from "./modal/SupplyModal";
 import WithdrawDoneModal from "./modal/WithdrawDoneModal";
 import WithdrawModal from "./modal/WithdrawModal";
 
 const SupplyContent = () => {
-  const { tokens } = useChainConfig();
+  const { tokens, network } = useChainConfig();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     "weth"
   );
+
+  // Get native token symbol (XDC, ETH, etc.)
+  const nativeTokenSymbol = network.nativeToken.symbol;
+
+  // Get token logos dynamically
+  const nativeTokenLogo = getTokenLogo(nativeTokenSymbol);
+  const wrappedTokenLogo = getTokenLogo(tokens.weth.symbol);
   const [amount, setAmount] = useState("");
   const [isSupplyModal, setIsSupplyModal] = useState<boolean>(false);
   const [isSupplyDoneModal, setIsSupplyDoneModal] = useState<boolean>(false);
@@ -76,12 +82,12 @@ const SupplyContent = () => {
   );
 
   const wethSupplied = formatUnits(
-    wethUserData.suppliedAmount,
+    wethUserData.suppliedAmount as bigint,
     tokens.weth.decimals
   );
 
   const usdcSupplied = formatUnits(
-    usdcUserData.suppliedAmount,
+    usdcUserData.suppliedAmount as bigint,
     tokens.usdc.decimals
   );
 
@@ -164,7 +170,8 @@ const SupplyContent = () => {
     name: string,
     tokenSymbol: "weth" | "usdc" | "eth"
   ) => {
-    const finalToken = name === "ETH" ? "eth" : tokenSymbol;
+    // Check if it's the native token (XDC, ETH, etc.)
+    const finalToken = name === nativeTokenSymbol ? "eth" : tokenSymbol;
     setSelectedToken(finalToken);
     setIsWithdrawModal(true);
   };
@@ -172,12 +179,12 @@ const SupplyContent = () => {
   const yourSupplies = [
     {
       id: 1,
-      name: "ETH",
+      name: tokens.weth.symbol, // WXDC on XDC, WETH on ETH chains
       symbol: "weth",
       balance: formatValue(parseFloat(wethSupplied)),
       dollarBalance: `${formatUsdValue(parseFloat(wethSupplied) * ethPrice)}`,
       apy: `${parseFloat(wethReserveData.supplyApy)}%`,
-      img: ethIcon,
+      img: wrappedTokenLogo,
       isCollateral: true,
       actualAmount: wethUserData.suppliedAmount,
     },
@@ -192,17 +199,17 @@ const SupplyContent = () => {
       isCollateral: true,
       actualAmount: usdcUserData.suppliedAmount,
     },
-  ].filter((item) => item.actualAmount > BigInt(0));
+  ].filter((item) => (item.actualAmount as bigint) > BigInt(0));
 
   // Assets to Supply - wallet balances
   const assetsToSupply = [
     {
       id: 1,
-      name: "ETH",
+      name: nativeTokenSymbol, // XDC on XDC chains, ETH on ETH chains
       symbol: "eth",
       balance: ethBalance ? formatValue(parseFloat(ethBalance.formatted)) : "0",
       apy: `${wethReserveData.supplyApy}%`,
-      img: ethIcon,
+      img: nativeTokenLogo,
       canBeCollateral: true,
       walletBalance: ethBalance?.formatted || "0",
     },
@@ -218,11 +225,11 @@ const SupplyContent = () => {
     },
     {
       id: 3,
-      name: "WETH",
+      name: tokens.weth.symbol, // WXDC on XDC, WETH on ETH chains
       symbol: "weth",
       balance: formatValue(parseFloat(wethBalance)),
       apy: `${wethReserveData.supplyApy}%`,
-      img: wethIcon,
+      img: wrappedTokenLogo,
       canBeCollateral: true,
       walletBalance: wethBalance,
     },

@@ -1,4 +1,4 @@
-import { poolAbi } from "@/config/poolAbi";
+import { POOL_ABI } from "@/config/abis";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { parseUnits } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
@@ -21,7 +21,7 @@ export function useBorrow() {
 
     return writeContract({
       address: contracts.pool,
-      abi: poolAbi,
+      abi: POOL_ABI,
       functionName: "borrow",
       args: [
         tokenAddress as `0x${string}`,

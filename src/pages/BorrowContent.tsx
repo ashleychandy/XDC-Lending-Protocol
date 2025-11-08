@@ -1,3 +1,4 @@
+import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useBorrow } from "@/hooks/useBorrow";
@@ -12,7 +13,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
-import ethIcon from "../assets/images/eth.svg";
 import usdcIcon from "../assets/images/usdc.svg";
 import BorrowDoneModal from "./modal/BorrowDoneModal";
 import BorrowModal from "./modal/BorrowModal";
@@ -20,10 +20,16 @@ import RepayDoneModal from "./modal/RepayDoneModal";
 import RepayModal from "./modal/RepayModal";
 
 function BorrowContent() {
-  const { tokens } = useChainConfig();
+  const { tokens, network } = useChainConfig();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     "weth"
   );
+
+  // Get native token symbol (XDC, ETH, etc.)
+  const nativeTokenSymbol = network.nativeToken.symbol;
+
+  // Get token logo dynamically
+  const wrappedTokenLogo = getTokenLogo(tokens.weth.symbol);
   const [amount, setAmount] = useState("");
   const [isBorrowModal, setIsBorrowModal] = useState<boolean>(false);
   const [isBorrowDoneModal, setIsBorrowDoneModal] = useState<boolean>(false);
@@ -53,12 +59,12 @@ function BorrowContent() {
   );
 
   const wethBorrowed = formatUnits(
-    wethUserData.borrowedAmount,
+    wethUserData.borrowedAmount as bigint,
     tokens.weth.decimals
   );
 
   const usdcBorrowed = formatUnits(
-    usdcUserData.borrowedAmount,
+    usdcUserData.borrowedAmount as bigint,
     tokens.usdc.decimals
   );
 
@@ -157,21 +163,21 @@ function BorrowContent() {
     },
     {
       id: 2,
-      name: "ETH",
+      name: tokens.weth.symbol, // WXDC on XDC, WETH on ETH chains
       symbol: "weth",
       debt: formatValue(parseFloat(wethBorrowed)),
       dollarDebt: `${formatUsdValue(parseFloat(wethBorrowed) * ethPrice)}`,
       apy: `${wethReserveData.borrowApy}%`,
-      img: ethIcon,
+      img: wrappedTokenLogo,
       actualAmount: wethUserData.borrowedAmount,
     },
-  ].filter((item) => item.actualAmount > BigInt(0));
+  ].filter((item) => (item.actualAmount as bigint) > BigInt(0));
 
   // Assets to Borrow
   const assetsToBorrow = [
     {
       id: 1,
-      name: "ETH",
+      name: tokens.weth.symbol, // WXDC on XDC, WETH on ETH chains
       symbol: "weth",
       available: formatValue(
         parseFloat(accountData.availableBorrows) / ethPrice
@@ -180,7 +186,7 @@ function BorrowContent() {
         parseFloat(accountData.availableBorrows)
       )}`,
       apy: `${wethReserveData.borrowApy}%`,
-      img: ethIcon,
+      img: wrappedTokenLogo,
     },
     {
       id: 2,

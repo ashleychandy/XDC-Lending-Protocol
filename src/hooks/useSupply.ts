@@ -1,6 +1,6 @@
-import { poolAbi } from "@/config/poolAbi";
+import { ERC20_ABI, POOL_ABI } from "@/config/abis";
 import { useChainConfig } from "@/hooks/useChainConfig";
-import { erc20Abi, parseUnits } from "viem";
+import { parseUnits } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export function useSupply() {
@@ -19,7 +19,7 @@ export function useSupply() {
 
     return writeContract({
       address: tokenAddress as `0x${string}`,
-      abi: erc20Abi,
+      abi: ERC20_ABI,
       functionName: "approve",
       args: [contracts.pool, amountInWei],
     });
@@ -35,7 +35,7 @@ export function useSupply() {
 
     return writeContract({
       address: contracts.pool,
-      abi: poolAbi,
+      abi: POOL_ABI,
       functionName: "supply",
       args: [
         tokenAddress as `0x${string}`,

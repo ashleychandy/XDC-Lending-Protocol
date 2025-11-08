@@ -1,6 +1,6 @@
-import { poolAbi } from "@/config/poolAbi";
+import { ERC20_ABI, POOL_ABI } from "@/config/abis";
 import { useChainConfig } from "@/hooks/useChainConfig";
-import { erc20Abi, maxUint256, parseUnits } from "viem";
+import { maxUint256, parseUnits } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export function useRepay() {
@@ -19,7 +19,7 @@ export function useRepay() {
 
     return writeContract({
       address: tokenAddress as `0x${string}`,
-      abi: erc20Abi,
+      abi: ERC20_ABI,
       functionName: "approve",
       args: [contracts.pool, amountInWei],
     });
@@ -37,7 +37,7 @@ export function useRepay() {
 
     return writeContract({
       address: contracts.pool,
-      abi: poolAbi,
+      abi: POOL_ABI,
       functionName: "repay",
       args: [
         tokenAddress as `0x${string}`,

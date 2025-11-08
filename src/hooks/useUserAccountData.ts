@@ -1,4 +1,4 @@
-import { poolAbi } from "@/config/poolAbi";
+import { POOL_ABI } from "@/config/abis";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
@@ -9,7 +9,7 @@ export function useUserAccountData() {
 
   const { data, isLoading, error, refetch } = useReadContract({
     address: contracts.pool,
-    abi: poolAbi,
+    abi: POOL_ABI,
     functionName: "getUserAccountData",
     args: address ? [address] : undefined,
     chainId: network.chainId,

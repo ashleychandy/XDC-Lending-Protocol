@@ -1,8 +1,13 @@
 // src/hooks/useAssetDetails.ts
-import { erc20Abi, formatUnits } from "viem";
+import {
+  CREDITIFY_ORACLE_ABI,
+  ERC20_ABI,
+  POOL_ABI,
+  POOL_ADDRESSES_PROVIDER_ABI,
+} from "@/config/abis";
+import { getTokenLogo } from "@/config/tokenLogos";
+import { formatUnits } from "viem";
 import { useReadContract } from "wagmi";
-import usdcIcon from "../assets/images/usdc.svg";
-import wethIcon from "../assets/images/weth.svg";
 import { useChainConfig } from "./useChainConfig";
 
 const getTokenMetadata = (tokens: any) =>
@@ -11,7 +16,7 @@ const getTokenMetadata = (tokens: any) =>
       symbol: "WETH",
       name: "Wrapped Ether",
       fullName: "Wrapped Ether",
-      icon: wethIcon,
+      icon: getTokenLogo("WETH"),
       address: tokens.weth.address,
       decimals: 18,
     },
@@ -19,7 +24,7 @@ const getTokenMetadata = (tokens: any) =>
       symbol: "WETH",
       name: "Wrapped Ether",
       fullName: "Wrapped Ether",
-      icon: wethIcon,
+      icon: getTokenLogo("WETH"),
       address: tokens.weth.address,
       decimals: 18,
     },
@@ -27,7 +32,7 @@ const getTokenMetadata = (tokens: any) =>
       symbol: "USDC",
       name: "USD Coin",
       fullName: "USD Coin",
-      icon: usdcIcon,
+      icon: getTokenLogo("USDC"),
       address: tokens.usdc.address,
       decimals: 6,
     },
@@ -58,34 +63,7 @@ export function useAssetDetails(tokenSymbol: string) {
   // Get reserve data from Aave Pool
   const { data: reserveData, isLoading: isLoadingReserve } = useReadContract({
     address: contracts.pool,
-    abi: [
-      {
-        inputs: [{ name: "asset", type: "address" }],
-        name: "getReserveData",
-        outputs: [
-          {
-            components: [
-              { name: "configuration", type: "uint256" },
-              { name: "liquidityIndex", type: "uint128" },
-              { name: "currentLiquidityRate", type: "uint128" },
-              { name: "variableBorrowIndex", type: "uint128" },
-              { name: "currentVariableBorrowRate", type: "uint128" },
-              { name: "currentStableBorrowRate", type: "uint128" },
-              { name: "lastUpdateTimestamp", type: "uint40" },
-              { name: "id", type: "uint16" },
-              { name: "aTokenAddress", type: "address" },
-              { name: "stableDebtTokenAddress", type: "address" },
-              { name: "variableDebtTokenAddress", type: "address" },
-              { name: "interestRateStrategyAddress", type: "address" },
-            ],
-            name: "",
-            type: "tuple",
-          },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-    ] as const,
+    abi: POOL_ABI,
     functionName: "getReserveData",
     args: [token.address as `0x${string}`],
     chainId: network.chainId,
@@ -94,7 +72,7 @@ export function useAssetDetails(tokenSymbol: string) {
   // Get aToken total supply (total supplied)
   const { data: aTokenTotalSupply } = useReadContract({
     address: reserveData?.aTokenAddress as `0x${string}`,
-    abi: erc20Abi,
+    abi: ERC20_ABI,
     functionName: "totalSupply",
     chainId: network.chainId,
     query: {
@@ -105,7 +83,7 @@ export function useAssetDetails(tokenSymbol: string) {
   // Get total stable debt
   const { data: totalStableDebt } = useReadContract({
     address: reserveData?.stableDebtTokenAddress as `0x${string}`,
-    abi: erc20Abi,
+    abi: ERC20_ABI,
     functionName: "totalSupply",
     chainId: network.chainId,
     query: {
@@ -116,7 +94,7 @@ export function useAssetDetails(tokenSymbol: string) {
   // Get total variable debt
   const { data: totalVariableDebt } = useReadContract({
     address: reserveData?.variableDebtTokenAddress as `0x${string}`,
-    abi: erc20Abi,
+    abi: ERC20_ABI,
     functionName: "totalSupply",
     chainId: network.chainId,
     query: {
@@ -127,7 +105,7 @@ export function useAssetDetails(tokenSymbol: string) {
   // Get underlying token balance of aToken (actual available liquidity in the pool)
   const { data: underlyingBalance } = useReadContract({
     address: token.address as `0x${string}`,
-    abi: erc20Abi,
+    abi: ERC20_ABI,
     functionName: "balanceOf",
     args: [reserveData?.aTokenAddress as `0x${string}`],
     chainId: network.chainId,
@@ -140,29 +118,13 @@ export function useAssetDetails(tokenSymbol: string) {
   const { data: priceOracleAddress } = useReadContract({
     address: contracts.pool,
     chainId: network.chainId,
-    abi: [
-      {
-        inputs: [],
-        name: "ADDRESSES_PROVIDER",
-        outputs: [{ name: "", type: "address" }],
-        stateMutability: "view",
-        type: "function",
-      },
-    ] as const,
+    abi: POOL_ABI,
     functionName: "ADDRESSES_PROVIDER",
   });
 
   const { data: oracleAddress } = useReadContract({
     address: priceOracleAddress as `0x${string}`,
-    abi: [
-      {
-        inputs: [],
-        name: "getPriceOracle",
-        outputs: [{ name: "", type: "address" }],
-        stateMutability: "view",
-        type: "function",
-      },
-    ] as const,
+    abi: POOL_ADDRESSES_PROVIDER_ABI,
     functionName: "getPriceOracle",
     chainId: network.chainId,
     query: {
@@ -172,15 +134,7 @@ export function useAssetDetails(tokenSymbol: string) {
 
   const { data: assetPrice } = useReadContract({
     address: oracleAddress as `0x${string}`,
-    abi: [
-      {
-        inputs: [{ name: "asset", type: "address" }],
-        name: "getAssetPrice",
-        outputs: [{ name: "", type: "uint256" }],
-        stateMutability: "view",
-        type: "function",
-      },
-    ] as const,
+    abi: CREDITIFY_ORACLE_ABI,
     functionName: "getAssetPrice",
     args: [token.address as `0x${string}`],
     chainId: network.chainId,

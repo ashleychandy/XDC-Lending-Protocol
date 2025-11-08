@@ -1,3 +1,4 @@
+import { POOL_ABI } from "@/config/abis";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { useReadContract } from "wagmi";
 
@@ -6,34 +7,7 @@ export const useReserveData = (assetAddress: string) => {
 
   const { data, isLoading, error } = useReadContract({
     address: contracts.pool,
-    abi: [
-      {
-        inputs: [{ name: "asset", type: "address" }],
-        name: "getReserveData",
-        outputs: [
-          {
-            components: [
-              { name: "configuration", type: "uint256" },
-              { name: "liquidityIndex", type: "uint128" },
-              { name: "currentLiquidityRate", type: "uint128" },
-              { name: "variableBorrowIndex", type: "uint128" },
-              { name: "currentVariableBorrowRate", type: "uint128" },
-              { name: "currentStableBorrowRate", type: "uint128" },
-              { name: "lastUpdateTimestamp", type: "uint40" },
-              { name: "id", type: "uint16" },
-              { name: "aTokenAddress", type: "address" },
-              { name: "stableDebtTokenAddress", type: "address" },
-              { name: "variableDebtTokenAddress", type: "address" },
-              { name: "interestRateStrategyAddress", type: "address" },
-            ],
-            name: "",
-            type: "tuple",
-          },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-    ] as const,
+    abi: POOL_ABI,
     functionName: "getReserveData",
     args: [assetAddress as `0x${string}`],
     chainId: network.chainId,

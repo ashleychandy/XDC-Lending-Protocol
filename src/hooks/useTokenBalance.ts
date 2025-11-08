@@ -1,12 +1,13 @@
-import { useReadContract, useAccount } from "wagmi";
-import { erc20Abi, formatUnits } from "viem";
+import { ERC20_ABI } from "@/config/abis";
+import { formatUnits } from "viem";
+import { useAccount, useReadContract } from "wagmi";
 
 export function useTokenBalance(tokenAddress: string, decimals: number) {
   const { address } = useAccount();
 
   const { data, isLoading, error, refetch } = useReadContract({
     address: tokenAddress as `0x${string}`,
-    abi: erc20Abi,
+    abi: ERC20_ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
     query: {
