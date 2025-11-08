@@ -61,7 +61,6 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
 
   // Get reserve data (APY, etc.) for each asset
   const wethReserveData = useReserveData(tokens.weth.address);
-  // console.log("wethReserveData", wethReserveData);
   const usdcReserveData = useReserveData(tokens.usdc.address);
 
   // Token config — depends on selected tab, not prop

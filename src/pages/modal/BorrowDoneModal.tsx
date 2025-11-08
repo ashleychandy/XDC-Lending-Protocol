@@ -6,12 +6,11 @@ import {
   Heading,
   HStack,
   Icon,
-  Image,
   Portal,
 } from "@chakra-ui/react";
-import { IoMdClose } from "react-icons/io";
 import { FaCheck } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 import { useAccount } from "wagmi";
 
 interface Props {
@@ -79,25 +78,6 @@ const BorrowDoneModal: React.FC<Props> = ({
                     You Borrowed {amount || "0.00"} {tokenSymbol?.toUpperCase()}
                   </Box>
                 </Box>
-                {/* <Box m="15px">
-                  <Box p="12px" bg="bg.muted" borderRadius="6px">
-                    <Image
-                      src={usdcIcon}
-                      width="32px"
-                      height="32px"
-                      m="0 auto 10px"
-                    ></Image>
-                    <Box mb="10px">
-                      Add aToken to wallet to track your balance.
-                    </Box>
-                    <Button size="sm">
-                      <Icon size="md">
-                        <IoWalletOutline />
-                      </Icon>
-                      Add to wallet
-                    </Button>
-                  </Box>
-                </Box> */}
               </Dialog.Body>
               <Dialog.Footer flexDirection="column" gap="8px">
                 <Button

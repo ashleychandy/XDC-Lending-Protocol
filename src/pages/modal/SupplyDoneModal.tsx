@@ -79,25 +79,6 @@ const SupplyDoneModal: React.FC<Props> = ({
                     You Supplied {amount || "0.00"} {tokenSymbol?.toUpperCase()}
                   </Box>
                 </Box>
-                {/* <Box m="15px">
-                  <Box p="12px" bg="bg.muted" borderRadius="6px">
-                    <Image
-                      src={xdcIcon}
-                      width="32px"
-                      height="32px"
-                      m="0 auto 10px"
-                    ></Image>
-                    <Box mb="10px">
-                      Add aToken to wallet to track your balance.
-                    </Box>
-                    <Button size="sm">
-                      <Icon size="md">
-                        <IoWalletOutline />
-                      </Icon>
-                      Add to wallet
-                    </Button>
-                  </Box>
-                </Box> */}
               </Dialog.Body>
               <Dialog.Footer flexDirection="column" gap="8px">
                 <Button

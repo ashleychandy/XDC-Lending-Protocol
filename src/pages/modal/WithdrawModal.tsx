@@ -1,3 +1,6 @@
+import { formatUsdValue, formatValue } from "@/helpers/formatValue";
+import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
 import {
   Box,
   Button,
@@ -17,11 +20,8 @@ import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
 import ethIcon from "../../assets/images/eth.svg";
-import wethIcon from "../../assets/images/weth.svg";
 import usdcIcon from "../../assets/images/usdc.svg";
-import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { formatUsdValue, formatValue } from "@/helpers/formatValue";
-import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import wethIcon from "../../assets/images/weth.svg";
 
 interface Props {
   isOpen: boolean;
@@ -317,38 +317,6 @@ const WithdrawModal: React.FC<Props> = ({
                     </Flex>
                   </Box>
                 </Box>
-
-                {/* Warning if risky withdrawal */}
-                {/* {isWithdrawalRisky && parseFloat(amount) > 0 && (
-                  <Box
-                    mt="15px"
-                    p="10px"
-                    bg="orange.50"
-                    border="1px solid"
-                    borderColor="orange.300"
-                    borderRadius="6px"
-                  >
-                    <Flex gap="8px" alignItems="flex-start">
-                      <Box color="orange.600" fontWeight="bold" fontSize="lg">
-                        ⚠️
-                      </Box>
-                      <Box>
-                        <Box
-                          fontSize="sm"
-                          fontWeight="semibold"
-                          color="orange.700"
-                        >
-                          Low health factor
-                        </Box>
-                        <Box fontSize="xs" color="orange.600" mt="2px">
-                          Withdrawing this amount will significantly reduce your
-                          health factor. Your position may be at risk of
-                          liquidation.
-                        </Box>
-                      </Box>
-                    </Flex>
-                  </Box>
-                )} */}
 
                 {/* Gas cost */}
                 <Flex mt="20px" alignItems="center" gap="5px">

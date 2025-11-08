@@ -1,29 +1,22 @@
 import {
+  formatCurrency,
+  formatPercentage,
+  formatTokenAmount,
+  useAssetDetails,
+} from "@/hooks/useAssetDetails";
+import {
   AbsoluteCenter,
   Box,
   Flex,
   Heading,
   Icon,
   ProgressCircle,
-  SimpleGrid,
   Spinner,
 } from "@chakra-ui/react";
 import React from "react";
+import { BiInfinite } from "react-icons/bi";
 import { FaCheck } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
-import { useAssetDetails } from "@/hooks/useAssetDetails";
-import {
-  formatCurrency,
-  formatPercentage,
-  formatTokenAmount,
-} from "@/hooks/useAssetDetails";
-import { BiInfinite } from "react-icons/bi";
-/* import { useAssetChartData } from "@/hooks/useAssetChartData";
-import {
-  APYHistoryChart,
-  SupplyBorrowDistribution,
-  UtilizationChart,
-} from "./AssetCharts"; */
 
 // Helper function to format BPS values (e.g., 8050 -> "80.50%")
 const formatBps = (bps: bigint): string => {
@@ -57,15 +50,7 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
     borrowApy,
     reserveData,
     isLoading,
-    availableLiquidityInTokens,
   } = useAssetDetails(token || "weth");
-
-  /* const { historicalData, interestRateParams } = useAssetChartData(
-    supplyApy,
-    borrowApy,
-    utilizationRate,
-    reserveData?.interestRateStrategyAddress as `0x${string}` | undefined
-  ); */
 
   const config = reserveData?.configuration || 0n;
   const ltv = config & 0xffffn;
@@ -431,20 +416,6 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
             </Flex>
           </Flex>
         </Flex>
-        {/* <SimpleGrid columns={{ base: 1, lg: 2 }} gap={6} mb={8}>
-          <APYHistoryChart data={historicalData} />
-          <UtilizationChart
-            data={historicalData}
-            currentUtilization={utilizationRate}
-          />
-        </SimpleGrid>
-        <Box mb={8}>
-          <SupplyBorrowDistribution
-            totalSupplied={totalSupplied}
-            totalBorrowed={totalBorrowed}
-            availableLiquidity={availableLiquidityInTokens}
-          />
-        </Box> */}
       </Box>
     </Box>
   );
