@@ -38,14 +38,15 @@ export const useReserveData = (assetAddress: string) => {
     return apy.toFixed(2);
   };
 
-  const supplyApy = rateToApy(data.currentLiquidityRate);
-  const borrowApy = rateToApy(data.currentVariableBorrowRate);
+  const reserveData = data as any;
+  const supplyApy = rateToApy(reserveData.currentLiquidityRate);
+  const borrowApy = rateToApy(reserveData.currentVariableBorrowRate);
 
   return {
     supplyApy,
     borrowApy,
-    totalLiquidity: data.liquidityIndex.toString(),
-    aTokenAddress: data.aTokenAddress,
+    totalLiquidity: reserveData.liquidityIndex.toString(),
+    aTokenAddress: reserveData.aTokenAddress,
     isLoading,
     error,
   };

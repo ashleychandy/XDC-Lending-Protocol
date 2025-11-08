@@ -69,36 +69,38 @@ export function useAssetDetails(tokenSymbol: string) {
     chainId: network.chainId,
   });
 
+  const reserveDataAny = reserveData as any;
+
   // Get aToken total supply (total supplied)
   const { data: aTokenTotalSupply } = useReadContract({
-    address: reserveData?.aTokenAddress as `0x${string}`,
+    address: reserveDataAny?.aTokenAddress as `0x${string}`,
     abi: ERC20_ABI,
     functionName: "totalSupply",
     chainId: network.chainId,
     query: {
-      enabled: !!reserveData?.aTokenAddress,
+      enabled: !!reserveDataAny?.aTokenAddress,
     },
   });
 
   // Get total stable debt
   const { data: totalStableDebt } = useReadContract({
-    address: reserveData?.stableDebtTokenAddress as `0x${string}`,
+    address: reserveDataAny?.stableDebtTokenAddress as `0x${string}`,
     abi: ERC20_ABI,
     functionName: "totalSupply",
     chainId: network.chainId,
     query: {
-      enabled: !!reserveData?.stableDebtTokenAddress,
+      enabled: !!reserveDataAny?.stableDebtTokenAddress,
     },
   });
 
   // Get total variable debt
   const { data: totalVariableDebt } = useReadContract({
-    address: reserveData?.variableDebtTokenAddress as `0x${string}`,
+    address: reserveDataAny?.variableDebtTokenAddress as `0x${string}`,
     abi: ERC20_ABI,
     functionName: "totalSupply",
     chainId: network.chainId,
     query: {
-      enabled: !!reserveData?.variableDebtTokenAddress,
+      enabled: !!reserveDataAny?.variableDebtTokenAddress,
     },
   });
 
@@ -107,10 +109,10 @@ export function useAssetDetails(tokenSymbol: string) {
     address: token.address as `0x${string}`,
     abi: ERC20_ABI,
     functionName: "balanceOf",
-    args: [reserveData?.aTokenAddress as `0x${string}`],
+    args: [reserveDataAny?.aTokenAddress as `0x${string}`],
     chainId: network.chainId,
     query: {
-      enabled: !!reserveData?.aTokenAddress,
+      enabled: !!reserveDataAny?.aTokenAddress,
     },
   });
 
@@ -145,8 +147,8 @@ export function useAssetDetails(tokenSymbol: string) {
 
   // Decode supply and borrow caps from configuration
   // Configuration is a nested tuple with a 'data' field
-  const configData = reserveData?.configuration
-    ? (reserveData.configuration as any).data || reserveData.configuration
+  const configData = reserveDataAny?.configuration
+    ? (reserveDataAny.configuration as any).data || reserveDataAny.configuration
     : 0n;
   const caps = configData
     ? decodeReserveConfiguration(BigInt(configData))
@@ -165,7 +167,9 @@ export function useAssetDetails(tokenSymbol: string) {
   };
 
   // Oracle price (8 decimals)
-  const oraclePrice = assetPrice ? parseFloat(formatUnits(assetPrice, 8)) : 0;
+  const oraclePrice = assetPrice
+    ? parseFloat(formatUnits(assetPrice as bigint, 8))
+    : 0;
 
   // Total borrowed = stable debt + variable debt
   const stableDebt = totalStableDebt
@@ -199,11 +203,11 @@ export function useAssetDetails(tokenSymbol: string) {
       : 0;
 
   // Supply APY
-  const supplyApy = reserveData?.currentLiquidityRate
-    ? rateToApy(reserveData.currentLiquidityRate as bigint)
+  const supplyApy = reserveDataAny?.currentLiquidityRate
+    ? rateToApy(reserveDataAny.currentLiquidityRate as bigint)
     : "0.00";
-  const borrowApy = reserveData?.currentVariableBorrowRate
-    ? rateToApy(reserveData.currentVariableBorrowRate as bigint)
+  const borrowApy = reserveDataAny?.currentVariableBorrowRate
+    ? rateToApy(reserveDataAny.currentVariableBorrowRate as bigint)
     : "0.00";
 
   // Calculate cap percentages for progress circles
@@ -259,9 +263,9 @@ export function useAssetDetails(tokenSymbol: string) {
 
     // Raw reserve data
     reserveData,
-    aTokenAddress: reserveData?.aTokenAddress,
-    stableDebtTokenAddress: reserveData?.stableDebtTokenAddress,
-    variableDebtTokenAddress: reserveData?.variableDebtTokenAddress,
+    aTokenAddress: reserveDataAny?.aTokenAddress,
+    stableDebtTokenAddress: reserveDataAny?.stableDebtTokenAddress,
+    variableDebtTokenAddress: reserveDataAny?.variableDebtTokenAddress,
 
     // Loading state
     isLoading: isLoadingReserve,

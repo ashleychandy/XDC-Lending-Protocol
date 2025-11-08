@@ -34,12 +34,12 @@ const Dashboard = () => {
   const accountData = useUserAccountData();
 
   const wethSupplied = formatUnits(
-    wethUserData.suppliedAmount,
+    (wethUserData.suppliedAmount || 0n) as bigint,
     tokens.weth.decimals
   );
 
   const usdcSupplied = formatUnits(
-    usdcUserData.suppliedAmount,
+    (usdcUserData.suppliedAmount || 0n) as bigint,
     tokens.usdc.decimals
   );
 

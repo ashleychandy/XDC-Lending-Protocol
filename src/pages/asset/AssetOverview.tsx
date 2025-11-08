@@ -53,8 +53,9 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
   } = useAssetDetails(token || "weth");
 
   // Configuration is a nested tuple with a 'data' field
-  const configData = reserveData?.configuration
-    ? (reserveData.configuration as any).data || reserveData.configuration
+  const reserveDataAny = reserveData as any;
+  const configData = reserveDataAny?.configuration
+    ? (reserveDataAny.configuration as any).data || reserveDataAny.configuration
     : 0n;
   const config = BigInt(configData || 0);
   const ltv = config & 0xffffn;

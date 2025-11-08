@@ -30,7 +30,8 @@ export const useUserReserveData = (
     args: [assetAddress as `0x${string}`],
   });
 
-  const variableDebtTokenAddress = reserveData?.variableDebtTokenAddress;
+  const variableDebtTokenAddress = (reserveData as any)
+    ?.variableDebtTokenAddress;
 
   const { data: debtBalance } = useReadContract({
     address: variableDebtTokenAddress as `0x${string}`,

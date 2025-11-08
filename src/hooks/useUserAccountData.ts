@@ -32,6 +32,7 @@ export function useUserAccountData() {
     };
   }
 
+  const accountData = data as any[];
   const [
     totalCollateralBase,
     totalDebtBase,
@@ -39,7 +40,7 @@ export function useUserAccountData() {
     currentLiquidationThreshold,
     ltv,
     healthFactor,
-  ] = data;
+  ] = accountData;
 
   return {
     totalCollateral: formatUnits(totalCollateralBase, 8), // Base currency has 8 decimals

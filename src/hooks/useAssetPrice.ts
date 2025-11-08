@@ -38,7 +38,9 @@ export const useAssetPrice = (assetAddress: string) => {
   });
 
   // Aave price oracle returns prices in USD with 8 decimals
-  const priceInUsd = assetPrice ? parseFloat(formatUnits(assetPrice, 8)) : 0;
+  const priceInUsd = assetPrice
+    ? parseFloat(formatUnits(assetPrice as bigint, 8))
+    : 0;
 
   return {
     price: priceInUsd,
