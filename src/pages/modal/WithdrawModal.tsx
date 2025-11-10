@@ -35,6 +35,8 @@ interface Props {
   usdcPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
+  unwrapToNative?: boolean;
+  setUnwrapToNative?: (value: boolean) => void;
 }
 
 const WithdrawModal: React.FC<Props> = ({
@@ -49,9 +51,17 @@ const WithdrawModal: React.FC<Props> = ({
   usdcPrice = 1,
   isPending,
   isConfirming,
+  unwrapToNative: externalUnwrapToNative,
+  setUnwrapToNative: externalSetUnwrapToNative,
 }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
+  const [internalUnwrapToNative, setInternalUnwrapToNative] =
+    useState<boolean>(true);
+
+  // Use external state if provided, otherwise use internal state
+  const unwrapToNative = externalUnwrapToNative ?? internalUnwrapToNative;
+  const setUnwrapToNative =
+    externalSetUnwrapToNative ?? setInternalUnwrapToNative;
 
   // Get chain config for dynamic tokens
   const { tokens, network } = useChainConfig();

@@ -10,7 +10,7 @@ const Layout = () => {
   const { isConnected } = useAccount();
   const navigate = useNavigate();
   const location = useLocation();
-  const noLayoutRoutes = [ROUTES.HOME];
+  const noLayoutRoutes: string[] = [ROUTES.HOME];
   const isNoLayout = noLayoutRoutes.includes(location.pathname);
 
   // Remove auto-redirect - let users navigate freely

@@ -4,6 +4,7 @@ import {
   useAssetDetails,
 } from "@/hooks/useAssetDetails";
 import { landingSystem } from "@/landingSystem";
+import { ROUTES } from "@/routes/paths";
 import {
   Box,
   Button,

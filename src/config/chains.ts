@@ -9,6 +9,7 @@ export interface ChainConfig {
     protocolDataProvider: `0x${string}`;
     walletBalanceProvider: `0x${string}`;
     oracle: `0x${string}`;
+    wrappedTokenGateway: `0x${string}`;
     uiIncentiveDataProvider?: `0x${string}`;
   };
   tokens: {
@@ -50,6 +51,7 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
       protocolDataProvider: "0x4135bA78F54aB5fF80eb9DE7d535293a319C99b7",
       walletBalanceProvider: "0x55F14A53B0e595d6d8118dE6b14B5A4d92509AaB",
       oracle: "0x0f659a3e35BC502BF67Bf119778c8936E9A7b84e",
+      wrappedTokenGateway: "0x0000000000000000000000000000000000000000", // TODO: Add mainnet address
       uiIncentiveDataProvider: "0x69E15dF062F9C79F7eE0d377EBC9C12a34F059b5",
     },
     tokens: {
@@ -88,6 +90,7 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
       protocolDataProvider: "0x4135bA78F54aB5fF80eb9DE7d535293a319C99b7",
       walletBalanceProvider: "0x55F14A53B0e595d6d8118dE6b14B5A4d92509AaB",
       oracle: "0x0f659a3e35BC502BF67Bf119778c8936E9A7b84e",
+      wrappedTokenGateway: "0xC2EABDC14A96A48ee56Dec9917d9057AB93439Ab",
       uiIncentiveDataProvider: "0x69E15dF062F9C79F7eE0d377EBC9C12a34F059b5",
     },
     tokens: {
@@ -126,6 +129,7 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
       protocolDataProvider: "0x4135bA78F54aB5fF80eb9DE7d535293a319C99b7",
       walletBalanceProvider: "0x9a0c75502Bf6BA8a3aAAD995Db8c2554C114DA9a",
       oracle: "0x0f659a3e35BC502BF67Bf119778c8936E9A7b84e",
+      wrappedTokenGateway: "0x0000000000000000000000000000000000000000", // TODO: Add Arbitrum Sepolia address
     },
     tokens: {
       weth: {
