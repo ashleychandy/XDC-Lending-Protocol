@@ -1,8 +1,8 @@
 import Footer from "@/pages/Footer";
 import Header from "@/pages/Header";
+import { ROUTES } from "@/routes/paths";
 import { routes } from "@/routes/routes";
 import { Box, Flex } from "@chakra-ui/react";
-import { useEffect } from "react";
 import { Routes, useLocation, useNavigate } from "react-router-dom";
 import { useAccount } from "wagmi";
 
@@ -10,15 +10,11 @@ const Layout = () => {
   const { isConnected } = useAccount();
   const navigate = useNavigate();
   const location = useLocation();
-  const noLayoutRoutes = ["/"];
+  const noLayoutRoutes = [ROUTES.HOME];
   const isNoLayout = noLayoutRoutes.includes(location.pathname);
 
-  useEffect(() => {
-    // Only auto-redirect on initial connection, not when navigating manually
-    if (isConnected && location.pathname === "/") {
-      navigate("/dashboard");
-    }
-  }, [isConnected]);
+  // Remove auto-redirect - let users navigate freely
+  // Users can click "Get Started" button to go to dashboard
 
   return (
     <Box className="page-content-wrapper">

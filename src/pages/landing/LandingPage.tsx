@@ -69,7 +69,7 @@ const LandingPage = () => {
               <Flex alignItems={"center"} gap={"20px"} mb={"40px"}>
                 <Button
                   className="primary-btn"
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate(ROUTES.DASHBOARD)}
                 >
                   Get Started
                 </Button>

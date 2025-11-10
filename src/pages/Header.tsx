@@ -1,4 +1,5 @@
 import { ColorModeButton, useColorMode } from "@/components/ui/color-mode";
+import { ROUTES } from "@/routes/paths";
 import { Box, Flex } from "@chakra-ui/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { NavLink } from "react-router";
@@ -22,7 +23,7 @@ const Header = () => {
         direction={{ base: "column", lg: "row" }}
       >
         <Flex gap="10" justify="space-between" alignItems="center">
-          <NavLink to="/">
+          <NavLink to={ROUTES.HOME}>
             <Box w="80px" cursor="pointer">
               {colorMode === "dark" ? (
                 <img src={xdcLightLogo} alt="XDC-Logo-Light" />
@@ -32,11 +33,11 @@ const Header = () => {
             </Box>
           </NavLink>
           <Flex gap="4" justify="space-between" alignItems="center">
-            <NavLink to="/">Home</NavLink>
-            <NavLink to="/dashboard">Dashboard</NavLink>
-            <NavLink to="/market">Markets</NavLink>
-            <NavLink to="/governance">Governance</NavLink>
-            <NavLink to="/savings">Savings</NavLink>
+            <NavLink to={ROUTES.HOME}>Home</NavLink>
+            <NavLink to={ROUTES.DASHBOARD}>Dashboard</NavLink>
+            <NavLink to={ROUTES.MARKET}>Markets</NavLink>
+            <NavLink to={ROUTES.GOVERNANCE}>Governance</NavLink>
+            <NavLink to={ROUTES.SAVINGS}>Savings</NavLink>
           </Flex>
         </Flex>
         <Flex alignItems="center" gap="10px">

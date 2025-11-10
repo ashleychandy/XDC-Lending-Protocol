@@ -98,7 +98,7 @@ const AssetDetails = () => {
     >
       <Box h="100%" p="30px 0">
         <Flex alignItems="center" gap="10px" mb="15px">
-          <Button size="sm" onClick={() => navigate("/dashboard")}>
+          <Button size="sm" onClick={() => navigate(-1)}>
             <Icon size="md">
               <IoMdArrowBack />
             </Icon>

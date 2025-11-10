@@ -448,7 +448,7 @@ function BorrowContent() {
                         size="sm"
                         variant="outline"
                         onClick={() =>
-                          navigate(`/asset-details?token=${item.symbol}`)
+                          navigate(buildAssetDetailsRoute(item.symbol))
                         }
                       >
                         Details
