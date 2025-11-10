@@ -11,6 +11,9 @@ const landingConfig = defineConfig({
         body: {
           value: `"Inter", sans-serif`,
         },
+        ibmPlexMono: {
+          value: `font-family: "IBM Plex Mono", monospace;`,
+        },
       },
       colors: {
         brand: {

@@ -11,12 +11,24 @@ import {
   Container,
   Flex,
   Heading,
+  HStack,
   Image,
+  Progress,
   SimpleGrid,
+  Text,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import section1Img from "../../assets/images/landing/section1Img.png";
 import LandingHeader from "./LandingHeader";
+import { useUserAccountData } from "@/hooks/useUserAccountData";
+import HowCreditifyWorks from "./HowCreditifyWorks";
+import MarketOverview from "./MarketOverview";
+import type { TokenDetailsDTO } from "./types/type";
+import YourAssets from "./YourAssets";
+import GovernanceSecurity from "./GovernanceSecurity";
+import OwnMoney from "./OwnMoney";
+import Faq from "./Faq";
+import LandingFooter from "./LandingFooter";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -35,6 +47,60 @@ const LandingPage = () => {
 
   const { supplyApy: usdcSupplyApy, borrowApy: usdcBorrowApy } =
     useAssetDetails("usdc");
+
+  const accountData = useUserAccountData();
+  console.log("accountData", accountData);
+
+  const tokenDetails: TokenDetailsDTO[] = [
+    {
+      symbol: "US",
+      shortName: "USDC",
+      fullName: "Stablecoin Reserve",
+      // tvl:,
+      // hf:,
+      tokenInfo: [
+        {
+          label: "Supply APY",
+          value: formatPercentage(parseFloat(usdcSupplyApy)),
+        },
+        {
+          label: "Borrow APY",
+          value: formatPercentage(parseFloat(usdcBorrowApy)),
+        },
+        {
+          label: "Available Liquidity",
+          value: formatCurrency(usdcLiquidity),
+        },
+        {
+          label: "Utilization",
+          value: formatPercentage(usdcUtilizationRate),
+        },
+      ],
+    },
+    {
+      symbol: "WT",
+      shortName: "WETH",
+      fullName: "Wrapped ETH Reserve",
+      tokenInfo: [
+        {
+          label: "Supply APY",
+          value: formatPercentage(parseFloat(wethSupplyApy)),
+        },
+        {
+          label: "Borrow APY",
+          value: formatPercentage(parseFloat(wethBorrowApy)),
+        },
+        {
+          label: "Available Liquidity",
+          value: formatCurrency(wethLiquidity),
+        },
+        {
+          label: "Utilization",
+          value: formatPercentage(wethUtilizationRate),
+        },
+      ],
+    },
+  ];
 
   return (
     <ChakraProvider value={landingSystem}>
@@ -83,114 +149,85 @@ const LandingPage = () => {
                 </Button>
               </Flex>
               <Flex alignItems={"center"} gap={"15px"}>
-                <Box p="10px" className="box" borderRadius={"14px"} w={"50%"}>
-                  <Flex gap="3" alignItems="center" mb={"10px"}>
-                    <Flex
-                      w="44px"
-                      h="44px"
-                      borderRadius="12px"
-                      className="primary-color"
-                      justifyContent="center"
-                      alignItems="center"
-                      color={"#041022"}
-                      fontWeight={"700"}
+                {tokenDetails.map((x, i) => {
+                  return (
+                    <Box
+                      p="10px"
+                      className="box"
+                      borderRadius={"14px"}
+                      w={"50%"}
+                      key={i}
                     >
-                      US
-                    </Flex>
-                    <Flex direction="column">
-                      <Box fontWeight={"700"}>USDC</Box>
-                      <Box as={"p"} fontSize="13px">
-                        Stablecoin Reserve
-                      </Box>
-                    </Flex>
-                  </Flex>
-                  <SimpleGrid columns={{ base: 1, md: 2 }} gap="10px">
-                    <Box p="10px" borderRadius="10px" className="box2">
-                      <Box>Supply APY</Box>
-                      <Box fontWeight={"700"}>
-                        {formatPercentage(parseFloat(usdcSupplyApy))}
-                      </Box>
+                      <Flex gap="3" alignItems="center" mb={"10px"}>
+                        <Flex
+                          w="44px"
+                          h="44px"
+                          borderRadius="12px"
+                          className="primary-color"
+                          justifyContent="center"
+                          alignItems="center"
+                          color={"#041022"}
+                          fontWeight={"700"}
+                        >
+                          {x.symbol}
+                        </Flex>
+                        <Flex direction="column">
+                          <Box fontWeight={"700"}>{x.shortName}</Box>
+                          <Box as={"p"} fontSize="13px">
+                            {x.fullName}
+                          </Box>
+                        </Flex>
+                      </Flex>
+                      <SimpleGrid columns={{ base: 1, md: 2 }} gap="10px">
+                        {x.tokenInfo.map((y, index) => {
+                          return (
+                            <Box
+                              p="10px"
+                              borderRadius="10px"
+                              className="box2"
+                              key={index}
+                            >
+                              <Box>{y.label}</Box>
+                              <Box fontWeight={"700"}>{y.value}</Box>
+                            </Box>
+                          );
+                        })}
+                      </SimpleGrid>
                     </Box>
-                    <Box p="10px" borderRadius="10px" className="box2">
-                      <Box>Borrow APY</Box>
-                      <Box fontWeight={"700"}>
-                        {formatPercentage(parseFloat(usdcBorrowApy))}
-                      </Box>
-                    </Box>
-                    <Box p="10px" borderRadius="10px" className="box2">
-                      <Box>Available Liquidity</Box>
-                      <Box fontWeight={"700"}>
-                        {formatCurrency(usdcLiquidity)}
-                      </Box>
-                    </Box>
-                    <Box p="10px" borderRadius="10px" className="box2">
-                      <Box>Utilization</Box>
-                      <Box fontWeight={"700"}>
-                        {formatPercentage(usdcUtilizationRate)}
-                      </Box>
-                    </Box>
-                  </SimpleGrid>
-                </Box>
-                <Box p="10px" className="box" borderRadius={"14px"} w={"50%"}>
-                  <Flex gap="3" alignItems="center" mb={"10px"}>
-                    <Flex
-                      w="44px"
-                      h="44px"
-                      borderRadius="12px"
-                      className="primary-color"
-                      justifyContent="center"
-                      alignItems="center"
-                      color={"#041022"}
-                      fontWeight={"700"}
-                    >
-                      WT
-                    </Flex>
-                    <Flex direction="column">
-                      <Box fontWeight={"700"}>WETH</Box>
-                      <Box as={"p"} fontSize="13px">
-                        Wrapped ETH Reserve
-                      </Box>
-                    </Flex>
-                  </Flex>
-                  <SimpleGrid columns={{ base: 1, md: 2 }} gap="10px">
-                    <Box p="10px" borderRadius="10px" className="box2">
-                      <Box>Supply APY</Box>
-                      <Box fontWeight={"700"}>
-                        {formatPercentage(parseFloat(wethSupplyApy))}
-                      </Box>
-                    </Box>
-                    <Box p="10px" borderRadius="10px" className="box2">
-                      <Box>Borrow APY</Box>
-                      <Box fontWeight={"700"}>
-                        {formatPercentage(parseFloat(wethBorrowApy))}
-                      </Box>
-                    </Box>
-                    <Box p="10px" borderRadius="10px" className="box2">
-                      <Box>Available Liquidity</Box>
-                      <Box fontWeight={"700"}>
-                        {formatCurrency(wethLiquidity)}
-                      </Box>
-                    </Box>
-                    <Box p="10px" borderRadius="10px" className="box2">
-                      <Box>Utilization</Box>
-                      <Box fontWeight={"700"}>
-                        {" "}
-                        {formatPercentage(wethUtilizationRate)}
-                      </Box>
-                    </Box>
-                  </SimpleGrid>
-                </Box>
+                  );
+                })}
               </Flex>
             </Box>
-            {/* <Box w={"45%"}> */}
-            <Image
-              w={"45%"}
-              src={section1Img}
-              alt="section1Img"
-              maxW={"100%"}
-            ></Image>
-            {/* </Box> */}
+            <Box w={"45%"}>
+              <Image
+                // w={"45%"}
+                src={section1Img}
+                alt="section1Img"
+                maxW={"100%"}
+              ></Image>
+            </Box>
           </Flex>
+          {/* How Creditify works */}
+          <HowCreditifyWorks />
+          {/* Market Overview section */}
+          <MarketOverview tokenDetails={tokenDetails} />
+          <Box
+            pt={"120px"}
+            maxW={"1054px"}
+            w={"100%"}
+            m={"0 auto 150px"}
+            borderBottom={"1px solid #404040"}
+          ></Box>
+          {/* Your assets, your control */}
+          <YourAssets />
+          {/* Governance & Security */}
+          <GovernanceSecurity />
+          {/* Own your money */}
+          <OwnMoney />
+          {/* Faq */}
+          <Faq />
+          {/* Footer */}
+          <LandingFooter />
         </Container>
       </Box>
     </ChakraProvider>
