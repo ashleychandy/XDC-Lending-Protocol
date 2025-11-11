@@ -1,5 +1,13 @@
+import { formatCurrency } from "@/hooks/useMainnetAssetDetails";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Image,
+  SimpleGrid,
+} from "@chakra-ui/react";
 import React from "react";
-import { Box, Heading, Flex, Button, SimpleGrid, Text } from "@chakra-ui/react";
 import type { TokenDetailsDTO } from "./types/type";
 
 interface Props {
@@ -36,14 +44,26 @@ const MarketOverview: React.FC<Props> = ({ tokenDetails }) => {
                     w="65px"
                     h="65px"
                     borderRadius="12px"
-                    className="primary-color"
+                    bg={x.icon ? "rgba(255, 255, 255, 0.1)" : undefined}
+                    className={x.icon ? undefined : "primary-color"}
                     justifyContent="center"
                     alignItems="center"
-                    color={"#041022"}
-                    fontWeight={"700"}
-                    fontSize={"19px"}
+                    color={x.icon ? undefined : "#041022"}
+                    fontWeight={x.icon ? undefined : "700"}
+                    fontSize={x.icon ? undefined : "19px"}
+                    overflow="hidden"
                   >
-                    {x.symbol}
+                    {x.icon ? (
+                      <Image
+                        src={x.icon}
+                        alt={x.shortName}
+                        w="48px"
+                        h="48px"
+                        objectFit="contain"
+                      />
+                    ) : (
+                      x.symbol
+                    )}
                   </Flex>
                   <Flex direction="column">
                     <Box fontWeight={"700"} fontSize={"19px"}>
@@ -86,38 +106,10 @@ const MarketOverview: React.FC<Props> = ({ tokenDetails }) => {
                   );
                 })}
               </SimpleGrid>
-              <Flex justifyContent={"space-between"} alignItems={"center"}>
-                <Flex alignItems={"center"} flex="1">
-                  {/* Label */}
-                  <Text as={"p"}>Health Factor</Text>
-                  {/* Progress bar */}
-                  <Box flex="1" mx="16px" position="relative" maxW={"200px"}>
-                    <Box
-                      w="100%"
-                      h="42px"
-                      borderRadius="full"
-                      background="linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 100%)"
-                      border="1px solid #FFFFFF08"
-                      overflow="hidden"
-                    >
-                      <Box
-                        w={`${50}%`}
-                        h="30px"
-                        m={"5px"}
-                        borderRadius="full"
-                        background="linear-gradient(90deg, #06B6D4 0%, #6366F1 100%)"
-                        box-shadow=" 0px 9.22px 23.05px 0px #6366F10F"
-                      />
-                    </Box>
-                  </Box>
-                  {/* Value */}
-                  <Text color="white" fontSize="sm" fontWeight="bold">
-                    1.78
-                  </Text>
-                </Flex>
-                <Flex>
-                  <Box as={"p"}> TVL: $42.60M</Box>
-                </Flex>
+              <Flex justifyContent={"flex-end"} alignItems={"center"}>
+                <Box as={"p"} fontSize={"16px"} fontWeight={"600"}>
+                  TVL: {x.tvl ? formatCurrency(x.tvl) : "$0.00"}
+                </Box>
               </Flex>
             </Box>
           );

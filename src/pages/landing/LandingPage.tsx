@@ -1,8 +1,8 @@
 import {
   formatCurrency,
   formatPercentage,
-  useAssetDetails,
-} from "@/hooks/useAssetDetails";
+  useMainnetAssetDetails,
+} from "@/hooks/useMainnetAssetDetails";
 import { landingSystem } from "@/landingSystem";
 import { ROUTES } from "@/routes/paths";
 import {
@@ -17,8 +17,9 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import section1Img from "../../assets/images/landing/section1Img.png";
+import usdcIcon from "../../assets/images/usdc.svg";
+import xdcIcon from "../../assets/images/xdc-icon.webp";
 import Faq from "./Faq";
-import GovernanceSecurity from "./GovernanceSecurity";
 import HowCreditifyWorks from "./HowCreditifyWorks";
 import LandingFooter from "./LandingFooter";
 import LandingHeader from "./LandingHeader";
@@ -29,29 +30,30 @@ import YourAssets from "./YourAssets";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  // Fetch data for landing page (XDC mainnet by default, or Apothem if VITE_TESTNET=true)
   const {
-    availableLiquidity: wethLiquidity,
-    utilizationRate: usdcUtilizationRate,
-  } = useAssetDetails("weth");
+    availableLiquidity: wxdcLiquidity,
+    utilizationRate: wxdcUtilizationRate,
+    supplyApy: wxdcSupplyApy,
+    borrowApy: wxdcBorrowApy,
+    totalSuppliedUsd: wxdcTvl,
+  } = useMainnetAssetDetails("wxdc");
 
   const {
     availableLiquidity: usdcLiquidity,
-    utilizationRate: wethUtilizationRate,
-  } = useAssetDetails("usdc");
-
-  const { supplyApy: wethSupplyApy, borrowApy: wethBorrowApy } =
-    useAssetDetails("weth");
-
-  const { supplyApy: usdcSupplyApy, borrowApy: usdcBorrowApy } =
-    useAssetDetails("usdc");
+    utilizationRate: usdcUtilizationRate,
+    supplyApy: usdcSupplyApy,
+    borrowApy: usdcBorrowApy,
+    totalSuppliedUsd: usdcTvl,
+  } = useMainnetAssetDetails("usdc");
 
   const tokenDetails: TokenDetailsDTO[] = [
     {
       symbol: "US",
       shortName: "USDC",
       fullName: "Stablecoin Reserve",
-      // tvl:,
-      // hf:,
+      icon: usdcIcon,
+      tvl: usdcTvl,
       tokenInfo: [
         {
           label: "Supply APY",
@@ -72,25 +74,27 @@ const LandingPage = () => {
       ],
     },
     {
-      symbol: "WT",
-      shortName: "WETH",
-      fullName: "Wrapped ETH Reserve",
+      symbol: "XDC",
+      shortName: "WXDC",
+      fullName: "XDC Network Reserve",
+      icon: xdcIcon,
+      tvl: wxdcTvl,
       tokenInfo: [
         {
           label: "Supply APY",
-          value: formatPercentage(parseFloat(wethSupplyApy)),
+          value: formatPercentage(parseFloat(wxdcSupplyApy)),
         },
         {
           label: "Borrow APY",
-          value: formatPercentage(parseFloat(wethBorrowApy)),
+          value: formatPercentage(parseFloat(wxdcBorrowApy)),
         },
         {
           label: "Available Liquidity",
-          value: formatCurrency(wethLiquidity),
+          value: formatCurrency(wxdcLiquidity),
         },
         {
           label: "Utilization",
-          value: formatPercentage(wethUtilizationRate),
+          value: formatPercentage(wxdcUtilizationRate),
         },
       ],
     },
@@ -128,7 +132,7 @@ const LandingPage = () => {
                 Supply. Earn. Borrow. — Securely.
               </Heading>
               <Box as={"p"} mb={"20px"}>
-                Creditify enables users to supply assets like USDC and WETH to
+                Creditify enables users to supply assets like USDC and XDC to
                 earn yield, and borrow instantly against collateral with
                 automated risk management. Non-custodial, audited, and governed
                 by the community.
@@ -164,13 +168,18 @@ const LandingPage = () => {
                           w="44px"
                           h="44px"
                           borderRadius="12px"
-                          className="primary-color"
+                          bg="rgba(255, 255, 255, 0.1)"
                           justifyContent="center"
                           alignItems="center"
-                          color={"#041022"}
-                          fontWeight={"700"}
+                          overflow="hidden"
                         >
-                          {x.symbol}
+                          <Image
+                            src={x.icon}
+                            alt={x.shortName}
+                            w="32px"
+                            h="32px"
+                            objectFit="contain"
+                          />
                         </Flex>
                         <Flex direction="column">
                           <Box fontWeight={"700"}>{x.shortName}</Box>
@@ -224,8 +233,6 @@ const LandingPage = () => {
           ></Box>
           {/* Your assets, your control */}
           <YourAssets />
-          {/* Governance & Security */}
-          <GovernanceSecurity />
           {/* Own your money */}
           <OwnMoney />
           {/* Faq */}

@@ -1,31 +1,46 @@
-// src/hooks/useAssetDetails.ts
+// src/hooks/useMainnetAssetDetails.ts
+// This hook fetches data from XDC mainnet or testnet for the landing page based on env
 import {
   CREDITIFY_ORACLE_ABI,
   ERC20_ABI,
   POOL_ABI,
   POOL_ADDRESSES_PROVIDER_ABI,
 } from "@/config/abis";
+import { CHAIN_CONFIGS } from "@/config/chains";
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUnits } from "viem";
 import { useReadContract } from "wagmi";
-import { useChainConfig } from "./useChainConfig";
+import { xdc, xdcTestnet } from "wagmi/chains";
 
-const getTokenMetadata = (tokens: any, network: any) =>
+// Check environment variable to determine which network to use
+const isTestnet = import.meta.env.VITE_TESTNET === "true";
+const LANDING_CHAIN_ID = isTestnet ? xdcTestnet.id : xdc.id;
+const LANDING_CONFIG = CHAIN_CONFIGS[LANDING_CHAIN_ID];
+
+const getTokenMetadata = () =>
   ({
     eth: {
-      symbol: tokens.weth.symbol,
-      name: tokens.weth.symbol,
-      fullName: `${tokens.weth.symbol} Reserve`,
-      icon: getTokenLogo(tokens.weth.symbol),
-      address: tokens.weth.address,
+      symbol: LANDING_CONFIG.tokens.weth.symbol,
+      name: LANDING_CONFIG.tokens.weth.symbol,
+      fullName: `${LANDING_CONFIG.tokens.weth.symbol} Reserve`,
+      icon: getTokenLogo(LANDING_CONFIG.tokens.weth.symbol),
+      address: LANDING_CONFIG.tokens.weth.address,
       decimals: 18,
     },
     weth: {
-      symbol: tokens.weth.symbol,
-      name: tokens.weth.symbol,
-      fullName: `${tokens.weth.symbol} Reserve`,
-      icon: getTokenLogo(tokens.weth.symbol),
-      address: tokens.weth.address,
+      symbol: LANDING_CONFIG.tokens.weth.symbol,
+      name: LANDING_CONFIG.tokens.weth.symbol,
+      fullName: `${LANDING_CONFIG.tokens.weth.symbol} Reserve`,
+      icon: getTokenLogo(LANDING_CONFIG.tokens.weth.symbol),
+      address: LANDING_CONFIG.tokens.weth.address,
+      decimals: 18,
+    },
+    wxdc: {
+      symbol: LANDING_CONFIG.tokens.weth.symbol,
+      name: LANDING_CONFIG.tokens.weth.symbol,
+      fullName: `${LANDING_CONFIG.tokens.weth.symbol} Reserve`,
+      icon: getTokenLogo(LANDING_CONFIG.tokens.weth.symbol),
+      address: LANDING_CONFIG.tokens.weth.address,
       decimals: 18,
     },
     usdc: {
@@ -33,7 +48,7 @@ const getTokenMetadata = (tokens: any, network: any) =>
       name: "USD Coin",
       fullName: "USD Coin",
       icon: getTokenLogo("USDC"),
-      address: tokens.usdc.address,
+      address: LANDING_CONFIG.tokens.usdc.address,
       decimals: 6,
     },
   }) as const;
@@ -41,7 +56,7 @@ const getTokenMetadata = (tokens: any, network: any) =>
 function decodeReserveConfiguration(configuration: bigint) {
   const BORROW_CAP_START = 80n;
   const SUPPLY_CAP_START = 116n;
-  const CAP_MASK = (1n << 36n) - 1n; // 36 bits for each cap
+  const CAP_MASK = (1n << 36n) - 1n;
 
   const borrowCap = Number((configuration >> BORROW_CAP_START) & CAP_MASK);
   const supplyCap = Number((configuration >> SUPPLY_CAP_START) & CAP_MASK);
@@ -52,53 +67,30 @@ function decodeReserveConfiguration(configuration: bigint) {
   };
 }
 
-export function useAssetDetails(tokenSymbol: string) {
-  const { contracts, tokens, network } = useChainConfig();
-  const TOKEN_METADATA = getTokenMetadata(tokens, network);
+export function useMainnetAssetDetails(tokenSymbol: string) {
+  const TOKEN_METADATA = getTokenMetadata();
 
   const token =
     TOKEN_METADATA[tokenSymbol?.toLowerCase() as keyof typeof TOKEN_METADATA] ||
     TOKEN_METADATA.weth;
 
-  // Get reserve data from Aave Pool
+  // Get reserve data from Pool - from configured landing chain
   const { data: reserveData, isLoading: isLoadingReserve } = useReadContract({
-    address: contracts.pool,
+    address: LANDING_CONFIG.contracts.pool,
     abi: POOL_ABI,
     functionName: "getReserveData",
     args: [token.address as `0x${string}`],
-    chainId: network.chainId,
+    chainId: LANDING_CHAIN_ID,
   });
 
   const reserveDataAny = reserveData as any;
-
-  // Get aToken total supply (total supplied)
-  const { data: aTokenTotalSupply } = useReadContract({
-    address: reserveDataAny?.aTokenAddress as `0x${string}`,
-    abi: ERC20_ABI,
-    functionName: "totalSupply",
-    chainId: network.chainId,
-    query: {
-      enabled: !!reserveDataAny?.aTokenAddress,
-    },
-  });
-
-  // Get total stable debt
-  const { data: totalStableDebt } = useReadContract({
-    address: reserveDataAny?.stableDebtTokenAddress as `0x${string}`,
-    abi: ERC20_ABI,
-    functionName: "totalSupply",
-    chainId: network.chainId,
-    query: {
-      enabled: !!reserveDataAny?.stableDebtTokenAddress,
-    },
-  });
 
   // Get total variable debt
   const { data: totalVariableDebt } = useReadContract({
     address: reserveDataAny?.variableDebtTokenAddress as `0x${string}`,
     abi: ERC20_ABI,
     functionName: "totalSupply",
-    chainId: network.chainId,
+    chainId: LANDING_CHAIN_ID,
     query: {
       enabled: !!reserveDataAny?.variableDebtTokenAddress,
     },
@@ -110,7 +102,7 @@ export function useAssetDetails(tokenSymbol: string) {
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: [reserveDataAny?.aTokenAddress as `0x${string}`],
-    chainId: network.chainId,
+    chainId: LANDING_CHAIN_ID,
     query: {
       enabled: !!reserveDataAny?.aTokenAddress,
     },
@@ -118,8 +110,8 @@ export function useAssetDetails(tokenSymbol: string) {
 
   // Get asset price from oracle
   const { data: priceOracleAddress } = useReadContract({
-    address: contracts.pool,
-    chainId: network.chainId,
+    address: LANDING_CONFIG.contracts.pool,
+    chainId: LANDING_CHAIN_ID,
     abi: POOL_ABI,
     functionName: "ADDRESSES_PROVIDER",
   });
@@ -128,7 +120,7 @@ export function useAssetDetails(tokenSymbol: string) {
     address: priceOracleAddress as `0x${string}`,
     abi: POOL_ADDRESSES_PROVIDER_ABI,
     functionName: "getPriceOracle",
-    chainId: network.chainId,
+    chainId: LANDING_CHAIN_ID,
     query: {
       enabled: !!priceOracleAddress,
     },
@@ -139,14 +131,13 @@ export function useAssetDetails(tokenSymbol: string) {
     abi: CREDITIFY_ORACLE_ABI,
     functionName: "getAssetPrice",
     args: [token.address as `0x${string}`],
-    chainId: network.chainId,
+    chainId: LANDING_CHAIN_ID,
     query: {
       enabled: !!oracleAddress,
     },
   });
 
   // Decode supply and borrow caps from configuration
-  // Configuration is a nested tuple with a 'data' field
   const configData = reserveDataAny?.configuration
     ? (reserveDataAny.configuration as any).data || reserveDataAny.configuration
     : 0n;
@@ -171,23 +162,19 @@ export function useAssetDetails(tokenSymbol: string) {
     ? parseFloat(formatUnits(assetPrice as bigint, 8))
     : 0;
 
-  // Total borrowed = stable debt + variable debt
-  const stableDebt = totalStableDebt
-    ? parseFloat(formatUnits(totalStableDebt, token.decimals))
-    : 0;
-
+  // Total borrowed = variable debt (no stable debt in this protocol)
   const variableDebt = totalVariableDebt
     ? parseFloat(formatUnits(totalVariableDebt, token.decimals))
     : 0;
 
-  const totalBorrowed = stableDebt + variableDebt;
+  const totalBorrowed = variableDebt;
 
   // Available liquidity = actual balance of underlying token in aToken contract
   const availableLiquidityInTokens = underlyingBalance
     ? parseFloat(formatUnits(underlyingBalance, token.decimals))
     : 0;
 
-  // Total supplied = available liquidity + total borrowed (Aave standard)
+  // Total supplied = available liquidity + total borrowed
   const totalSupplied = availableLiquidityInTokens + totalBorrowed;
 
   // Reserve size in USD
@@ -210,7 +197,7 @@ export function useAssetDetails(tokenSymbol: string) {
     ? rateToApy(reserveDataAny.currentVariableBorrowRate as bigint)
     : "0.00";
 
-  // Calculate cap percentages for progress circles
+  // Calculate cap percentages
   const supplyCapPercentage =
     caps.supplyCap > 0
       ? Math.min((totalSupplied / caps.supplyCap) * 100, 100)
@@ -244,7 +231,6 @@ export function useAssetDetails(tokenSymbol: string) {
     totalSuppliedUsd: totalSupplied * oraclePrice,
     totalBorrowed,
     totalBorrowedUsd: totalBorrowed * oraclePrice,
-    stableDebt,
     variableDebt,
 
     // Caps and percentages
@@ -264,7 +250,6 @@ export function useAssetDetails(tokenSymbol: string) {
     // Raw reserve data
     reserveData,
     aTokenAddress: reserveDataAny?.aTokenAddress,
-    stableDebtTokenAddress: reserveDataAny?.stableDebtTokenAddress,
     variableDebtTokenAddress: reserveDataAny?.variableDebtTokenAddress,
 
     // Loading state
@@ -288,17 +273,4 @@ export function formatCurrency(value: number): string {
 
 export function formatPercentage(value: number): string {
   return `${value.toFixed(2)}%`;
-}
-
-export function formatTokenAmount(value: number): string {
-  if (value >= 1_000_000_000) {
-    return `${(value / 1_000_000_000).toFixed(2)}B`;
-  }
-  if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(2)}M`;
-  }
-  if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(2)}K`;
-  }
-  return `${value.toFixed(2)}`;
 }

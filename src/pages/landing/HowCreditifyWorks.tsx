@@ -1,7 +1,6 @@
-import React from "react";
-import { Box, Heading, Flex, SimpleGrid, Image } from "@chakra-ui/react";
-import supplyImg from "../../assets/images/landing/supply.png";
+import { Box, Flex, Heading, Image, SimpleGrid } from "@chakra-ui/react";
 import borrowImg from "../../assets/images/landing/borrow.png";
+import supplyImg from "../../assets/images/landing/supply.png";
 
 const HowCreditifyWorks = () => {
   return (
@@ -38,9 +37,9 @@ const HowCreditifyWorks = () => {
             fontSize={{ base: "14px", sm: "18px", lg: "22px" }}
             p={"15px 40px"}
           >
-            Deposit USDC or WETH into the reserve and receive
+            Deposit USDC or XDC into the reserve and receive
             <br />
-            xTokens (xUSDC/xWETH) that accrue yield automatically.
+            xTokens (xUSDC/xXDC) that accrue yield automatically.
           </Box>
         </Box>
         <Box

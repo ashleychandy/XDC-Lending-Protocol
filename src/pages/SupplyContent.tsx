@@ -444,8 +444,25 @@ const SupplyContent = () => {
                   <Table.Row key={item.id}>
                     <Table.Cell w="25%">
                       <Flex gap="10px" alignItems="center">
-                        <Image src={item.img} width="28px" height="28px" />
-                        <Box>{item.name}</Box>
+                        <Image
+                          src={item.img}
+                          width="28px"
+                          height="28px"
+                          cursor="pointer"
+                          onClick={() =>
+                            navigate(buildAssetDetailsRoute(item.symbol))
+                          }
+                          _hover={{ opacity: 0.7 }}
+                        />
+                        <Box
+                          cursor="pointer"
+                          onClick={() =>
+                            navigate(buildAssetDetailsRoute(item.symbol))
+                          }
+                          _hover={{ textDecoration: "underline" }}
+                        >
+                          {item.name}
+                        </Box>
                       </Flex>
                     </Table.Cell>
                     <Table.Cell w="20%">
@@ -545,8 +562,25 @@ const SupplyContent = () => {
                 <Table.Row key={item.id}>
                   <Table.Cell w="23%">
                     <Flex gap="10px" alignItems="center">
-                      <Image src={item.img} width="28px" height="28px" />
-                      <Box>{item.name}</Box>
+                      <Image
+                        src={item.img}
+                        width="28px"
+                        height="28px"
+                        cursor="pointer"
+                        onClick={() =>
+                          navigate(buildAssetDetailsRoute(item.symbol))
+                        }
+                        _hover={{ opacity: 0.7 }}
+                      />
+                      <Box
+                        cursor="pointer"
+                        onClick={() =>
+                          navigate(buildAssetDetailsRoute(item.symbol))
+                        }
+                        _hover={{ textDecoration: "underline" }}
+                      >
+                        {item.name}
+                      </Box>
                     </Flex>
                   </Table.Cell>
                   <Table.Cell w="23%">
