@@ -283,7 +283,7 @@ const RepayModal: React.FC<Props> = ({
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          colorScheme="blue"
+                          colorPalette="blue"
                           onClick={() => {
                             // Set to minimum of wallet balance or borrowed amount
                             const walletBal = parseFloat(
@@ -420,7 +420,7 @@ const RepayModal: React.FC<Props> = ({
                   w="100%"
                   fontSize="18px"
                   onClick={onClickRepay}
-                  colorScheme="blue"
+                  colorPalette="blue"
                   loading={isPending || isConfirming}
                 >
                   {isPending || isConfirming

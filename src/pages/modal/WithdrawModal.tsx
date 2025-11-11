@@ -286,7 +286,7 @@ const WithdrawModal: React.FC<Props> = ({
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          colorScheme="blue"
+                          colorPalette="blue"
                           onClick={() => {
                             setAmount(formatValue(parseFloat(suppliedBalance)));
                           }}
@@ -385,7 +385,7 @@ const WithdrawModal: React.FC<Props> = ({
                   w="100%"
                   fontSize="18px"
                   onClick={onClickWithdraw}
-                  colorScheme={isWithdrawalRisky ? "orange" : "blue"}
+                  colorPalette={isWithdrawalRisky ? "orange" : "blue"}
                 >
                   {!amount || amount.trim() === "" || parseFloat(amount) === 0
                     ? "Enter an amount"

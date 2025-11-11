@@ -24,7 +24,7 @@ const NotFound = () => {
         </Box>
         <Button
           size="lg"
-          colorScheme="blue"
+          colorPalette="blue"
           onClick={() => navigate(ROUTES.HOME)}
         >
           Go to Home

@@ -254,7 +254,7 @@ const BorrowModal: React.FC<Props> = ({
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          colorScheme="blue"
+                          colorPalette="blue"
                           onClick={() => {
                             setAmount(formatValue(parseFloat(borrowedBalance)));
                           }}
@@ -343,7 +343,7 @@ const BorrowModal: React.FC<Props> = ({
                   w="100%"
                   fontSize="18px"
                   onClick={onClickBorrow}
-                  colorScheme={isBorrowRisky ? "orange" : "blue"}
+                  colorPalette={isBorrowRisky ? "orange" : "blue"}
                 >
                   {!amount || amount.trim() === "" || parseFloat(amount) === 0
                     ? "Enter an amount"

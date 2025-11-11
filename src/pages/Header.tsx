@@ -25,11 +25,10 @@ const Header = () => {
     <Box
       as="header"
       p="8px 20px"
-      bg="bg.panel"
+      bg="transparent"
       position="sticky"
       top="0"
       zIndex="1000"
-      backdropFilter="blur(10px)"
     >
       <Flex gap="4" justify="space-between" alignItems="center">
         <NavLink to={ROUTES.HOME}>
