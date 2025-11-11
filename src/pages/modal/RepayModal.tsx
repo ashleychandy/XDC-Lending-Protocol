@@ -17,8 +17,9 @@ import {
   Input,
   InputGroup,
   Portal,
+  Switch,
 } from "@chakra-ui/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
 import usdcIcon from "../../assets/images/usdc.svg";
@@ -35,6 +36,8 @@ interface Props {
   usdcPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
+  useNative?: boolean;
+  setUseNative?: (value: boolean) => void;
 }
 
 const RepayModal: React.FC<Props> = ({
@@ -49,9 +52,16 @@ const RepayModal: React.FC<Props> = ({
   usdcPrice = 1,
   isPending = false,
   isConfirming = false,
+  useNative: externalUseNative,
+  setUseNative: externalSetUseNative,
 }) => {
   const { tokens, network } = useChainConfig();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [internalUseNative, setInternalUseNative] = useState<boolean>(false);
+
+  // Use external state if provided, otherwise use internal state
+  const useNative = externalUseNative ?? internalUseNative;
+  const setUseNative = externalSetUseNative ?? setInternalUseNative;
 
   // Get native token info
   const nativeTokenSymbol = network.nativeToken.symbol;
@@ -273,7 +283,7 @@ const RepayModal: React.FC<Props> = ({
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          colorScheme="blue"
+                          colorPalette="blue"
                           onClick={() => {
                             // Set to minimum of wallet balance or borrowed amount
                             const walletBal = parseFloat(
@@ -290,6 +300,24 @@ const RepayModal: React.FC<Props> = ({
                     </Flex>
                   </Box>
                 </Box>
+
+                {/* Use native token toggle for WETH/ETH */}
+                {(tokenSymbol === "weth" || tokenSymbol === "eth") && (
+                  <Box mb="15px" p="12px" borderRadius="6px">
+                    <Switch.Root
+                      colorPalette="green"
+                      checked={useNative}
+                      onCheckedChange={(e) => setUseNative(e.checked)}
+                      size="sm"
+                    >
+                      <Switch.HiddenInput />
+                      <Switch.Control />
+                      <Switch.Label fontSize="sm">
+                        Repay with native {network.nativeToken.symbol}
+                      </Switch.Label>
+                    </Switch.Root>
+                  </Box>
+                )}
 
                 {/* Transaction overview */}
                 <Box>
@@ -392,7 +420,7 @@ const RepayModal: React.FC<Props> = ({
                   w="100%"
                   fontSize="18px"
                   onClick={onClickRepay}
-                  colorScheme="blue"
+                  colorPalette="blue"
                   loading={isPending || isConfirming}
                 >
                   {isPending || isConfirming

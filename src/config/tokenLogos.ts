@@ -1,10 +1,9 @@
 // Token logo configuration
-import arbitrumIcon from "@/assets/images/arbitrum.svg";
 import ethIcon from "@/assets/images/eth.svg";
 import usdcIcon from "@/assets/images/usdc.svg";
 import wethIcon from "@/assets/images/weth.svg";
+import xdc from "@/assets/images/XDC Primary Color Logo.svg";
 import xdcIcon from "@/assets/images/xdc-icon.webp";
-
 /**
  * Token logo mapping by symbol
  * Supports both native and ERC20 tokens
@@ -41,15 +40,8 @@ export const TOKEN_LOGOS: Record<string, string> = {
  * Chain logo mapping by chain ID
  */
 export const CHAIN_LOGOS: Record<number, string> = {
-  50: xdcIcon, // XDC Mainnet
-  51: xdcIcon, // XDC Apothem Testnet
-  1: ethIcon, // Ethereum Mainnet
-  5: ethIcon, // Goerli
-  11155111: ethIcon, // Sepolia
-  421614: arbitrumIcon, // Arbitrum Sepolia
-  42161: arbitrumIcon, // Arbitrum One
-  137: ethIcon, // Polygon (placeholder)
-  80001: ethIcon, // Mumbai (placeholder)
+  50: xdc, // XDC Mainnet
+  51: xdc, // XDC Apothem Testnet
 };
 
 /**
@@ -66,7 +58,7 @@ export function getTokenLogo(symbol: string): string {
  * Returns a fallback icon if not found
  */
 export function getChainLogo(chainId: number): string {
-  return CHAIN_LOGOS[chainId] || ethIcon; // Default to ETH icon
+  return CHAIN_LOGOS[chainId];
 }
 
 /**
@@ -76,16 +68,9 @@ export function getNativeTokenSymbol(chainId: number): string {
   const nativeTokens: Record<number, string> = {
     50: "XDC", // XDC Mainnet
     51: "XDC", // XDC Apothem Testnet
-    1: "ETH", // Ethereum Mainnet
-    5: "ETH", // Goerli
-    11155111: "ETH", // Sepolia
-    421614: "ETH", // Arbitrum Sepolia
-    42161: "ETH", // Arbitrum One
-    137: "MATIC", // Polygon
-    80001: "MATIC", // Mumbai
   };
 
-  return nativeTokens[chainId] || "ETH";
+  return nativeTokens[chainId] || "XDC";
 }
 
 /**
@@ -95,16 +80,9 @@ export function getWrappedTokenSymbol(chainId: number): string {
   const wrappedTokens: Record<number, string> = {
     50: "WXDC", // XDC Mainnet
     51: "WXDC", // XDC Apothem Testnet
-    1: "WETH", // Ethereum Mainnet
-    5: "WETH", // Goerli
-    11155111: "WETH", // Sepolia
-    421614: "WETH", // Arbitrum Sepolia
-    42161: "WETH", // Arbitrum One
-    137: "WMATIC", // Polygon
-    80001: "WMATIC", // Mumbai
   };
 
-  return wrappedTokens[chainId] || "WETH";
+  return wrappedTokens[chainId] || "WXDC";
 }
 
 /**

@@ -1,4 +1,4 @@
-import { POOL_ABI } from "@/config/abis";
+import { POOL_ABI, WRAPPED_TOKEN_GATEWAY_V3_ABI } from "@/config/abis";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { maxUint256, parseUnits } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
@@ -31,8 +31,27 @@ export function useWithdraw() {
     });
   };
 
+  /**
+   * Withdraw native token (XDC/ETH) directly - automatically unwraps
+   */
+  const withdrawNative = async (
+    amount: string,
+    userAddress: string,
+    decimals: number = 18
+  ) => {
+    const amountInWei = parseUnits(amount, decimals);
+
+    return writeContract({
+      address: contracts.wrappedTokenGateway,
+      abi: WRAPPED_TOKEN_GATEWAY_V3_ABI,
+      functionName: "withdrawETH",
+      args: [contracts.pool, amountInWei, userAddress as `0x${string}`],
+    });
+  };
+
   return {
     withdraw,
+    withdrawNative,
     hash,
     isPending,
     isConfirming,

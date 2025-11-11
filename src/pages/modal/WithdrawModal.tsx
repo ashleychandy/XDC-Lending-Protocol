@@ -35,6 +35,8 @@ interface Props {
   usdcPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
+  unwrapToNative?: boolean;
+  setUnwrapToNative?: (value: boolean) => void;
 }
 
 const WithdrawModal: React.FC<Props> = ({
@@ -49,9 +51,17 @@ const WithdrawModal: React.FC<Props> = ({
   usdcPrice = 1,
   isPending,
   isConfirming,
+  unwrapToNative: externalUnwrapToNative,
+  setUnwrapToNative: externalSetUnwrapToNative,
 }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
+  const [internalUnwrapToNative, setInternalUnwrapToNative] =
+    useState<boolean>(true);
+
+  // Use external state if provided, otherwise use internal state
+  const unwrapToNative = externalUnwrapToNative ?? internalUnwrapToNative;
+  const setUnwrapToNative =
+    externalSetUnwrapToNative ?? setInternalUnwrapToNative;
 
   // Get chain config for dynamic tokens
   const { tokens, network } = useChainConfig();
@@ -276,7 +286,7 @@ const WithdrawModal: React.FC<Props> = ({
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          colorScheme="blue"
+                          colorPalette="blue"
                           onClick={() => {
                             setAmount(formatValue(parseFloat(suppliedBalance)));
                           }}
@@ -375,7 +385,7 @@ const WithdrawModal: React.FC<Props> = ({
                   w="100%"
                   fontSize="18px"
                   onClick={onClickWithdraw}
-                  colorScheme={isWithdrawalRisky ? "orange" : "blue"}
+                  colorPalette={isWithdrawalRisky ? "orange" : "blue"}
                 >
                   {!amount || amount.trim() === "" || parseFloat(amount) === 0
                     ? "Enter an amount"

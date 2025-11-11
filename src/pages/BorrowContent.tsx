@@ -8,6 +8,7 @@ import { useReserveData } from "@/hooks/useReserveData";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
 import { useUserReserveData } from "@/hooks/useUserReserveData";
+import { buildAssetDetailsRoute } from "@/routes/paths";
 import { Box, Button, Flex, Heading, Image, Table } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +21,7 @@ import RepayDoneModal from "./modal/RepayDoneModal";
 import RepayModal from "./modal/RepayModal";
 
 function BorrowContent() {
-  const { tokens, network } = useChainConfig();
+  const { tokens, network, contracts } = useChainConfig();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     "weth"
   );
@@ -35,6 +36,8 @@ function BorrowContent() {
   const [isBorrowDoneModal, setIsBorrowDoneModal] = useState<boolean>(false);
   const [isRepayModal, setIsRepayModal] = useState<boolean>(false);
   const [isRepayDoneModal, setIsRepayDoneModal] = useState<boolean>(false);
+  const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
+  const [useNativeForRepay, setUseNativeForRepay] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const { address } = useAccount();
@@ -93,11 +96,29 @@ function BorrowContent() {
         ).toFixed(2)
       : "0.00";
 
-  const handleBorrow = async () => {
+  const handleBorrow = async (unwrapToNative: boolean = false) => {
     if (!address || !amount) return;
     const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+
     try {
-      await borrowHook.borrow(token.address, amount, token.decimals, address);
+      // If borrowing as native token (ETH/XDC) and unwrap is enabled
+      if (
+        (selectedToken === "eth" || selectedToken === "weth") &&
+        unwrapToNative
+      ) {
+        // Check if gateway is configured
+        if (
+          contracts.wrappedTokenGateway ===
+          "0x0000000000000000000000000000000000000000"
+        ) {
+          console.error("Wrapped token gateway not configured for this chain");
+          return;
+        }
+        await borrowHook.borrowNative(amount, address);
+      } else {
+        // Standard borrow
+        await borrowHook.borrow(token.address, amount, token.decimals, address);
+      }
     } catch (err) {
       console.error("Borrow error:", err);
     }
@@ -115,14 +136,29 @@ function BorrowContent() {
     },
   });
 
-  const handleRepay = async () => {
+  const handleRepay = async (useNative: boolean = false) => {
     if (!address || !amount) return;
     const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+
     try {
-      await repayHook.approve(token.address, amount, token.decimals);
-      setTimeout(async () => {
-        await repayHook.repay(token.address, amount, token.decimals, address);
-      }, 2000);
+      // If repaying with native token (ETH/XDC)
+      if ((selectedToken === "eth" || selectedToken === "weth") && useNative) {
+        // Check if gateway is configured
+        if (
+          contracts.wrappedTokenGateway ===
+          "0x0000000000000000000000000000000000000000"
+        ) {
+          console.error("Wrapped token gateway not configured for this chain");
+          return;
+        }
+        await repayHook.repayNative(amount, address);
+      } else {
+        // Standard ERC20 flow: approve then repay
+        await repayHook.approve(token.address, amount, token.decimals);
+        setTimeout(async () => {
+          await repayHook.repay(token.address, amount, token.decimals, address);
+        }, 2000);
+      }
     } catch (err) {
       console.error("Repay error:", err);
     }
@@ -211,12 +247,13 @@ function BorrowContent() {
           onClose={() => {
             setIsBorrowModal(false);
             setAmount("");
+            setUnwrapToNative(true);
           }}
           tokenSymbol={selectedToken}
           amount={amount}
           setAmount={setAmount}
           onClickBorrow={() => {
-            handleBorrow();
+            handleBorrow(unwrapToNative);
           }}
           borrowedBalance={
             selectedToken === "eth" || selectedToken === "weth"
@@ -229,6 +266,8 @@ function BorrowContent() {
           usdcPrice={usdcPrice}
           isPending={borrowHook.isPending}
           isConfirming={borrowHook.isConfirming}
+          unwrapToNative={unwrapToNative}
+          setUnwrapToNative={setUnwrapToNative}
         />
       )}
       {isBorrowDoneModal && (
@@ -249,12 +288,13 @@ function BorrowContent() {
           onClose={() => {
             setIsRepayModal(false);
             setAmount("");
+            setUseNativeForRepay(false);
           }}
           tokenSymbol={selectedToken}
           amount={amount}
           setAmount={setAmount}
           onClickRepay={() => {
-            handleRepay();
+            handleRepay(useNativeForRepay);
           }}
           borrowedAmount={
             selectedToken === "eth" || selectedToken === "weth"
@@ -265,6 +305,8 @@ function BorrowContent() {
           usdcPrice={usdcPrice}
           isPending={repayHook.isPending}
           isConfirming={repayHook.isConfirming}
+          useNative={useNativeForRepay}
+          setUseNative={setUseNativeForRepay}
         />
       )}
       {isRepayDoneModal && (
@@ -448,7 +490,7 @@ function BorrowContent() {
                         size="sm"
                         variant="outline"
                         onClick={() =>
-                          navigate(`/asset-details?token=${item.symbol}`)
+                          navigate(buildAssetDetailsRoute(item.symbol))
                         }
                       >
                         Details

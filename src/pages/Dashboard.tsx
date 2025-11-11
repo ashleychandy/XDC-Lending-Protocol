@@ -9,6 +9,7 @@ import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import BorrowContent from "./BorrowContent";
 import ConnectYourWalletContent from "./ConnectYourWalletContent";
+import Header from "./Header";
 import SupplyContent from "./SupplyContent";
 
 const Dashboard = () => {
@@ -64,56 +65,59 @@ const Dashboard = () => {
       : "0.00";
 
   return (
-    <Container
-      maxW={{
-        base: "100%",
-        md: "container.md",
-        lg: "container.lg",
-        xl: "container.xl",
-      }}
-      px={{ base: 4, md: 6 }}
-      py={4}
-      h="100%"
-    >
-      <Box h="100%" p="30px 0">
-        <Flex gap="2" alignItems="center" mb="15px">
-          <Image src={network.icon} width="32px" height="32px" />
-          <Heading size="3xl">{network.name} Market</Heading>
-        </Flex>
+    <>
+      <Header />
+      <Container
+        maxW={{
+          base: "100%",
+          md: "container.md",
+          lg: "container.lg",
+          xl: "container.xl",
+        }}
+        px={{ base: 4, md: 6 }}
+        py={4}
+        h="100%"
+      >
+        <Box h="100%" p="30px 0">
+          <Flex gap="2" alignItems="center" mb="15px">
+            <Image src={network.icon} width="32px" height="32px" />
+            <Heading size="3xl">{network.name} Market</Heading>
+          </Flex>
 
-        <Flex gap="6" alignItems="center" mb="50px" flexWrap="wrap">
-          <Flex direction="column">
-            <Box>Net worth</Box>
-            <Heading size="2xl">${netWorth.toFixed(2)}</Heading>
+          <Flex gap="6" alignItems="center" mb="50px" flexWrap="wrap">
+            <Flex direction="column">
+              <Box>Net worth</Box>
+              <Heading size="2xl">${netWorth.toFixed(2)}</Heading>
+            </Flex>
+            <Flex direction="column">
+              <Box>Net APY</Box>
+              <Heading size="2xl">{weightedSupplyApy}%</Heading>
+            </Flex>
+            <Flex direction="column">
+              <Box>Health factor</Box>
+              <Heading size="2xl" color={healthFactorColor}>
+                {healthFactorValue > 1000 ? "∞" : healthFactorValue.toFixed(2)}
+              </Heading>
+            </Flex>
+            <Flex direction="column">
+              <Box>Available Rewards</Box>
+              <Heading size="2xl">$0</Heading>
+            </Flex>
           </Flex>
-          <Flex direction="column">
-            <Box>Net APY</Box>
-            <Heading size="2xl">{weightedSupplyApy}%</Heading>
-          </Flex>
-          <Flex direction="column">
-            <Box>Health factor</Box>
-            <Heading size="2xl" color={healthFactorColor}>
-              {healthFactorValue > 1000 ? "∞" : healthFactorValue.toFixed(2)}
-            </Heading>
-          </Flex>
-          <Flex direction="column">
-            <Box>Available Rewards</Box>
-            <Heading size="2xl">$0</Heading>
-          </Flex>
-        </Flex>
 
-        {isConnected ? (
-          <Flex gap="4" direction={{ base: "column", lg: "row" }}>
-            {/* LEFT CONTENT - SUPPLY */}
-            <SupplyContent />
-            {/* RIGHT CONTENT - BORROW */}
-            <BorrowContent />
-          </Flex>
-        ) : (
-          <ConnectYourWalletContent />
-        )}
-      </Box>
-    </Container>
+          {isConnected ? (
+            <Flex gap="4" direction={{ base: "column", lg: "row" }}>
+              {/* LEFT CONTENT - SUPPLY */}
+              <SupplyContent />
+              {/* RIGHT CONTENT - BORROW */}
+              <BorrowContent />
+            </Flex>
+          ) : (
+            <ConnectYourWalletContent />
+          )}
+        </Box>
+      </Container>
+    </>
   );
 };
 

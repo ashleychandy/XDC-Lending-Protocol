@@ -10,6 +10,7 @@ import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
 import { useUserReserveData } from "@/hooks/useUserReserveData";
 import { useWithdraw } from "@/hooks/useWithdraw";
+import { buildAssetDetailsRoute } from "@/routes/paths";
 import {
   Box,
   Button,
@@ -32,7 +33,7 @@ import WithdrawDoneModal from "./modal/WithdrawDoneModal";
 import WithdrawModal from "./modal/WithdrawModal";
 
 const SupplyContent = () => {
-  const { tokens, network } = useChainConfig();
+  const { tokens, network, contracts } = useChainConfig();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     "weth"
   );
@@ -49,6 +50,7 @@ const SupplyContent = () => {
   const [isWithdrawModal, setIsWithdrawModal] = useState<boolean>(false);
   const [isWithdrawDoneModal, setIsWithdrawDoneModal] =
     useState<boolean>(false);
+  const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
 
   const navigate = useNavigate();
   const supplyHook = useSupply();
@@ -114,11 +116,31 @@ const SupplyContent = () => {
   const handleSupply = async () => {
     if (!address || !amount) return;
     const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+
     try {
-      await supplyHook.approve(token.address, amount, token.decimals);
-      setTimeout(async () => {
-        await supplyHook.supply(token.address, amount, token.decimals, address);
-      }, 2000);
+      // If supplying native token (ETH/XDC), use native gateway
+      if (selectedToken === "eth") {
+        // Check if gateway is configured
+        if (
+          contracts.wrappedTokenGateway ===
+          "0x0000000000000000000000000000000000000000"
+        ) {
+          console.error("Wrapped token gateway not configured for this chain");
+          return;
+        }
+        await supplyHook.supplyNative(amount, address);
+      } else {
+        // Standard ERC20 flow: approve then supply
+        await supplyHook.approve(token.address, amount, token.decimals);
+        setTimeout(async () => {
+          await supplyHook.supply(
+            token.address,
+            amount,
+            token.decimals,
+            address
+          );
+        }, 2000);
+      }
     } catch (err) {
       console.error("Supply error:", err);
     }
@@ -136,16 +158,34 @@ const SupplyContent = () => {
     },
   });
 
-  const handleWithdraw = async () => {
+  const handleWithdraw = async (unwrapToNative: boolean = false) => {
     if (!address || !amount) return;
     const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+
     try {
-      await withdrawHook.withdraw(
-        token.address,
-        amount,
-        token.decimals,
-        address
-      );
+      // If withdrawing as native token (ETH/XDC) and unwrap is enabled
+      if (
+        (selectedToken === "eth" || selectedToken === "weth") &&
+        unwrapToNative
+      ) {
+        // Check if gateway is configured
+        if (
+          contracts.wrappedTokenGateway ===
+          "0x0000000000000000000000000000000000000000"
+        ) {
+          console.error("Wrapped token gateway not configured for this chain");
+          return;
+        }
+        await withdrawHook.withdrawNative(amount, address);
+      } else {
+        // Standard withdraw
+        await withdrawHook.withdraw(
+          token.address,
+          amount,
+          token.decimals,
+          address
+        );
+      }
     } catch (err) {
       console.error("Withdraw error:", err);
     }
@@ -303,12 +343,13 @@ const SupplyContent = () => {
           onClose={() => {
             setIsWithdrawModal(false);
             setAmount("");
+            setUnwrapToNative(true);
           }}
           tokenSymbol={selectedToken}
           amount={amount}
           setAmount={setAmount}
           onClickWithdraw={() => {
-            handleWithdraw();
+            handleWithdraw(unwrapToNative);
           }}
           suppliedBalance={
             selectedToken === "eth" || selectedToken === "weth"
@@ -319,6 +360,8 @@ const SupplyContent = () => {
           usdcPrice={usdcPrice}
           isPending={withdrawHook.isPending}
           isConfirming={withdrawHook.isConfirming}
+          unwrapToNative={unwrapToNative}
+          setUnwrapToNative={setUnwrapToNative}
         />
       )}
       {isWithdrawDoneModal && (
@@ -530,7 +573,7 @@ const SupplyContent = () => {
                         size="sm"
                         variant="outline"
                         onClick={() =>
-                          navigate(`/asset-details?token=${item.symbol}`)
+                          navigate(buildAssetDetailsRoute(item.symbol))
                         }
                       >
                         Details

@@ -4,6 +4,7 @@ import {
   useAssetDetails,
 } from "@/hooks/useAssetDetails";
 import { landingSystem } from "@/landingSystem";
+import { ROUTES } from "@/routes/paths";
 import {
   Box,
   Button,
@@ -135,7 +136,7 @@ const LandingPage = () => {
               <Flex alignItems={"center"} gap={"20px"} mb={"40px"}>
                 <Button
                   className="primary-btn"
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate(ROUTES.DASHBOARD)}
                 >
                   Launch xVault
                 </Button>
