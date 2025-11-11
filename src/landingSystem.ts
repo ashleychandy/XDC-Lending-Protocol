@@ -6,13 +6,13 @@ const landingConfig = defineConfig({
     tokens: {
       fonts: {
         heading: {
-          value: `"Space Grotesk", sans-serif`,
+          value: `"Aeonik", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
         },
         body: {
-          value: `"Inter", sans-serif`,
+          value: `"Aeonik", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
         },
         ibmPlexMono: {
-          value: `font-family: "IBM Plex Mono", monospace;`,
+          value: `"Aeonik", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
         },
       },
       colors: {

@@ -80,7 +80,13 @@ const Dashboard = () => {
       >
         <Box h="100%" p="30px 0">
           <Flex gap="2" alignItems="center" mb="15px">
-            <Image src={network.icon} width="32px" height="32px" />
+            <Image
+              src={network.icon}
+              width="48px"
+              height="48px"
+              objectFit="contain"
+              flexShrink={0}
+            />
             <Heading size="3xl">{network.name} Market</Heading>
           </Flex>
 
@@ -98,10 +104,6 @@ const Dashboard = () => {
               <Heading size="2xl" color={healthFactorColor}>
                 {healthFactorValue > 1000 ? "∞" : healthFactorValue.toFixed(2)}
               </Heading>
-            </Flex>
-            <Flex direction="column">
-              <Box>Available Rewards</Box>
-              <Heading size="2xl">$0</Heading>
             </Flex>
           </Flex>
 

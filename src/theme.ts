@@ -5,10 +5,10 @@ const customConfig = defineConfig({
     tokens: {
       fonts: {
         heading: {
-          value: `"Inter", sans-serif`,
+          value: `"Aeonik", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
         },
         body: {
-          value: `"Inter", sans-serif`,
+          value: `"Aeonik", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
         },
       },
       colors: {

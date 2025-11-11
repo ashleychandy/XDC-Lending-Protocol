@@ -335,7 +335,7 @@ const SupplyModal: React.FC<Props> = ({
                 </Box>
                 <Flex mt="20px" alignItems="center" gap="5px">
                   <MdLocalGasStation size="16px" />
-                  <Box fontSize="sm">{`< $0.01`}</Box>
+                  <Box fontSize="sm">~$0.0001 (12.5 Gwei)</Box>
                 </Flex>
               </Dialog.Body>
               <Dialog.Footer>

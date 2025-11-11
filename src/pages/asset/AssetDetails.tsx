@@ -111,7 +111,13 @@ const AssetDetails = () => {
               Go Back
             </Button>
             <Flex gap="2" alignItems="center">
-              <Image src={network.icon} width="20px" height="20px" />
+              <Image
+                src={network.icon}
+                width="32px"
+                height="32px"
+                objectFit="contain"
+                flexShrink={0}
+              />
               <Heading size="lg">{network.name} Market</Heading>
             </Flex>
           </Flex>
