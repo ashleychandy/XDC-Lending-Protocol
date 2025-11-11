@@ -9,7 +9,13 @@ import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export function useRepay() {
   const { contracts } = useChainConfig();
-  const { data: hash, writeContract, isPending, error } = useWriteContract();
+  const {
+    data: hash,
+    writeContract,
+    writeContractAsync,
+    isPending,
+    error,
+  } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -21,7 +27,7 @@ export function useRepay() {
   ) => {
     const amountInWei = parseUnits(amount, decimals);
 
-    return writeContract({
+    return writeContractAsync({
       address: tokenAddress as `0x${string}`,
       abi: ERC20_ABI,
       functionName: "approve",

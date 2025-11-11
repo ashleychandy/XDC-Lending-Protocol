@@ -91,10 +91,12 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
     if (!address || !amount) return;
     const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
     try {
+      // First, approve the tokens
       await supplyHook.approve(token.address, amount, token.decimals);
-      setTimeout(async () => {
-        await supplyHook.supply(token.address, amount, token.decimals, address);
-      }, 2000);
+
+      // Wait for approval to be confirmed (wagmi handles this automatically)
+      // Then call supply
+      await supplyHook.supply(token.address, amount, token.decimals, address);
     } catch (err) {
       console.error("Supply error:", err);
     }

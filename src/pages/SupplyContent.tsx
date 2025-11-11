@@ -133,15 +133,16 @@ const SupplyContent = () => {
         await supplyHook.supplyNative(amount, address);
       } else {
         // Standard ERC20 flow: approve then supply
-        await supplyHook.approve(token.address, amount, token.decimals);
-        setTimeout(async () => {
-          await supplyHook.supply(
-            token.address,
-            amount,
-            token.decimals,
-            address
-          );
-        }, 2000);
+        // First, approve the tokens
+        const approvalHash = await supplyHook.approve(
+          token.address,
+          amount,
+          token.decimals
+        );
+
+        // Wait for approval to be confirmed (wagmi handles this automatically)
+        // Then call supply
+        await supplyHook.supply(token.address, amount, token.decimals, address);
       }
     } catch (err) {
       console.error("Supply error:", err);

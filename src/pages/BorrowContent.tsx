@@ -157,10 +157,12 @@ function BorrowContent() {
         await repayHook.repayNative(amount, address);
       } else {
         // Standard ERC20 flow: approve then repay
+        // First, approve the tokens
         await repayHook.approve(token.address, amount, token.decimals);
-        setTimeout(async () => {
-          await repayHook.repay(token.address, amount, token.decimals, address);
-        }, 2000);
+
+        // Wait for approval to be confirmed (wagmi handles this automatically)
+        // Then call repay
+        await repayHook.repay(token.address, amount, token.decimals, address);
       }
     } catch (err) {
       console.error("Repay error:", err);
