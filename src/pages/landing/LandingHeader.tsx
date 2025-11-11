@@ -6,8 +6,12 @@ const LandingHeader = () => {
   const navigate = useNavigate();
 
   return (
-    <Box as={"header"} p="40px 20px">
-      <Flex justifyContent={"flex-end"} alignItems={"center"} gap={"15px"}>
+    <Box as={"header"} p={{ base: "20px 0", lg: "40px 20px" }}>
+      <Flex
+        justifyContent={{ base: "center", lg: "flex-end" }}
+        alignItems={"center"}
+        gap={"15px"}
+      >
         <Button className="secondary-btn" onClick={() => navigate("/market")}>
           View Markets
         </Button>

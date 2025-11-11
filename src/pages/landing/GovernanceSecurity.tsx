@@ -17,34 +17,55 @@ const GovernanceSecurity = () => {
     {
       title: "Governance",
       desc: "Token holders vote on parameters and upgrades. Transparent proposals and on-chain voting UI planned.",
+      points: [],
       btnName: "View Governance",
     },
   ];
 
   return (
-    <Box as={"section"} mb={"150px"}>
-      <Heading fontSize={"60px"} lineHeight={"60px"} mb={"20px"}>
+    <Box as={"section"} mb={{ base: "60px", md: "100px", lg: "150px" }}>
+      <Heading
+        fontSize={{ base: "40px", lg: "60px" }}
+        lineHeight={{ base: "40px", lg: "60px" }}
+        mb={"20px"}
+      >
         Governance & Security
       </Heading>
       <Box as={"p"} mb={"40px"}>
         xVault is governed by a DAO and uses audited smart contracts.
         Non-custodial design ensures users keep control of private keys.
       </Box>
-      <Flex gap={"20px"} alignItems={"center"}>
-        <Flex direction={"column"} gap={"40px"} w={"62%"}>
+      <Flex
+        gap={"20px"}
+        direction={{ base: "column", md: "row" }}
+        alignItems={"center"}
+      >
+        <Flex
+          direction={"column"}
+          gap={{ base: "20px", md: "40px" }}
+          w={{ base: "100%", md: "62%" }}
+        >
           {details.map((x, i) => {
             return (
               <Box className="box" key={i} p={"20px"} borderRadius={"15px"}>
-                <Box fontWeight={"700"} fontSize={"22px"} mb={"20px"}>
+                <Box
+                  fontWeight={"700"}
+                  fontSize={{ base: "14px", sm: "18px", lg: "22px" }}
+                  mb={"20px"}
+                >
                   {x.title}
                 </Box>
-                <Box as={"p"} mb={"15px"} fontSize={"22px"}>
+                <Box
+                  as={"p"}
+                  mb={"15px"}
+                  fontSize={{ base: "14px", sm: "18px", lg: "22px" }}
+                >
                   {x.desc}
                 </Box>
-                {x.points?.length! > 0 && (
+                {x.points.length > 0 && (
                   <Box
                     as="ul"
-                    listStyleType="circle"
+                    listStyleType="disc"
                     fill={"white"}
                     listStylePosition="inside"
                     ps={"30px"}
@@ -52,13 +73,14 @@ const GovernanceSecurity = () => {
                   >
                     {x.points?.map((a, index) => {
                       return (
-                        <li
+                        <Box
+                          as={"li"}
                           className="p"
                           key={index}
-                          style={{ fontSize: "22px" }}
+                          fontSize={{ base: "14px", sm: "18px", lg: "22px" }}
                         >
                           {a}
-                        </li>
+                        </Box>
                       );
                     })}{" "}
                   </Box>
@@ -68,7 +90,7 @@ const GovernanceSecurity = () => {
             );
           })}
         </Flex>
-        <Box w={"38%"}>
+        <Box w={{ base: "100%", md: "38%" }}>
           <Image
             src={securityImg}
             mx={"auto"}

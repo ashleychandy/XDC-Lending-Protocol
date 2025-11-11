@@ -31,17 +31,22 @@ const YourAssets = () => {
 
   return (
     <Box as={"section"} mb={"80px"}>
-      <Heading fontSize={"60px"} lineHeight={"60px"} mb={"50px"}>
+      <Heading
+        fontSize={{ base: "40px", lg: "60px" }}
+        lineHeight={{ base: "40px", lg: "60px" }}
+        mb={"50px"}
+      >
         Your assets, your control.
       </Heading>
-      <SimpleGrid columns={{ base: 1, md: 2 }} gap="20px">
+      <SimpleGrid columns={{ base: 1, sm: 2 }} gap="20px">
         {assetsDetails.map((x, i) => {
           return (
-            <Box p={"30px 50px"} key={i}>
+            <Box p={{ base: "", md: "15px", lg: "30px 50px" }} key={i}>
               <Image
                 src={x.img}
                 maxW={"350px"}
                 w={"100%"}
+                mx={{ base: "auto", sm: "0" }}
                 alt={`${x.title}-img`}
               />
               <Heading fontSize={"32px"} mb={"15px"}>
