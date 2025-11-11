@@ -38,7 +38,9 @@ export function useNativeTokenOperations() {
 
     // Otherwise use standard ERC20 supply
     const token =
-      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
+      tokenSymbol === "xdc" || tokenSymbol === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[tokenSymbol as "usdc" | "cgo"];
     return supplyHook.supply(
       token.address,
       amount,
@@ -70,7 +72,9 @@ export function useNativeTokenOperations() {
 
     // Otherwise use standard borrow
     const token =
-      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
+      tokenSymbol === "xdc" || tokenSymbol === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[tokenSymbol as "usdc" | "cgo"];
     return borrowHook.borrow(
       token.address,
       amount,
@@ -103,7 +107,9 @@ export function useNativeTokenOperations() {
 
     // Otherwise use standard repay
     const token =
-      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
+      tokenSymbol === "xdc" || tokenSymbol === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[tokenSymbol as "usdc" | "cgo"];
     return repayHook.repay(
       token.address,
       amount,
@@ -138,7 +144,9 @@ export function useNativeTokenOperations() {
 
     // Otherwise use standard withdraw
     const token =
-      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
+      tokenSymbol === "xdc" || tokenSymbol === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[tokenSymbol as "usdc" | "cgo"];
     return withdrawHook.withdraw(
       token.address,
       amount,
@@ -157,7 +165,9 @@ export function useNativeTokenOperations() {
     operation: "supply" | "repay"
   ) => {
     const token =
-      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
+      tokenSymbol === "xdc" || tokenSymbol === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[tokenSymbol as "usdc" | "cgo"];
 
     if (operation === "supply") {
       return supplyHook.approve(token.address, amount, token.decimals);

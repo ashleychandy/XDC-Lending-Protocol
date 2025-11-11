@@ -9,9 +9,18 @@ import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
 import { useUserReserveData } from "@/hooks/useUserReserveData";
 import { buildAssetDetailsRoute } from "@/routes/paths";
-import { Box, Button, Flex, Heading, Image, Table } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Icon,
+  Image,
+  Table,
+} from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -40,6 +49,22 @@ function BorrowContent() {
   const [isRepayDoneModal, setIsRepayDoneModal] = useState<boolean>(false);
   const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
   const [useNativeForRepay, setUseNativeForRepay] = useState<boolean>(false);
+
+  // Sorting state for Your Borrows table
+  const [borrowsSortField, setBorrowsSortField] = useState<
+    "apy" | "debt" | null
+  >(null);
+  const [borrowsSortDirection, setBorrowsSortDirection] = useState<
+    "asc" | "desc"
+  >("desc");
+
+  // Sorting state for Assets to Borrow table
+  const [assetsSortField, setAssetsSortField] = useState<
+    "apy" | "available" | null
+  >(null);
+  const [assetsSortDirection, setAssetsSortDirection] = useState<
+    "asc" | "desc"
+  >("desc");
 
   const navigate = useNavigate();
   const { address } = useAccount();
@@ -214,7 +239,7 @@ function BorrowContent() {
     setIsRepayModal(true);
   };
 
-  const yourBorrows = [
+  const yourBorrowsBase = [
     {
       id: 1,
       name: "USDC",
@@ -224,6 +249,8 @@ function BorrowContent() {
       apy: `${usdcReserveData.borrowApy}%`,
       img: usdcIcon,
       actualAmount: usdcUserData.borrowedAmount,
+      apyValue: parseFloat(usdcReserveData.borrowApy),
+      debtValue: parseFloat(usdcBorrowed) * usdcPrice,
     },
     {
       id: 2,
@@ -234,6 +261,8 @@ function BorrowContent() {
       apy: `${wxdcReserveData.borrowApy}%`,
       img: wrappedTokenLogo,
       actualAmount: wxdcUserData.borrowedAmount,
+      apyValue: parseFloat(wxdcReserveData.borrowApy),
+      debtValue: parseFloat(wxdcBorrowed) * xdcPrice,
     },
     {
       id: 3,
@@ -244,11 +273,30 @@ function BorrowContent() {
       apy: `${cgoReserveData.borrowApy}%`,
       img: getTokenLogo("CGO"),
       actualAmount: cgoUserData.borrowedAmount,
+      apyValue: parseFloat(cgoReserveData.borrowApy),
+      debtValue: parseFloat(cgoBorrowed) * cgoPrice,
     },
   ].filter((item) => (item.actualAmount as bigint) > BigInt(0));
 
+  // Sorted your borrows
+  const yourBorrows = useMemo(() => {
+    if (!borrowsSortField) return yourBorrowsBase;
+
+    return [...yourBorrowsBase].sort((a, b) => {
+      let comparison = 0;
+
+      if (borrowsSortField === "apy") {
+        comparison = a.apyValue - b.apyValue;
+      } else if (borrowsSortField === "debt") {
+        comparison = a.debtValue - b.debtValue;
+      }
+
+      return borrowsSortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [yourBorrowsBase, borrowsSortField, borrowsSortDirection]);
+
   // Assets to Borrow
-  const assetsToBorrow = [
+  const assetsToBorrowBase = [
     {
       id: 1,
       name: tokens.wrappedNative.symbol, // WXDC
@@ -261,6 +309,8 @@ function BorrowContent() {
       )}`,
       apy: `${wxdcReserveData.borrowApy}%`,
       img: wrappedTokenLogo,
+      apyValue: parseFloat(wxdcReserveData.borrowApy),
+      availableValue: parseFloat(accountData.availableBorrows) / xdcPrice,
     },
     {
       id: 2,
@@ -274,6 +324,8 @@ function BorrowContent() {
       )}`,
       apy: `${usdcReserveData.borrowApy}%`,
       img: usdcIcon,
+      apyValue: parseFloat(usdcReserveData.borrowApy),
+      availableValue: parseFloat(accountData.availableBorrows) / usdcPrice,
     },
     {
       id: 3,
@@ -287,8 +339,73 @@ function BorrowContent() {
       )}`,
       apy: `${cgoReserveData.borrowApy}%`,
       img: getTokenLogo("CGO"),
+      apyValue: parseFloat(cgoReserveData.borrowApy),
+      availableValue: parseFloat(accountData.availableBorrows) / cgoPrice,
     },
   ];
+
+  // Sorted assets to borrow
+  const assetsToBorrow = useMemo(() => {
+    if (!assetsSortField) return assetsToBorrowBase;
+
+    return [...assetsToBorrowBase].sort((a, b) => {
+      let comparison = 0;
+
+      if (assetsSortField === "apy") {
+        comparison = a.apyValue - b.apyValue;
+      } else if (assetsSortField === "available") {
+        comparison = a.availableValue - b.availableValue;
+      }
+
+      return assetsSortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [assetsToBorrowBase, assetsSortField, assetsSortDirection]);
+
+  // Handle column header click for sorting - Your Borrows
+  const handleBorrowsSort = (field: "apy" | "debt") => {
+    if (borrowsSortField === field) {
+      if (borrowsSortDirection === "desc") {
+        setBorrowsSortDirection("asc");
+      } else {
+        setBorrowsSortField(null);
+        setBorrowsSortDirection("desc");
+      }
+    } else {
+      setBorrowsSortField(field);
+      setBorrowsSortDirection("desc");
+    }
+  };
+
+  // Handle column header click for sorting - Assets to Borrow
+  const handleAssetsSort = (field: "apy" | "available") => {
+    if (assetsSortField === field) {
+      if (assetsSortDirection === "desc") {
+        setAssetsSortDirection("asc");
+      } else {
+        setAssetsSortField(null);
+        setAssetsSortDirection("desc");
+      }
+    } else {
+      setAssetsSortField(field);
+      setAssetsSortDirection("desc");
+    }
+  };
+
+  // Get sort icon for column header - Your Borrows
+  const getBorrowsSortIcon = (field: "apy" | "debt") => {
+    if (borrowsSortField !== field) {
+      return <FaSort />;
+    }
+    return borrowsSortDirection === "asc" ? <FaSortUp /> : <FaSortDown />;
+  };
+
+  // Get sort icon for column header - Assets to Borrow
+  const getAssetsSortIcon = (field: "apy" | "available") => {
+    if (assetsSortField !== field) {
+      return <FaSort />;
+    }
+    return assetsSortDirection === "asc" ? <FaSortUp /> : <FaSortDown />;
+  };
 
   return (
     <Box width={{ base: "100%", lg: "50%" }}>
@@ -429,11 +546,33 @@ function BorrowContent() {
                   <Table.ColumnHeader w="30%" minW="100px">
                     Asset
                   </Table.ColumnHeader>
-                  <Table.ColumnHeader w="25%" minW="100px">
-                    Debt
+                  <Table.ColumnHeader
+                    w="25%"
+                    minW="100px"
+                    cursor="pointer"
+                    onClick={() => handleBorrowsSort("debt")}
+                    _hover={{ bg: "gray.50" }}
+                  >
+                    <Flex alignItems="center" gap="5px">
+                      Debt
+                      <Icon fontSize="xs" color="gray.500">
+                        {getBorrowsSortIcon("debt")}
+                      </Icon>
+                    </Flex>
                   </Table.ColumnHeader>
-                  <Table.ColumnHeader w="15%" minW="60px">
-                    APY
+                  <Table.ColumnHeader
+                    w="15%"
+                    minW="60px"
+                    cursor="pointer"
+                    onClick={() => handleBorrowsSort("apy")}
+                    _hover={{ bg: "gray.50" }}
+                  >
+                    <Flex alignItems="center" gap="5px">
+                      APY
+                      <Icon fontSize="xs" color="gray.500">
+                        {getBorrowsSortIcon("apy")}
+                      </Icon>
+                    </Flex>
                   </Table.ColumnHeader>
                   <Table.ColumnHeader w="30%" minW="150px"></Table.ColumnHeader>
                 </Table.Row>
@@ -524,11 +663,33 @@ function BorrowContent() {
                 <Table.ColumnHeader w="30%" minW="100px">
                   Asset
                 </Table.ColumnHeader>
-                <Table.ColumnHeader w="25%" minW="100px">
-                  Available
+                <Table.ColumnHeader
+                  w="25%"
+                  minW="100px"
+                  cursor="pointer"
+                  onClick={() => handleAssetsSort("available")}
+                  _hover={{ bg: "gray.50" }}
+                >
+                  <Flex alignItems="center" gap="5px">
+                    Available
+                    <Icon fontSize="xs" color="gray.500">
+                      {getAssetsSortIcon("available")}
+                    </Icon>
+                  </Flex>
                 </Table.ColumnHeader>
-                <Table.ColumnHeader w="18%" minW="80px">
-                  APY, variable
+                <Table.ColumnHeader
+                  w="18%"
+                  minW="80px"
+                  cursor="pointer"
+                  onClick={() => handleAssetsSort("apy")}
+                  _hover={{ bg: "gray.50" }}
+                >
+                  <Flex alignItems="center" gap="5px">
+                    APY, variable
+                    <Icon fontSize="xs" color="gray.500">
+                      {getAssetsSortIcon("apy")}
+                    </Icon>
+                  </Flex>
                 </Table.ColumnHeader>
                 <Table.ColumnHeader w="27%" minW="150px"></Table.ColumnHeader>
               </Table.Row>

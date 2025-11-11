@@ -22,8 +22,8 @@ import {
   Table,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { FaCheck } from "react-icons/fa6";
+import { useMemo, useState } from "react";
+import { FaCheck, FaSort, FaSortDown, FaSortUp } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
@@ -53,6 +53,18 @@ const SupplyContent = () => {
   const [isWithdrawDoneModal, setIsWithdrawDoneModal] =
     useState<boolean>(false);
   const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
+
+  // Sorting state for Your Supplies table
+  const [suppliesSortField, setSuppliesSortField] = useState<
+    "apy" | "balance" | null
+  >(null);
+  const [suppliesSortDirection, setSuppliesSortDirection] = useState<
+    "asc" | "desc"
+  >("desc");
+
+  // Sorting state for Assets to Supply table
+  const [sortField, setSortField] = useState<"apy" | "balance" | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const navigate = useNavigate();
   const supplyHook = useSupply();
@@ -184,7 +196,9 @@ const SupplyContent = () => {
   const handleWithdraw = async (unwrapToNative: boolean = false) => {
     if (!address || !amount) return;
     const token =
-      selectedToken === "xdc" ? tokens.wrappedNative : tokens[selectedToken];
+      selectedToken === "xdc" || selectedToken === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[selectedToken as "usdc" | "cgo"];
 
     try {
       // If withdrawing as native token (XDC) and unwrap is enabled
@@ -266,7 +280,7 @@ const SupplyContent = () => {
     setIsWithdrawModal(true);
   };
 
-  const yourSupplies = [
+  const yourSuppliesBase = [
     {
       id: 1,
       name: tokens.wrappedNative.symbol, // WXDC
@@ -277,6 +291,8 @@ const SupplyContent = () => {
       img: wrappedTokenLogo,
       isCollateral: wxdcUserData.isUsingAsCollateral,
       actualAmount: wxdcUserData.suppliedAmount,
+      apyValue: parseFloat(wxdcReserveData.supplyApy),
+      balanceValue: parseFloat(wxdcSupplied) * xdcPrice,
     },
     {
       id: 2,
@@ -288,6 +304,8 @@ const SupplyContent = () => {
       img: usdcIcon,
       isCollateral: usdcUserData.isUsingAsCollateral,
       actualAmount: usdcUserData.suppliedAmount,
+      apyValue: parseFloat(usdcReserveData.supplyApy),
+      balanceValue: parseFloat(usdcSupplied) * usdcPrice,
     },
     {
       id: 3,
@@ -299,11 +317,30 @@ const SupplyContent = () => {
       img: getTokenLogo("CGO"),
       isCollateral: cgoUserData.isUsingAsCollateral,
       actualAmount: cgoUserData.suppliedAmount,
+      apyValue: parseFloat(cgoReserveData.supplyApy),
+      balanceValue: parseFloat(cgoSupplied) * cgoPrice,
     },
   ].filter((item) => (item.actualAmount as bigint) > BigInt(0));
 
+  // Sorted your supplies
+  const yourSupplies = useMemo(() => {
+    if (!suppliesSortField) return yourSuppliesBase;
+
+    return [...yourSuppliesBase].sort((a, b) => {
+      let comparison = 0;
+
+      if (suppliesSortField === "apy") {
+        comparison = a.apyValue - b.apyValue;
+      } else if (suppliesSortField === "balance") {
+        comparison = a.balanceValue - b.balanceValue;
+      }
+
+      return suppliesSortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [yourSuppliesBase, suppliesSortField, suppliesSortDirection]);
+
   // Assets to Supply - wallet balances
-  const assetsToSupply = [
+  const assetsToSupplyBase = [
     {
       id: 1,
       name: nativeTokenSymbol, // XDC on XDC chains, XDC on XDC chains
@@ -313,6 +350,8 @@ const SupplyContent = () => {
       img: nativeTokenLogo,
       canBeCollateral: true,
       walletBalance: xdcBalance?.formatted || "0",
+      apyValue: parseFloat(wxdcReserveData.supplyApy),
+      balanceValue: parseFloat(xdcBalance?.formatted || "0"),
     },
     {
       id: 2,
@@ -323,6 +362,8 @@ const SupplyContent = () => {
       img: usdcIcon,
       canBeCollateral: true,
       walletBalance: usdcBalance,
+      apyValue: parseFloat(usdcReserveData.supplyApy),
+      balanceValue: parseFloat(usdcBalance),
     },
     {
       id: 3,
@@ -333,6 +374,8 @@ const SupplyContent = () => {
       img: wrappedTokenLogo,
       canBeCollateral: true,
       walletBalance: wxdcBalance,
+      apyValue: parseFloat(wxdcReserveData.supplyApy),
+      balanceValue: parseFloat(wxdcBalance),
     },
     {
       id: 4,
@@ -343,8 +386,74 @@ const SupplyContent = () => {
       img: getTokenLogo("CGO"),
       canBeCollateral: true,
       walletBalance: cgoBalance,
+      apyValue: parseFloat(cgoReserveData.supplyApy),
+      balanceValue: parseFloat(cgoBalance),
     },
   ];
+
+  // Sorted assets to supply
+  const assetsToSupply = useMemo(() => {
+    if (!sortField) return assetsToSupplyBase;
+
+    return [...assetsToSupplyBase].sort((a, b) => {
+      let comparison = 0;
+
+      if (sortField === "apy") {
+        comparison = a.apyValue - b.apyValue;
+      } else if (sortField === "balance") {
+        comparison = a.balanceValue - b.balanceValue;
+      }
+
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [assetsToSupplyBase, sortField, sortDirection]);
+
+  // Handle column header click for sorting - Your Supplies
+  const handleSuppliesSort = (field: "apy" | "balance") => {
+    if (suppliesSortField === field) {
+      if (suppliesSortDirection === "desc") {
+        setSuppliesSortDirection("asc");
+      } else {
+        setSuppliesSortField(null);
+        setSuppliesSortDirection("desc");
+      }
+    } else {
+      setSuppliesSortField(field);
+      setSuppliesSortDirection("desc");
+    }
+  };
+
+  // Handle column header click for sorting - Assets to Supply
+  const handleSort = (field: "apy" | "balance") => {
+    if (sortField === field) {
+      // Toggle direction or clear sort
+      if (sortDirection === "desc") {
+        setSortDirection("asc");
+      } else {
+        setSortField(null);
+        setSortDirection("desc");
+      }
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+  };
+
+  // Get sort icon for column header - Your Supplies
+  const getSuppliesSortIcon = (field: "apy" | "balance") => {
+    if (suppliesSortField !== field) {
+      return <FaSort />;
+    }
+    return suppliesSortDirection === "asc" ? <FaSortUp /> : <FaSortDown />;
+  };
+
+  // Get sort icon for column header - Assets to Supply
+  const getSortIcon = (field: "apy" | "balance") => {
+    if (sortField !== field) {
+      return <FaSort />;
+    }
+    return sortDirection === "asc" ? <FaSortUp /> : <FaSortDown />;
+  };
 
   return (
     <Box width={{ base: "100%", lg: "50%" }}>
@@ -482,11 +591,33 @@ const SupplyContent = () => {
                   <Table.ColumnHeader w="25%" minW="100px">
                     Asset
                   </Table.ColumnHeader>
-                  <Table.ColumnHeader w="20%" minW="100px">
-                    Balance
+                  <Table.ColumnHeader
+                    w="20%"
+                    minW="100px"
+                    cursor="pointer"
+                    onClick={() => handleSuppliesSort("balance")}
+                    _hover={{ bg: "gray.50" }}
+                  >
+                    <Flex alignItems="center" gap="5px">
+                      Balance
+                      <Icon fontSize="xs" color="gray.500">
+                        {getSuppliesSortIcon("balance")}
+                      </Icon>
+                    </Flex>
                   </Table.ColumnHeader>
-                  <Table.ColumnHeader w="13%" minW="60px">
-                    APY
+                  <Table.ColumnHeader
+                    w="13%"
+                    minW="60px"
+                    cursor="pointer"
+                    onClick={() => handleSuppliesSort("apy")}
+                    _hover={{ bg: "gray.50" }}
+                  >
+                    <Flex alignItems="center" gap="5px">
+                      APY
+                      <Icon fontSize="xs" color="gray.500">
+                        {getSuppliesSortIcon("apy")}
+                      </Icon>
+                    </Flex>
                   </Table.ColumnHeader>
                   <Table.ColumnHeader w="12%" minW="80px">
                     Collateral
@@ -602,11 +733,33 @@ const SupplyContent = () => {
                 <Table.ColumnHeader w="23%" minW="100px">
                   Assets
                 </Table.ColumnHeader>
-                <Table.ColumnHeader w="23%" minW="100px">
-                  Wallet Balance
+                <Table.ColumnHeader
+                  w="23%"
+                  minW="100px"
+                  cursor="pointer"
+                  onClick={() => handleSort("balance")}
+                  _hover={{ bg: "gray.50" }}
+                >
+                  <Flex alignItems="center" gap="5px">
+                    Wallet Balance
+                    <Icon fontSize="xs" color="gray.500">
+                      {getSortIcon("balance")}
+                    </Icon>
+                  </Flex>
                 </Table.ColumnHeader>
-                <Table.ColumnHeader w="15%" minW="60px">
-                  APY
+                <Table.ColumnHeader
+                  w="15%"
+                  minW="60px"
+                  cursor="pointer"
+                  onClick={() => handleSort("apy")}
+                  _hover={{ bg: "gray.50" }}
+                >
+                  <Flex alignItems="center" gap="5px">
+                    APY
+                    <Icon fontSize="xs" color="gray.500">
+                      {getSortIcon("apy")}
+                    </Icon>
+                  </Flex>
                 </Table.ColumnHeader>
                 <Table.ColumnHeader w="12%" minW="80px">
                   Can be collateral
