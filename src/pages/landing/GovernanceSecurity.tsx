@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Button, Flex, Heading, Image } from "@chakra-ui/react";
 import securityImg from "../../assets/images/landing/security.png";
 
@@ -32,7 +31,7 @@ const GovernanceSecurity = () => {
         Governance & Security
       </Heading>
       <Box as={"p"} mb={"40px"}>
-        xVault is governed by a DAO and uses audited smart contracts.
+        Creditify is governed by a DAO and uses audited smart contracts.
         Non-custodial design ensures users keep control of private keys.
       </Box>
       <Flex

@@ -21,6 +21,7 @@ import {
   Switch,
   Table,
 } from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { FaCheck } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
@@ -33,6 +34,7 @@ import WithdrawDoneModal from "./modal/WithdrawDoneModal";
 import WithdrawModal from "./modal/WithdrawModal";
 
 const SupplyContent = () => {
+  const queryClient = useQueryClient();
   const { tokens, network, contracts } = useChainConfig();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     "weth"
@@ -151,6 +153,7 @@ const SupplyContent = () => {
     onSuccess: () => {
       setIsSupplyModal(false);
       setIsSupplyDoneModal(true);
+      queryClient.invalidateQueries();
     },
     onError: (err) => {
       console.log("error in supply transaction", err);
@@ -207,6 +210,7 @@ const SupplyContent = () => {
     onSuccess: () => {
       setIsWithdrawModal(false);
       setIsWithdrawDoneModal(true);
+      queryClient.invalidateQueries();
     },
     onError: (err) => {
       console.log("error in withdraw transaction", err);
@@ -218,7 +222,8 @@ const SupplyContent = () => {
     hash: collateralHook.hash,
     onSuccess: () => {
       console.log("Collateral setting updated successfully");
-      // Data will automatically refresh due to wagmi's query invalidation
+      // Invalidate all queries to refetch updated data
+      queryClient.invalidateQueries();
     },
     onError: (err) => {
       console.error("Error updating collateral setting:", err);
@@ -454,7 +459,7 @@ const SupplyContent = () => {
                     <Table.Cell w="12%">
                       <Switch.Root
                         colorPalette="green"
-                        defaultChecked={item.isCollateral}
+                        checked={item.isCollateral}
                         size="sm"
                         onCheckedChange={(e) =>
                           handleCollateralToggle(

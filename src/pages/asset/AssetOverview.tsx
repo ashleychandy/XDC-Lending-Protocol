@@ -16,7 +16,6 @@ import {
 import React from "react";
 import { BiInfinite } from "react-icons/bi";
 import { FaCheck } from "react-icons/fa6";
-import { RxCross2 } from "react-icons/rx";
 
 // Helper function to format BPS values (e.g., 8050 -> "80.50%")
 const formatBps = (bps: bigint): string => {
@@ -84,10 +83,6 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
     {
       title: "Reserve factor",
       value: formatBps(reserveFactor),
-    },
-    {
-      title: "Collector Contract",
-      value: "View contract",
     },
   ];
 
@@ -344,103 +339,7 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
               </Box>
             </Flex>
           </Flex>
-          <Box as="hr" borderWidth="100%"></Box>
-          <Flex gap="10px">
-            <Heading size="md" minW="170px">
-              E-Mode info
-            </Heading>
-            <Flex direction="column" gap="20px" w="100%">
-              <Box>
-                <Flex alignItems="center" gap="10px" mb="10px">
-                  <Box fontSize="14px">ETH correlated</Box>
-                  <Flex alignItems="center" gap="5px" color="green.600">
-                    <FaCheck />
-                    <Box fontSize="14px" fontWeight="600">
-                      Collateral
-                    </Box>
-                  </Flex>
-                  <Flex alignItems="center" gap="5px" color="green.600">
-                    <FaCheck />
-                    <Box fontSize="14px" fontWeight="600">
-                      Borrowable
-                    </Box>
-                  </Flex>
-                </Flex>
-                <Flex
-                  alignItems="stretch"
-                  gap="10px"
-                  flexWrap={{ base: "wrap", md: "nowrap" }}
-                >
-                  {supplyInfo.map((x, i) => {
-                    return (
-                      <Flex
-                        p="4px 8px"
-                        direction="column"
-                        justifyContent="center"
-                        borderWidth="1px"
-                        key={i}
-                        w={{ base: "100%", sm: "48%", md: "33.33%" }}
-                        borderRadius="8px"
-                      >
-                        <Box fontSize={{ base: "xs", md: "sm" }}>{x.title}</Box>
-                        <Box
-                          fontSize={{ base: "sm", md: "md" }}
-                          fontWeight="600"
-                        >
-                          {x.value}
-                        </Box>
-                      </Flex>
-                    );
-                  })}
-                </Flex>
-              </Box>
-              <Box mb="10px">
-                <Flex alignItems="center" gap="10px" mb="10px" flexWrap="wrap">
-                  <Box fontSize="14px">weETH/wstETH ETH Correlated</Box>
-                  <Flex alignItems="center" gap="5px" color="red.500">
-                    <RxCross2 />
-                    <Box fontSize="14px" fontWeight="600">
-                      Collateral
-                    </Box>
-                  </Flex>
-                  <Flex alignItems="center" gap="5px" color="green.600">
-                    <FaCheck />
-                    <Box fontSize="14px" fontWeight="600">
-                      Borrowable
-                    </Box>
-                  </Flex>
-                </Flex>
-                <Flex
-                  alignItems="stretch"
-                  gap="10px"
-                  flexWrap={{ base: "wrap", md: "nowrap" }}
-                >
-                  {supplyInfo.map((x, i) => {
-                    return (
-                      <Flex
-                        p="4px 8px"
-                        direction="column"
-                        justifyContent="center"
-                        borderWidth="1px"
-                        key={i}
-                        w={{ base: "100%", sm: "48%", md: "33.33%" }}
-                        borderRadius="8px"
-                      >
-                        <Box fontSize={{ base: "xs", md: "sm" }}>{x.title}</Box>
-                        <Box
-                          fontSize={{ base: "sm", md: "md" }}
-                          fontWeight="600"
-                        >
-                          {x.value}
-                        </Box>
-                      </Flex>
-                    );
-                  })}
-                </Flex>
-              </Box>
-            </Flex>
-          </Flex>
-          <Box as="hr" borderWidth="100%"></Box>
+
           <Flex gap="10px">
             <Heading size="md" minW="170px">
               Interest rate model

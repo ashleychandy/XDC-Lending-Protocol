@@ -8,6 +8,7 @@ import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
 import { Box, Button, Flex, Heading, Icon, Tabs } from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { IoWalletOutline } from "react-icons/io5";
 import { useAccount, useBalance } from "wagmi";
@@ -21,6 +22,7 @@ interface Props {
 }
 
 const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
+  const queryClient = useQueryClient();
   const { tokens } = useChainConfig();
   // Local tab state
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
@@ -103,6 +105,7 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
     onSuccess: () => {
       setIsSupplyModal(false);
       setIsSupplyDoneModal(true);
+      queryClient.invalidateQueries();
     },
     onError: (err) => {
       console.log("error in supply transaction", err);
@@ -125,6 +128,7 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
     onSuccess: () => {
       setIsBorrowModal(false);
       setIsBorrowDoneModal(true);
+      queryClient.invalidateQueries();
     },
     onError: (err) => {
       console.log("error in borrow transaction", err);

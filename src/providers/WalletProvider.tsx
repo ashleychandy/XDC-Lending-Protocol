@@ -19,7 +19,15 @@ export const config = getDefaultConfig({
   },
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: true,
+      retry: 1,
+      staleTime: 5000,
+    },
+  },
+});
 
 export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
   return (

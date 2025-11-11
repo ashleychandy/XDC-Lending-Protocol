@@ -17,15 +17,15 @@ import {
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import section1Img from "../../assets/images/landing/section1Img.png";
-import LandingHeader from "./LandingHeader";
+import Faq from "./Faq";
+import GovernanceSecurity from "./GovernanceSecurity";
 import HowCreditifyWorks from "./HowCreditifyWorks";
+import LandingFooter from "./LandingFooter";
+import LandingHeader from "./LandingHeader";
 import MarketOverview from "./MarketOverview";
+import OwnMoney from "./OwnMoney";
 import type { TokenDetailsDTO } from "./types/type";
 import YourAssets from "./YourAssets";
-import GovernanceSecurity from "./GovernanceSecurity";
-import OwnMoney from "./OwnMoney";
-import Faq from "./Faq";
-import LandingFooter from "./LandingFooter";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -138,7 +138,7 @@ const LandingPage = () => {
                   className="primary-btn"
                   onClick={() => navigate(ROUTES.DASHBOARD)}
                 >
-                  Launch xVault
+                  Launch Creditify
                 </Button>
                 <Button
                   className="secondary-btn"

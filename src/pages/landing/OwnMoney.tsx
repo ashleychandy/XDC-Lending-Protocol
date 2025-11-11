@@ -1,7 +1,6 @@
-import React from "react";
 import { Box, Button, Flex, Heading, Image } from "@chakra-ui/react";
-import creditiFyImg from "../../assets/images/landing/creditify.png";
 import { useNavigate } from "react-router-dom";
+import creditiFyImg from "../../assets/images/landing/creditify.png";
 
 const OwnMoney = () => {
   const navigate = useNavigate();
@@ -48,7 +47,7 @@ const OwnMoney = () => {
         <Box mb={{ base: "20px", md: "0" }}>
           <Box fontWeight={"700"}>Ready to get started?</Box>
           <Box as={"p"} fontSize={"13px"}>
-            Connect your wallet and launch xVault to start supplying or
+            Connect your wallet and launch Creditify to start supplying or
             borrowing.
           </Box>
         </Box>

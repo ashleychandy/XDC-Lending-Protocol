@@ -10,6 +10,7 @@ import { useUserAccountData } from "@/hooks/useUserAccountData";
 import { useUserReserveData } from "@/hooks/useUserReserveData";
 import { buildAssetDetailsRoute } from "@/routes/paths";
 import { Box, Button, Flex, Heading, Image, Table } from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
@@ -21,6 +22,7 @@ import RepayDoneModal from "./modal/RepayDoneModal";
 import RepayModal from "./modal/RepayModal";
 
 function BorrowContent() {
+  const queryClient = useQueryClient();
   const { tokens, network, contracts } = useChainConfig();
   const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
     "weth"
@@ -129,6 +131,7 @@ function BorrowContent() {
     onSuccess: () => {
       setIsBorrowModal(false);
       setIsBorrowDoneModal(true);
+      queryClient.invalidateQueries();
     },
     onError: (err) => {
       console.log("error in borrow transaction", err);
@@ -169,6 +172,7 @@ function BorrowContent() {
     onSuccess: () => {
       setIsRepayModal(false);
       setIsRepayDoneModal(true);
+      queryClient.invalidateQueries();
     },
     onError: (err) => {
       console.log("error in repay transaction", err);
