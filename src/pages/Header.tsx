@@ -3,8 +3,7 @@ import { ROUTES } from "@/routes/paths";
 import { Box, Flex } from "@chakra-ui/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { NavLink } from "react-router";
-import xdcDarkLogo from "../assets/images/xdc-icon.webp";
-import xdcLightLogo from "../assets/images/xdc-network-logo-white.svg";
+import creditify from "src/assets/images/CreditifyBold.svg";
 
 const Header = () => {
   const { colorMode } = useColorMode();
@@ -24,11 +23,11 @@ const Header = () => {
       >
         <Flex gap="10" justify="space-between" alignItems="center">
           <NavLink to={ROUTES.HOME}>
-            <Box w="80px" cursor="pointer">
+            <Box w="120px" cursor="pointer">
               {colorMode === "dark" ? (
-                <img src={xdcLightLogo} alt="XDC-Logo-Light" />
+                <img src={creditify} alt="XDC-Logo-Light" />
               ) : (
-                <img src={xdcDarkLogo} alt="XDC-Logo-Dark" />
+                <img src={creditify} alt="XDC-Logo-Dark" />
               )}
             </Box>
           </NavLink>
