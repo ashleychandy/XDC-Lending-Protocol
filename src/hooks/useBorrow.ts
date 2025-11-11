@@ -5,7 +5,13 @@ import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export function useBorrow() {
   const { contracts } = useChainConfig();
-  const { data: hash, writeContract, isPending, error } = useWriteContract();
+  const {
+    data: hash,
+    writeContract,
+    writeContractAsync,
+    isPending,
+    error,
+  } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -19,7 +25,7 @@ export function useBorrow() {
   ) => {
     const amountInWei = parseUnits(amount, decimals);
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "borrow",
@@ -39,7 +45,7 @@ export function useBorrow() {
   const borrowNative = async (amount: string, userAddress: string) => {
     const amountInWei = parseUnits(amount, 18);
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.wrappedTokenGateway,
       abi: WRAPPED_TOKEN_GATEWAY_V3_ABI,
       functionName: "borrowETH",

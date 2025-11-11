@@ -125,22 +125,41 @@ const LandingPage = () => {
             py={{ base: "40px", md: "60px", lg: "100px" }}
           >
             <Box w={{ base: "100%", lg: "55%" }}>
-              <Box as={"p"} fontSize={"13px"} mb={"20px"}>
+              <Box
+                as={"p"}
+                fontSize={{ base: "12px", md: "13px" }}
+                mb={{ base: "15px", md: "20px" }}
+              >
                 Decentralized Liquidity Protocol
               </Box>
-              <Heading fontSize={"48px"} lineHeight={"56px"} mb={"20px"}>
+              <Heading
+                fontSize={{ base: "32px", md: "40px", lg: "48px" }}
+                lineHeight={{ base: "40px", md: "48px", lg: "56px" }}
+                mb={{ base: "15px", md: "20px" }}
+              >
                 Supply. Earn. Borrow. — Securely.
               </Heading>
-              <Box as={"p"} mb={"20px"}>
+              <Box
+                as={"p"}
+                mb={{ base: "15px", md: "20px" }}
+                fontSize={{ base: "14px", md: "16px" }}
+              >
                 Creditify enables users to supply assets like USDC and XDC to
                 earn yield, and borrow instantly against collateral with
                 automated risk management. Non-custodial, audited, and governed
                 by the community.
               </Box>
-              <Flex alignItems={"center"} gap={"20px"} mb={"40px"}>
+              <Flex
+                alignItems={"center"}
+                gap={{ base: "10px", md: "20px" }}
+                mb={{ base: "30px", md: "40px" }}
+                direction={{ base: "column", sm: "row" }}
+                w={{ base: "100%", sm: "auto" }}
+              >
                 <Button
                   className="primary-btn"
                   onClick={() => navigate(ROUTES.DASHBOARD)}
+                  w={{ base: "100%", sm: "auto" }}
                 >
                   Launch Creditify
                 </Button>
@@ -149,41 +168,58 @@ const LandingPage = () => {
                   onClick={() =>
                     window.open("https://docs.xdc.network/", "_blank")
                   }
+                  w={{ base: "100%", sm: "auto" }}
                 >
                   How it works
                 </Button>
               </Flex>
-              <Flex alignItems={"center"} gap={"15px"}>
+              <Flex
+                alignItems={"stretch"}
+                gap={{ base: "10px", md: "15px" }}
+                direction={{ base: "column", sm: "row" }}
+              >
                 {tokenDetails.map((x, i) => {
                   return (
                     <Box
-                      p="10px"
+                      p={{ base: "12px", md: "10px" }}
                       className="box"
                       borderRadius={"14px"}
-                      w={"50%"}
+                      w={{ base: "100%", sm: "50%" }}
                       key={i}
                     >
                       <Flex gap="3" alignItems="center" mb={"10px"}>
                         <Flex
-                          w="44px"
-                          h="44px"
+                          w={{ base: "40px", md: "44px" }}
+                          h={{ base: "40px", md: "44px" }}
                           borderRadius="12px"
                           bg="rgba(255, 255, 255, 0.1)"
                           justifyContent="center"
                           alignItems="center"
                           overflow="hidden"
+                          flexShrink={0}
                         >
                           <Image
                             src={x.icon}
                             alt={x.shortName}
-                            w="32px"
-                            h="32px"
+                            w={{ base: "28px", md: "32px" }}
+                            h={{ base: "28px", md: "32px" }}
                             objectFit="contain"
                           />
                         </Flex>
-                        <Flex direction="column">
-                          <Box fontWeight={"700"}>{x.shortName}</Box>
-                          <Box as={"p"} fontSize="13px">
+                        <Flex direction="column" minW={0}>
+                          <Box
+                            fontWeight={"700"}
+                            fontSize={{ base: "14px", md: "16px" }}
+                          >
+                            {x.shortName}
+                          </Box>
+                          <Box
+                            as={"p"}
+                            fontSize={{ base: "11px", md: "13px" }}
+                            overflow="hidden"
+                            textOverflow="ellipsis"
+                            whiteSpace="nowrap"
+                          >
                             {x.fullName}
                           </Box>
                         </Flex>
@@ -192,13 +228,20 @@ const LandingPage = () => {
                         {x.tokenInfo.map((y, index) => {
                           return (
                             <Box
-                              p="10px"
+                              p={{ base: "8px", md: "10px" }}
                               borderRadius="10px"
                               className="box2"
                               key={index}
                             >
-                              <Box>{y.label}</Box>
-                              <Box fontWeight={"700"}>{y.value}</Box>
+                              <Box fontSize={{ base: "11px", md: "13px" }}>
+                                {y.label}
+                              </Box>
+                              <Box
+                                fontWeight={"700"}
+                                fontSize={{ base: "13px", md: "15px" }}
+                              >
+                                {y.value}
+                              </Box>
                             </Box>
                           );
                         })}

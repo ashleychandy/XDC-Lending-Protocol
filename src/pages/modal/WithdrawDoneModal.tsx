@@ -8,11 +8,11 @@ import {
   Icon,
   Portal,
 } from "@chakra-ui/react";
-import { IoMdClose } from "react-icons/io";
+import React from "react";
 import { FaCheck } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 import { useAccount } from "wagmi";
-import React from "react";
 
 interface Props {
   isOpen: boolean;
@@ -41,7 +41,9 @@ const WithdrawDoneModal: React.FC<Props> = ({
     <HStack wrap="wrap" gap="4">
       <Dialog.Root
         open={isOpen}
-        onOpenChange={onClose}
+        onOpenChange={(e) => {
+          if (!e.open) onClose();
+        }}
         placement="center"
         motionPreset="slide-in-bottom"
         size="xs"

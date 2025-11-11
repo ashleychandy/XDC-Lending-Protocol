@@ -93,7 +93,13 @@ const Dashboard = () => {
           <Flex gap="6" alignItems="center" mb="50px" flexWrap="wrap">
             <Flex direction="column">
               <Box>Net worth</Box>
-              <Heading size="2xl">${netWorth.toFixed(2)}</Heading>
+              <Heading size="2xl">
+                $
+                {netWorth.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Heading>
             </Flex>
             <Flex direction="column">
               <Box>Net APY</Box>

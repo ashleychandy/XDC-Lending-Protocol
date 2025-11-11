@@ -45,7 +45,7 @@ export function useRepay() {
   ) => {
     const amountInWei = repayAll ? maxUint256 : parseUnits(amount, decimals);
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "repay",
@@ -68,7 +68,7 @@ export function useRepay() {
   ) => {
     const amountInWei = repayAll ? maxUint256 : parseUnits(amount, 18);
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.wrappedTokenGateway,
       abi: WRAPPED_TOKEN_GATEWAY_V3_ABI,
       functionName: "repayETH",
@@ -104,7 +104,7 @@ export function useRepay() {
   ) => {
     const amountInWei = repayAll ? maxUint256 : parseUnits(amount, decimals);
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "repayWithPermit",

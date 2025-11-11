@@ -133,15 +133,10 @@ const SupplyContent = () => {
         await supplyHook.supplyNative(amount, address);
       } else {
         // Standard ERC20 flow: approve then supply
-        // First, approve the tokens
-        const approvalHash = await supplyHook.approve(
-          token.address,
-          amount,
-          token.decimals
-        );
+        // First, approve the tokens and wait for confirmation
+        await supplyHook.approve(token.address, amount, token.decimals);
 
-        // Wait for approval to be confirmed (wagmi handles this automatically)
-        // Then call supply
+        // Then call supply (writeContractAsync waits for user confirmation)
         await supplyHook.supply(token.address, amount, token.decimals, address);
       }
     } catch (err) {
@@ -399,7 +394,11 @@ const SupplyContent = () => {
               border="1px solid #eaebef"
               fontSize="sm"
             >
-              Balance ${parseFloat(accountData.totalCollateral).toFixed(2)}
+              Balance $
+              {parseFloat(accountData.totalCollateral).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </Box>
             <Box
               p="4px 8px"
@@ -415,7 +414,11 @@ const SupplyContent = () => {
               border="1px solid #eaebef"
               fontSize="sm"
             >
-              Collateral ${parseFloat(accountData.totalCollateral).toFixed(2)}
+              Collateral $
+              {parseFloat(accountData.totalCollateral).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </Box>
           </Flex>
         )}

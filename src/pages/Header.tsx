@@ -1,4 +1,3 @@
-import { useColorMode } from "@/components/ui/color-mode";
 import * as Menu from "@/components/ui/menu";
 import { ROUTES } from "@/routes/paths";
 import { Box, Flex, IconButton, Switch, Text } from "@chakra-ui/react";
@@ -10,7 +9,6 @@ import { useAccount, useSwitchChain } from "wagmi";
 import { xdc, xdcTestnet } from "wagmi/chains";
 
 const Header = () => {
-  const { colorMode } = useColorMode();
   const { switchChain } = useSwitchChain();
   const { chain } = useAccount();
 
@@ -33,11 +31,7 @@ const Header = () => {
       <Flex gap="4" justify="space-between" alignItems="center">
         <NavLink to={ROUTES.HOME}>
           <Box w="120px" cursor="pointer">
-            {colorMode === "dark" ? (
-              <img src={creditify} alt="XDC-Logo-Light" />
-            ) : (
-              <img src={creditify} alt="XDC-Logo-Dark" />
-            )}
+            <img src={creditify} alt="Creditify Logo" />
           </Box>
         </NavLink>
 

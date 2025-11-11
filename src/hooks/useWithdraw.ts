@@ -5,7 +5,13 @@ import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export function useWithdraw() {
   const { contracts } = useChainConfig();
-  const { data: hash, writeContract, isPending, error } = useWriteContract();
+  const {
+    data: hash,
+    writeContract,
+    writeContractAsync,
+    isPending,
+    error,
+  } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
   });
@@ -19,7 +25,7 @@ export function useWithdraw() {
   ) => {
     const amountInWei = withdrawAll ? maxUint256 : parseUnits(amount, decimals);
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "withdraw",
@@ -41,7 +47,7 @@ export function useWithdraw() {
   ) => {
     const amountInWei = parseUnits(amount, decimals);
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.wrappedTokenGateway,
       abi: WRAPPED_TOKEN_GATEWAY_V3_ABI,
       functionName: "withdrawETH",

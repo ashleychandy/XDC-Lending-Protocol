@@ -13,7 +13,10 @@ const LandingHeader = () => {
         alignItems={"center"}
         gap={"15px"}
       >
-        <Button className="secondary-btn" onClick={() => navigate(ROUTES.MARKET)}>
+        <Button
+          className="secondary-btn"
+          onClick={() => navigate(ROUTES.MARKET)}
+        >
           View Markets
         </Button>
         <Button

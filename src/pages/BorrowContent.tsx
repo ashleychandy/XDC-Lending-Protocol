@@ -157,11 +157,10 @@ function BorrowContent() {
         await repayHook.repayNative(amount, address);
       } else {
         // Standard ERC20 flow: approve then repay
-        // First, approve the tokens
+        // First, approve the tokens and wait for confirmation
         await repayHook.approve(token.address, amount, token.decimals);
 
-        // Wait for approval to be confirmed (wagmi handles this automatically)
-        // Then call repay
+        // Then call repay (writeContractAsync waits for user confirmation)
         await repayHook.repay(token.address, amount, token.decimals, address);
       }
     } catch (err) {
@@ -344,7 +343,11 @@ function BorrowContent() {
               border="1px solid #eaebef"
               fontSize="sm"
             >
-              Balance ${parseFloat(accountData.totalDebt).toFixed(2)}
+              Balance $
+              {parseFloat(accountData.totalDebt).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </Box>
             <Box
               p="4px 8px"

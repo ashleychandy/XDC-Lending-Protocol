@@ -39,7 +39,9 @@ const BorrowDoneModal: React.FC<Props> = ({
     <HStack wrap="wrap" gap="4">
       <Dialog.Root
         open={isOpen}
-        onOpenChange={onClose}
+        onOpenChange={(e) => {
+          if (!e.open) onClose();
+        }}
         placement="center"
         motionPreset="slide-in-bottom"
         size="xs"

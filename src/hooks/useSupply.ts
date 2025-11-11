@@ -43,7 +43,7 @@ export function useSupply() {
   ) => {
     const amountInWei = parseUnits(amount, decimals);
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "supply",
@@ -62,7 +62,7 @@ export function useSupply() {
   const supplyNative = async (amount: string, userAddress: string) => {
     const amountInWei = parseUnits(amount, 18); // Native tokens are always 18 decimals
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.wrappedTokenGateway,
       abi: WRAPPED_TOKEN_GATEWAY_V3_ABI,
       functionName: "depositETH",
@@ -98,7 +98,7 @@ export function useSupply() {
   ) => {
     const amountInWei = parseUnits(amount, decimals);
 
-    return writeContract({
+    return writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "supplyWithPermit",
