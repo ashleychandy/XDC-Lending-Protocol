@@ -40,7 +40,7 @@ export function useBorrow() {
   };
 
   /**
-   * Borrow native token (XDC/ETH) directly - automatically unwraps
+   * Borrow native token (XDC) directly - automatically unwraps
    */
   const borrowNative = async (amount: string, userAddress: string) => {
     const amountInWei = parseUnits(amount, 18);

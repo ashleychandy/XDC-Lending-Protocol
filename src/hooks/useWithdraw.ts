@@ -38,7 +38,7 @@ export function useWithdraw() {
   };
 
   /**
-   * Withdraw native token (XDC/ETH) directly - automatically unwraps
+   * Withdraw native token (XDC) directly - automatically unwraps
    */
   const withdrawNative = async (
     amount: string,

@@ -4,7 +4,7 @@ import { parseUnits } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 /**
- * Hook for native token operations (XDC, ETH, etc.) via WrappedTokenGateway
+ * Hook for native token operations (XDC) via WrappedTokenGateway
  * Eliminates need for manual wrapping/unwrapping
  */
 export function useNativeToken() {
@@ -15,7 +15,7 @@ export function useNativeToken() {
   });
 
   /**
-   * Deposit native token (XDC/ETH) to the protocol
+   * Deposit native token (XDC) to the protocol
    * Automatically wraps and supplies to the pool
    */
   const depositNative = async (amount: string, userAddress: string) => {
@@ -35,7 +35,7 @@ export function useNativeToken() {
   };
 
   /**
-   * Withdraw native token (XDC/ETH) from the protocol
+   * Withdraw native token (XDC) from the protocol
    * Automatically unwraps and sends native token
    */
   const withdrawNative = async (
@@ -58,7 +58,7 @@ export function useNativeToken() {
   };
 
   /**
-   * Borrow native token (XDC/ETH) from the protocol
+   * Borrow native token (XDC) from the protocol
    * Automatically unwraps and sends native token
    */
   const borrowNative = async (amount: string, userAddress: string) => {
@@ -77,7 +77,7 @@ export function useNativeToken() {
   };
 
   /**
-   * Repay borrowed native token (XDC/ETH)
+   * Repay borrowed native token (XDC)
    * Automatically wraps and repays to the pool
    */
   const repayNative = async (

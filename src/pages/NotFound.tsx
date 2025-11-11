@@ -1,6 +1,5 @@
-import notFoundImage from "@/assets/images/not-found.png";
 import { ROUTES } from "@/routes/paths";
-import { Box, Button, Container, Flex, Heading, Image } from "@chakra-ui/react";
+import { Box, Button, Container, Flex, Heading } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 const NotFound = () => {
@@ -15,7 +14,6 @@ const NotFound = () => {
         h="100%"
         gap={6}
       >
-        <Image src={notFoundImage} alt="404 Not Found" maxW="400px" w="100%" />
         <Heading size="2xl" textAlign="center">
           Page Not Found
         </Heading>

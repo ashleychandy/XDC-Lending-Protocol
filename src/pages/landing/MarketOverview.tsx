@@ -44,8 +44,7 @@ const MarketOverview: React.FC<Props> = ({ tokenDetails }) => {
                     w="65px"
                     h="65px"
                     borderRadius="12px"
-                    bg={x.icon ? "rgba(255, 255, 255, 0.1)" : undefined}
-                    className={x.icon ? undefined : "primary-color"}
+                    className={x.icon ? "token-icon-bg" : "primary-color"}
                     justifyContent="center"
                     alignItems="center"
                     color={x.icon ? undefined : "#041022"}

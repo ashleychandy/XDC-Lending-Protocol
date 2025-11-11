@@ -19,28 +19,20 @@ const LANDING_CONFIG = CHAIN_CONFIGS[LANDING_CHAIN_ID];
 
 const getTokenMetadata = () =>
   ({
-    eth: {
-      symbol: LANDING_CONFIG.tokens.weth.symbol,
-      name: LANDING_CONFIG.tokens.weth.symbol,
-      fullName: `${LANDING_CONFIG.tokens.weth.symbol} Reserve`,
-      icon: getTokenLogo(LANDING_CONFIG.tokens.weth.symbol),
-      address: LANDING_CONFIG.tokens.weth.address,
-      decimals: 18,
-    },
-    weth: {
-      symbol: LANDING_CONFIG.tokens.weth.symbol,
-      name: LANDING_CONFIG.tokens.weth.symbol,
-      fullName: `${LANDING_CONFIG.tokens.weth.symbol} Reserve`,
-      icon: getTokenLogo(LANDING_CONFIG.tokens.weth.symbol),
-      address: LANDING_CONFIG.tokens.weth.address,
+    xdc: {
+      symbol: LANDING_CONFIG.tokens.wrappedNative.symbol,
+      name: LANDING_CONFIG.tokens.wrappedNative.symbol,
+      fullName: `${LANDING_CONFIG.tokens.wrappedNative.symbol} Reserve`,
+      icon: getTokenLogo(LANDING_CONFIG.tokens.wrappedNative.symbol),
+      address: LANDING_CONFIG.tokens.wrappedNative.address,
       decimals: 18,
     },
     wxdc: {
-      symbol: LANDING_CONFIG.tokens.weth.symbol,
-      name: LANDING_CONFIG.tokens.weth.symbol,
-      fullName: `${LANDING_CONFIG.tokens.weth.symbol} Reserve`,
-      icon: getTokenLogo(LANDING_CONFIG.tokens.weth.symbol),
-      address: LANDING_CONFIG.tokens.weth.address,
+      symbol: LANDING_CONFIG.tokens.wrappedNative.symbol,
+      name: LANDING_CONFIG.tokens.wrappedNative.symbol,
+      fullName: `${LANDING_CONFIG.tokens.wrappedNative.symbol} Reserve`,
+      icon: getTokenLogo(LANDING_CONFIG.tokens.wrappedNative.symbol),
+      address: LANDING_CONFIG.tokens.wrappedNative.address,
       decimals: 18,
     },
     usdc: {
@@ -50,6 +42,14 @@ const getTokenMetadata = () =>
       icon: getTokenLogo("USDC"),
       address: LANDING_CONFIG.tokens.usdc.address,
       decimals: 6,
+    },
+    cgo: {
+      symbol: LANDING_CONFIG.tokens.cgo.symbol,
+      name: LANDING_CONFIG.tokens.cgo.symbol,
+      fullName: `${LANDING_CONFIG.tokens.cgo.symbol} Reserve`,
+      icon: getTokenLogo(LANDING_CONFIG.tokens.cgo.symbol),
+      address: LANDING_CONFIG.tokens.cgo.address,
+      decimals: LANDING_CONFIG.tokens.cgo.decimals,
     },
   }) as const;
 
@@ -72,7 +72,7 @@ export function useMainnetAssetDetails(tokenSymbol: string) {
 
   const token =
     TOKEN_METADATA[tokenSymbol?.toLowerCase() as keyof typeof TOKEN_METADATA] ||
-    TOKEN_METADATA.weth;
+    TOKEN_METADATA.wxdc;
 
   // Get reserve data from Pool - from configured landing chain
   const { data: reserveData, isLoading: isLoadingReserve } = useReadContract({
@@ -138,12 +138,22 @@ export function useMainnetAssetDetails(tokenSymbol: string) {
   });
 
   // Decode supply and borrow caps from configuration
-  const configData = reserveDataAny?.configuration
-    ? (reserveDataAny.configuration as any).data || reserveDataAny.configuration
-    : 0n;
-  const caps = configData
-    ? decodeReserveConfiguration(BigInt(configData))
-    : { borrowCap: 0, supplyCap: 0 };
+  let configValue = 0n;
+  if (reserveDataAny?.configuration) {
+    const config = reserveDataAny.configuration as any;
+    if (typeof config === "bigint") {
+      configValue = config;
+    } else if (config.data !== undefined) {
+      configValue =
+        typeof config.data === "bigint" ? config.data : BigInt(config.data);
+    } else if (typeof config === "number" || typeof config === "string") {
+      configValue = BigInt(config);
+    }
+  }
+  const caps =
+    configValue !== 0n
+      ? decodeReserveConfiguration(configValue)
+      : { borrowCap: 0, supplyCap: 0 };
 
   // Calculate metrics
   const RAY = BigInt(10 ** 27);

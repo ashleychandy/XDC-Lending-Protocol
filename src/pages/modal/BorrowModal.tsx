@@ -26,13 +26,14 @@ import usdcIcon from "../../assets/images/usdc.svg";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  tokenSymbol: "weth" | "usdc" | "eth";
+  tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo";
   amount: string;
   setAmount: (value: string) => void;
   onClickBorrow: () => void;
   borrowedBalance?: string;
-  ethPrice?: number;
+  xdcPrice?: number;
   usdcPrice?: number;
+  cgoPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
   unwrapToNative?: boolean;
@@ -47,8 +48,9 @@ const BorrowModal: React.FC<Props> = ({
   setAmount,
   onClickBorrow,
   borrowedBalance = "0",
-  ethPrice = 2500,
+  xdcPrice = 2500,
   usdcPrice = 1,
+  cgoPrice = 1,
   isPending,
   isConfirming,
   unwrapToNative: externalUnwrapToNative,
@@ -66,35 +68,35 @@ const BorrowModal: React.FC<Props> = ({
   // Get chain config for dynamic tokens
   const { tokens, network } = useChainConfig();
   const nativeTokenSymbol = network.nativeToken.symbol;
-  const wrappedTokenSymbol = tokens.weth.symbol;
+  const wrappedTokenSymbol = tokens.wrappedNative.symbol;
 
   // Get account data for health factor
   const accountData = useUserAccountData();
 
   // Token configuration
   const getTokenConfig = () => {
-    // If WETH/ETH and unwrap is enabled, show native token
-    if ((tokenSymbol === "weth" || tokenSymbol === "eth") && unwrapToNative) {
+    // If WXDC and unwrap is enabled, show native token
+    if ((tokenSymbol === "wxdc" || tokenSymbol === "xdc") && unwrapToNative) {
       return {
         name: nativeTokenSymbol,
         symbol: nativeTokenSymbol,
         icon: getTokenLogo(nativeTokenSymbol),
         decimals: 18,
-        price: ethPrice,
+        price: xdcPrice,
       };
     }
-    // If WETH and unwrap is disabled, show wrapped token
-    if (tokenSymbol === "weth" && !unwrapToNative) {
+    // If WXDC and unwrap is disabled, show wrapped token
+    if (tokenSymbol === "wxdc" && !unwrapToNative) {
       return {
         name: wrappedTokenSymbol,
         symbol: wrappedTokenSymbol,
         icon: getTokenLogo(wrappedTokenSymbol),
         decimals: 18,
-        price: ethPrice,
+        price: xdcPrice,
       };
     }
-    // For ETH selection, always show based on toggle
-    if (tokenSymbol === "eth") {
+    // For XDC selection, always show based on toggle
+    if (tokenSymbol === "xdc") {
       return {
         name: unwrapToNative ? nativeTokenSymbol : wrappedTokenSymbol,
         symbol: unwrapToNative ? nativeTokenSymbol : wrappedTokenSymbol,
@@ -102,7 +104,17 @@ const BorrowModal: React.FC<Props> = ({
           ? getTokenLogo(nativeTokenSymbol)
           : getTokenLogo(wrappedTokenSymbol),
         decimals: 18,
-        price: ethPrice,
+        price: xdcPrice,
+      };
+    }
+    // CGO
+    if (tokenSymbol === "cgo") {
+      return {
+        name: "CGO",
+        symbol: "CGO",
+        icon: getTokenLogo("CGO"),
+        decimals: tokens.cgo.decimals,
+        price: cgoPrice,
       };
     }
     // USDC
@@ -266,8 +278,8 @@ const BorrowModal: React.FC<Props> = ({
                   </Box>
                 </Box>
 
-                {/* Unwrap toggle for WETH/ETH */}
-                {(tokenSymbol === "weth" || tokenSymbol === "eth") && (
+                {/* Unwrap toggle for WXDC */}
+                {(tokenSymbol === "wxdc" || tokenSymbol === "xdc") && (
                   <Box mb="15px" p="12px" borderRadius="6px">
                     <Switch.Root
                       colorPalette="green"
@@ -278,7 +290,7 @@ const BorrowModal: React.FC<Props> = ({
                       <Switch.HiddenInput />
                       <Switch.Control />
                       <Switch.Label fontSize="sm">
-                        Unwrap WETH (to borrow ETH)
+                        Unwrap WXDC (to borrow XDC)
                       </Switch.Label>
                     </Switch.Root>
                   </Box>

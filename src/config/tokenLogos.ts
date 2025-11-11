@@ -1,7 +1,6 @@
 // Token logo configuration
-import ethIcon from "@/assets/images/eth.svg";
+import cgoIcon from "@/assets/images/CGO_Token.png";
 import usdcIcon from "@/assets/images/usdc.svg";
-import wethIcon from "@/assets/images/weth.svg";
 import xdc from "@/assets/images/XDC Primary Color Logo.svg";
 import xdcIcon from "@/assets/images/xdc-icon.webp";
 /**
@@ -11,29 +10,15 @@ import xdcIcon from "@/assets/images/xdc-icon.webp";
 export const TOKEN_LOGOS: Record<string, string> = {
   // Native tokens
   XDC: xdcIcon,
-  ETH: ethIcon,
-  MATIC: ethIcon, // Placeholder
-  BNB: ethIcon, // Placeholder
-  AVAX: ethIcon, // Placeholder
 
   // Wrapped native tokens
   WXDC: xdcIcon,
-  WETH: wethIcon,
-  WMATIC: ethIcon,
-  WBNB: ethIcon,
-  WAVAX: ethIcon,
 
   // Stablecoins
   USDC: usdcIcon,
-  USDT: usdcIcon, // Using USDC icon as placeholder
-  DAI: usdcIcon, // Using USDC icon as placeholder
-  BUSD: usdcIcon, // Using USDC icon as placeholder
 
   // Other tokens
-  WBTC: ethIcon, // Placeholder
-  LINK: ethIcon, // Placeholder
-  UNI: ethIcon, // Placeholder
-  AAVE: ethIcon, // Placeholder
+  CGO: cgoIcon,
 };
 
 /**
@@ -50,7 +35,7 @@ export const CHAIN_LOGOS: Record<number, string> = {
  */
 export function getTokenLogo(symbol: string): string {
   const upperSymbol = symbol.toUpperCase();
-  return TOKEN_LOGOS[upperSymbol] || ethIcon; // Default to ETH icon
+  return TOKEN_LOGOS[upperSymbol]; // Default to XDC icon
 }
 
 /**

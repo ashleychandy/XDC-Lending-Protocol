@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Heading, Image } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import creditiFyImg from "../../assets/images/landing/creditify.png";
+import creditiFyImg from "../../assets/images/landing/Creditify.svg";
 
 const OwnMoney = () => {
   const navigate = useNavigate();
@@ -41,8 +41,7 @@ const OwnMoney = () => {
         mx={"auto"}
         direction={{ base: "column", md: "row" }}
         justifyContent={"space-between"}
-        border="1px solid #FFFFFF08"
-        background="linear-gradient(90deg, rgba(99, 102, 241, 0.06) 0%, rgba(6, 182, 212, 0.03) 100%)"
+        className="cta-box"
       >
         <Box mb={{ base: "20px", md: "0" }}>
           <Box fontWeight={"700"}>Ready to get started?</Box>

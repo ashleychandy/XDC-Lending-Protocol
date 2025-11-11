@@ -59,7 +59,7 @@ export function useRepay() {
   };
 
   /**
-   * Repay with native token (XDC/ETH) directly - automatically wraps
+   * Repay with native token (XDC) directly - automatically wraps
    */
   const repayNative = async (
     amount: string,

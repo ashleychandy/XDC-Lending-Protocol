@@ -34,15 +34,21 @@ export function useTokenInfo(tokenSymbol: string): TokenInfo {
   // Get token details based on symbol
   let tokenDetails: TokenInfo;
 
-  if (symbol === "WETH" || symbol === "ETH") {
+  if (symbol === tokens.wrappedNative.symbol || symbol === "XDC") {
     tokenDetails = {
-      symbol: symbol === "ETH" ? getNativeTokenSymbol(network.chainId) : "WETH",
-      name: symbol === "ETH" ? "Native Token" : "Wrapped Ether",
-      address: tokens.weth.address,
-      decimals: tokens.weth.decimals,
+      symbol:
+        symbol === "XDC"
+          ? getNativeTokenSymbol(network.chainId)
+          : tokens.wrappedNative.symbol,
+      name:
+        symbol === "XDC"
+          ? "Native Token"
+          : `Wrapped ${getNativeTokenSymbol(network.chainId)}`,
+      address: tokens.wrappedNative.address,
+      decimals: tokens.wrappedNative.decimals,
       logo: getTokenLogo(symbol),
-      isNative: symbol === "ETH",
-      isWrappedNative: symbol === "WETH",
+      isNative: symbol === "XDC",
+      isWrappedNative: symbol === tokens.wrappedNative.symbol,
     };
   } else if (symbol === "USDC") {
     tokenDetails = {
@@ -59,7 +65,7 @@ export function useTokenInfo(tokenSymbol: string): TokenInfo {
     tokenDetails = {
       symbol: symbol === "XDC" ? "XDC" : "WXDC",
       name: symbol === "XDC" ? "XDC Network" : "Wrapped XDC",
-      address: tokens.weth.address, // WXDC uses the weth address slot
+      address: tokens.wrappedNative.address, // WXDC uses the wxdc address slot
       decimals: 18,
       logo: getTokenLogo(symbol),
       isNative: symbol === "XDC",
@@ -70,7 +76,7 @@ export function useTokenInfo(tokenSymbol: string): TokenInfo {
     tokenDetails = {
       symbol,
       name: symbol,
-      address: tokens.weth.address,
+      address: tokens.wrappedNative.address,
       decimals: 18,
       logo: getTokenLogo(symbol),
       isNative: native,
@@ -103,8 +109,8 @@ export function useAvailableTokens(): TokenInfo[] {
     {
       symbol: wrappedSymbol,
       name: `Wrapped ${nativeSymbol}`,
-      address: tokens.weth.address,
-      decimals: tokens.weth.decimals,
+      address: tokens.wrappedNative.address,
+      decimals: tokens.wrappedNative.decimals,
       logo: getTokenLogo(wrappedSymbol),
       isNative: false,
       isWrappedNative: true,

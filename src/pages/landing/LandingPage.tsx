@@ -1,3 +1,4 @@
+import { getTokenLogo } from "@/config/tokenLogos";
 import {
   formatCurrency,
   formatPercentage,
@@ -20,6 +21,7 @@ import section1Img from "../../assets/images/landing/section1Img.png";
 import usdcIcon from "../../assets/images/usdc.svg";
 import xdcIcon from "../../assets/images/xdc-icon.webp";
 import Faq from "./Faq";
+import GovernanceSecurity from "./GovernanceSecurity";
 import HowCreditifyWorks from "./HowCreditifyWorks";
 import LandingFooter from "./LandingFooter";
 import LandingHeader from "./LandingHeader";
@@ -46,6 +48,14 @@ const LandingPage = () => {
     borrowApy: usdcBorrowApy,
     totalSuppliedUsd: usdcTvl,
   } = useMainnetAssetDetails("usdc");
+
+  const {
+    availableLiquidity: cgoLiquidity,
+    utilizationRate: cgoUtilizationRate,
+    supplyApy: cgoSupplyApy,
+    borrowApy: cgoBorrowApy,
+    totalSuppliedUsd: cgoTvl,
+  } = useMainnetAssetDetails("cgo");
 
   const tokenDetails: TokenDetailsDTO[] = [
     {
@@ -98,11 +108,40 @@ const LandingPage = () => {
         },
       ],
     },
+    {
+      symbol: "CG",
+      shortName: "CGO",
+      fullName: "CGO Reserve",
+      icon: getTokenLogo("CGO"),
+      tvl: cgoTvl,
+      tokenInfo: [
+        {
+          label: "Supply APY",
+          value: formatPercentage(parseFloat(cgoSupplyApy)),
+        },
+        {
+          label: "Borrow APY",
+          value: formatPercentage(parseFloat(cgoBorrowApy)),
+        },
+        {
+          label: "Available Liquidity",
+          value: formatCurrency(cgoLiquidity),
+        },
+        {
+          label: "Utilization",
+          value: formatPercentage(cgoUtilizationRate),
+        },
+      ],
+    },
   ];
 
   return (
     <ChakraProvider value={landingSystem}>
-      <Box bg="#0A1428" minH="100vh" className="landing-page">
+      <Box
+        bg="#FFFFFF"
+        minH="100vh"
+        className="landing-page landing-page-light"
+      >
         <Container
           maxW={{
             base: "100%",
@@ -272,12 +311,14 @@ const LandingPage = () => {
             w={"100%"}
             mx={"auto"}
             mb={{ base: "60px", md: "80px", lg: "150px" }}
-            borderBottom={"1px solid #404040"}
+            borderBottom={"1px solid #e2e8f0"}
           ></Box>
           {/* Your assets, your control */}
           <YourAssets />
           {/* Own your money */}
           <OwnMoney />
+          {/* Security & Audits */}
+          <GovernanceSecurity />
           {/* Faq */}
           <Faq />
           {/* Footer */}

@@ -24,15 +24,15 @@ import RepayModal from "./modal/RepayModal";
 function BorrowContent() {
   const queryClient = useQueryClient();
   const { tokens, network, contracts } = useChainConfig();
-  const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
-    "weth"
-  );
+  const [selectedToken, setSelectedToken] = useState<
+    "wxdc" | "usdc" | "xdc" | "cgo"
+  >("wxdc");
 
-  // Get native token symbol (XDC, ETH, etc.)
+  // Get native token symbol (XDC, XDC, etc.)
   const nativeTokenSymbol = network.nativeToken.symbol;
 
   // Get token logo dynamically
-  const wrappedTokenLogo = getTokenLogo(tokens.weth.symbol);
+  const wrappedTokenLogo = getTokenLogo(tokens.wrappedNative.symbol);
   const [amount, setAmount] = useState("");
   const [isBorrowModal, setIsBorrowModal] = useState<boolean>(false);
   const [isBorrowDoneModal, setIsBorrowDoneModal] = useState<boolean>(false);
@@ -47,15 +47,17 @@ function BorrowContent() {
   const repayHook = useRepay();
   const accountData = useUserAccountData();
 
-  const { price: ethPrice } = useAssetPrice(tokens.weth.address);
+  const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
   const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
+  const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
 
-  const wethReserveData = useReserveData(tokens.weth.address);
+  const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
   const usdcReserveData = useReserveData(tokens.usdc.address);
+  const cgoReserveData = useReserveData(tokens.cgo.address);
 
-  const wethUserData = useUserReserveData(
-    tokens.weth.address,
-    wethReserveData.aTokenAddress
+  const wxdcUserData = useUserReserveData(
+    tokens.wrappedNative.address,
+    wxdcReserveData.aTokenAddress
   );
 
   const usdcUserData = useUserReserveData(
@@ -63,14 +65,24 @@ function BorrowContent() {
     usdcReserveData.aTokenAddress
   );
 
-  const wethBorrowed = formatUnits(
-    wethUserData.borrowedAmount as bigint,
-    tokens.weth.decimals
+  const cgoUserData = useUserReserveData(
+    tokens.cgo.address,
+    cgoReserveData.aTokenAddress
+  );
+
+  const wxdcBorrowed = formatUnits(
+    wxdcUserData.borrowedAmount as bigint,
+    tokens.wrappedNative.decimals
   );
 
   const usdcBorrowed = formatUnits(
     usdcUserData.borrowedAmount as bigint,
     tokens.usdc.decimals
+  );
+
+  const cgoBorrowed = formatUnits(
+    cgoUserData.borrowedAmount as bigint,
+    tokens.cgo.decimals
   );
 
   const borrowPowerUsed =
@@ -84,28 +96,36 @@ function BorrowContent() {
       : "0.00";
 
   const totalBorrowedUsd =
-    parseFloat(wethBorrowed) * ethPrice + parseFloat(usdcBorrowed) * usdcPrice;
+    parseFloat(wxdcBorrowed) * xdcPrice +
+    parseFloat(usdcBorrowed) * usdcPrice +
+    parseFloat(cgoBorrowed) * cgoPrice;
   const weightedBorrowApy =
     totalBorrowedUsd > 0
       ? (
-          (parseFloat(wethBorrowed) *
-            ethPrice *
-            parseFloat(wethReserveData.borrowApy) +
+          (parseFloat(wxdcBorrowed) *
+            xdcPrice *
+            parseFloat(wxdcReserveData.borrowApy) +
             parseFloat(usdcBorrowed) *
               usdcPrice *
-              parseFloat(usdcReserveData.borrowApy)) /
+              parseFloat(usdcReserveData.borrowApy) +
+            parseFloat(cgoBorrowed) *
+              cgoPrice *
+              parseFloat(cgoReserveData.borrowApy)) /
           totalBorrowedUsd
         ).toFixed(2)
       : "0.00";
 
   const handleBorrow = async (unwrapToNative: boolean = false) => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+    const token =
+      selectedToken === "xdc" || selectedToken === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[selectedToken];
 
     try {
-      // If borrowing as native token (ETH/XDC) and unwrap is enabled
+      // If borrowing as native token (XDC) and unwrap is enabled
       if (
-        (selectedToken === "eth" || selectedToken === "weth") &&
+        (selectedToken === "xdc" || selectedToken === "wxdc") &&
         unwrapToNative
       ) {
         // Check if gateway is configured
@@ -141,11 +161,14 @@ function BorrowContent() {
 
   const handleRepay = async (useNative: boolean = false) => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+    const token =
+      selectedToken === "xdc" || selectedToken === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[selectedToken];
 
     try {
-      // If repaying with native token (ETH/XDC)
-      if ((selectedToken === "eth" || selectedToken === "weth") && useNative) {
+      // If repaying with native token (XDC)
+      if ((selectedToken === "xdc" || selectedToken === "wxdc") && useNative) {
         // Check if gateway is configured
         if (
           contracts.wrappedTokenGateway ===
@@ -181,12 +204,12 @@ function BorrowContent() {
     },
   });
 
-  const openBorrowModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
+  const openBorrowModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
     setSelectedToken(tokenSymbol);
     setIsBorrowModal(true);
   };
 
-  const openRepayModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
+  const openRepayModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
     setSelectedToken(tokenSymbol);
     setIsRepayModal(true);
   };
@@ -204,13 +227,23 @@ function BorrowContent() {
     },
     {
       id: 2,
-      name: tokens.weth.symbol, // WXDC on XDC, WETH on ETH chains
-      symbol: "weth",
-      debt: formatValue(parseFloat(wethBorrowed)),
-      dollarDebt: `${formatUsdValue(parseFloat(wethBorrowed) * ethPrice)}`,
-      apy: `${wethReserveData.borrowApy}%`,
+      name: tokens.wrappedNative.symbol, // WXDC
+      symbol: "wxdc",
+      debt: formatValue(parseFloat(wxdcBorrowed)),
+      dollarDebt: `${formatUsdValue(parseFloat(wxdcBorrowed) * xdcPrice)}`,
+      apy: `${wxdcReserveData.borrowApy}%`,
       img: wrappedTokenLogo,
-      actualAmount: wethUserData.borrowedAmount,
+      actualAmount: wxdcUserData.borrowedAmount,
+    },
+    {
+      id: 3,
+      name: "CGO",
+      symbol: "cgo",
+      debt: formatValue(parseFloat(cgoBorrowed)),
+      dollarDebt: `${formatUsdValue(parseFloat(cgoBorrowed) * cgoPrice)}`,
+      apy: `${cgoReserveData.borrowApy}%`,
+      img: getTokenLogo("CGO"),
+      actualAmount: cgoUserData.borrowedAmount,
     },
   ].filter((item) => (item.actualAmount as bigint) > BigInt(0));
 
@@ -218,15 +251,15 @@ function BorrowContent() {
   const assetsToBorrow = [
     {
       id: 1,
-      name: tokens.weth.symbol, // WXDC on XDC, WETH on ETH chains
-      symbol: "weth",
+      name: tokens.wrappedNative.symbol, // WXDC
+      symbol: "wxdc",
       available: formatValue(
-        parseFloat(accountData.availableBorrows) / ethPrice
+        parseFloat(accountData.availableBorrows) / xdcPrice
       ),
       dollarAvailable: `${formatUsdValue(
         parseFloat(accountData.availableBorrows)
       )}`,
-      apy: `${wethReserveData.borrowApy}%`,
+      apy: `${wxdcReserveData.borrowApy}%`,
       img: wrappedTokenLogo,
     },
     {
@@ -241,6 +274,19 @@ function BorrowContent() {
       )}`,
       apy: `${usdcReserveData.borrowApy}%`,
       img: usdcIcon,
+    },
+    {
+      id: 3,
+      name: "CGO",
+      symbol: "cgo",
+      available: formatValue(
+        parseFloat(accountData.availableBorrows) / cgoPrice
+      ),
+      dollarAvailable: `${formatUsdValue(
+        parseFloat(accountData.availableBorrows)
+      )}`,
+      apy: `${cgoReserveData.borrowApy}%`,
+      img: getTokenLogo("CGO"),
     },
   ];
 
@@ -261,14 +307,19 @@ function BorrowContent() {
             handleBorrow(unwrapToNative);
           }}
           borrowedBalance={
-            selectedToken === "eth" || selectedToken === "weth"
-              ? formatValue(parseFloat(accountData.availableBorrows) / ethPrice)
-              : formatValue(
-                  parseFloat(accountData.availableBorrows) / usdcPrice
-                )
+            selectedToken === "xdc" || selectedToken === "wxdc"
+              ? formatValue(parseFloat(accountData.availableBorrows) / xdcPrice)
+              : selectedToken === "cgo"
+                ? formatValue(
+                    parseFloat(accountData.availableBorrows) / cgoPrice
+                  )
+                : formatValue(
+                    parseFloat(accountData.availableBorrows) / usdcPrice
+                  )
           }
-          ethPrice={ethPrice}
+          xdcPrice={xdcPrice}
           usdcPrice={usdcPrice}
+          cgoPrice={cgoPrice}
           isPending={borrowHook.isPending}
           isConfirming={borrowHook.isConfirming}
           unwrapToNative={unwrapToNative}
@@ -302,12 +353,15 @@ function BorrowContent() {
             handleRepay(useNativeForRepay);
           }}
           borrowedAmount={
-            selectedToken === "eth" || selectedToken === "weth"
-              ? wethBorrowed
-              : usdcBorrowed
+            selectedToken === "xdc" || selectedToken === "wxdc"
+              ? wxdcBorrowed
+              : selectedToken === "cgo"
+                ? cgoBorrowed
+                : usdcBorrowed
           }
-          ethPrice={ethPrice}
+          xdcPrice={xdcPrice}
           usdcPrice={usdcPrice}
+          cgoPrice={cgoPrice}
           isPending={repayHook.isPending}
           isConfirming={repayHook.isConfirming}
           useNative={useNativeForRepay}
@@ -425,7 +479,7 @@ function BorrowContent() {
                           size="sm"
                           onClick={() =>
                             openBorrowModal(
-                              item.symbol as "weth" | "usdc" | "eth"
+                              item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
                             )
                           }
                         >
@@ -436,7 +490,7 @@ function BorrowContent() {
                           variant="outline"
                           onClick={() =>
                             openRepayModal(
-                              item.symbol as "weth" | "usdc" | "eth"
+                              item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
                             )
                           }
                         >
@@ -520,7 +574,7 @@ function BorrowContent() {
                         size="sm"
                         onClick={() =>
                           openBorrowModal(
-                            item.symbol as "weth" | "usdc" | "eth"
+                            item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
                           )
                         }
                         disabled={

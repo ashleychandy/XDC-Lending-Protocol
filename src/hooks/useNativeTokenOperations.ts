@@ -19,13 +19,13 @@ export function useNativeTokenOperations() {
    * Supply tokens - automatically uses native gateway if token is native
    */
   const supply = async (
-    tokenSymbol: "weth" | "usdc" | "eth",
+    tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo",
     amount: string,
     userAddress: string,
     useNative: boolean = false
   ) => {
-    // If ETH/XDC and useNative is true, use native supply
-    if ((tokenSymbol === "eth" || tokenSymbol === "weth") && useNative) {
+    // If XDC and useNative is true, use native supply
+    if ((tokenSymbol === "xdc" || tokenSymbol === "wxdc") && useNative) {
       // Check if gateway is configured
       if (
         contracts.wrappedTokenGateway ===
@@ -37,7 +37,8 @@ export function useNativeTokenOperations() {
     }
 
     // Otherwise use standard ERC20 supply
-    const token = tokenSymbol === "eth" ? tokens.weth : tokens[tokenSymbol];
+    const token =
+      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
     return supplyHook.supply(
       token.address,
       amount,
@@ -50,13 +51,13 @@ export function useNativeTokenOperations() {
    * Borrow tokens - automatically uses native gateway if unwrap is requested
    */
   const borrow = async (
-    tokenSymbol: "weth" | "usdc" | "eth",
+    tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo",
     amount: string,
     userAddress: string,
     unwrapToNative: boolean = false
   ) => {
-    // If WETH/ETH and unwrap is true, use native borrow
-    if ((tokenSymbol === "eth" || tokenSymbol === "weth") && unwrapToNative) {
+    // If WXDC and unwrap is true, use native borrow
+    if ((tokenSymbol === "xdc" || tokenSymbol === "wxdc") && unwrapToNative) {
       // Check if gateway is configured
       if (
         contracts.wrappedTokenGateway ===
@@ -68,7 +69,8 @@ export function useNativeTokenOperations() {
     }
 
     // Otherwise use standard borrow
-    const token = tokenSymbol === "eth" ? tokens.weth : tokens[tokenSymbol];
+    const token =
+      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
     return borrowHook.borrow(
       token.address,
       amount,
@@ -81,14 +83,14 @@ export function useNativeTokenOperations() {
    * Repay tokens - automatically uses native gateway if token is native
    */
   const repay = async (
-    tokenSymbol: "weth" | "usdc" | "eth",
+    tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo",
     amount: string,
     userAddress: string,
     useNative: boolean = false,
     repayAll: boolean = false
   ) => {
-    // If ETH/XDC and useNative is true, use native repay
-    if ((tokenSymbol === "eth" || tokenSymbol === "weth") && useNative) {
+    // If XDC and useNative is true, use native repay
+    if ((tokenSymbol === "xdc" || tokenSymbol === "wxdc") && useNative) {
       // Check if gateway is configured
       if (
         contracts.wrappedTokenGateway ===
@@ -100,7 +102,8 @@ export function useNativeTokenOperations() {
     }
 
     // Otherwise use standard repay
-    const token = tokenSymbol === "eth" ? tokens.weth : tokens[tokenSymbol];
+    const token =
+      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
     return repayHook.repay(
       token.address,
       amount,
@@ -115,14 +118,14 @@ export function useNativeTokenOperations() {
    * Withdraw tokens - automatically uses native gateway if unwrap is requested
    */
   const withdraw = async (
-    tokenSymbol: "weth" | "usdc" | "eth",
+    tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo",
     amount: string,
     userAddress: string,
     unwrapToNative: boolean = false,
     withdrawAll: boolean = false
   ) => {
-    // If WETH/ETH and unwrap is true, use native withdraw
-    if ((tokenSymbol === "eth" || tokenSymbol === "weth") && unwrapToNative) {
+    // If WXDC and unwrap is true, use native withdraw
+    if ((tokenSymbol === "xdc" || tokenSymbol === "wxdc") && unwrapToNative) {
       // Check if gateway is configured
       if (
         contracts.wrappedTokenGateway ===
@@ -134,7 +137,8 @@ export function useNativeTokenOperations() {
     }
 
     // Otherwise use standard withdraw
-    const token = tokenSymbol === "eth" ? tokens.weth : tokens[tokenSymbol];
+    const token =
+      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
     return withdrawHook.withdraw(
       token.address,
       amount,
@@ -148,11 +152,12 @@ export function useNativeTokenOperations() {
    * Approve tokens - only needed for ERC20 operations
    */
   const approve = async (
-    tokenSymbol: "weth" | "usdc" | "eth",
+    tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo",
     amount: string,
     operation: "supply" | "repay"
   ) => {
-    const token = tokenSymbol === "eth" ? tokens.weth : tokens[tokenSymbol];
+    const token =
+      tokenSymbol === "xdc" ? tokens.wrappedNative : tokens[tokenSymbol];
 
     if (operation === "supply") {
       return supplyHook.approve(token.address, amount, token.decimals);

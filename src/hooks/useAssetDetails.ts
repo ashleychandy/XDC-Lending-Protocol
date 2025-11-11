@@ -12,20 +12,20 @@ import { useChainConfig } from "./useChainConfig";
 
 const getTokenMetadata = (tokens: any, network: any) =>
   ({
-    eth: {
-      symbol: tokens.weth.symbol,
-      name: tokens.weth.symbol,
-      fullName: `${tokens.weth.symbol} Reserve`,
-      icon: getTokenLogo(tokens.weth.symbol),
-      address: tokens.weth.address,
+    xdc: {
+      symbol: tokens.wrappedNative.symbol,
+      name: tokens.wrappedNative.symbol,
+      fullName: `${tokens.wrappedNative.symbol} Reserve`,
+      icon: getTokenLogo(tokens.wrappedNative.symbol),
+      address: tokens.wrappedNative.address,
       decimals: 18,
     },
-    weth: {
-      symbol: tokens.weth.symbol,
-      name: tokens.weth.symbol,
-      fullName: `${tokens.weth.symbol} Reserve`,
-      icon: getTokenLogo(tokens.weth.symbol),
-      address: tokens.weth.address,
+    wxdc: {
+      symbol: tokens.wrappedNative.symbol,
+      name: tokens.wrappedNative.symbol,
+      fullName: `${tokens.wrappedNative.symbol} Reserve`,
+      icon: getTokenLogo(tokens.wrappedNative.symbol),
+      address: tokens.wrappedNative.address,
       decimals: 18,
     },
     usdc: {
@@ -35,6 +35,14 @@ const getTokenMetadata = (tokens: any, network: any) =>
       icon: getTokenLogo("USDC"),
       address: tokens.usdc.address,
       decimals: 6,
+    },
+    cgo: {
+      symbol: tokens.cgo.symbol,
+      name: tokens.cgo.symbol,
+      fullName: `${tokens.cgo.symbol} Reserve`,
+      icon: getTokenLogo(tokens.cgo.symbol),
+      address: tokens.cgo.address,
+      decimals: tokens.cgo.decimals,
     },
   }) as const;
 
@@ -58,7 +66,7 @@ export function useAssetDetails(tokenSymbol: string) {
 
   const token =
     TOKEN_METADATA[tokenSymbol?.toLowerCase() as keyof typeof TOKEN_METADATA] ||
-    TOKEN_METADATA.weth;
+    TOKEN_METADATA.wxdc;
 
   // Get reserve data from Aave Pool
   const { data: reserveData, isLoading: isLoadingReserve } = useReadContract({
@@ -147,12 +155,22 @@ export function useAssetDetails(tokenSymbol: string) {
 
   // Decode supply and borrow caps from configuration
   // Configuration is a nested tuple with a 'data' field
-  const configData = reserveDataAny?.configuration
-    ? (reserveDataAny.configuration as any).data || reserveDataAny.configuration
-    : 0n;
-  const caps = configData
-    ? decodeReserveConfiguration(BigInt(configData))
-    : { borrowCap: 0, supplyCap: 0 };
+  let configValue = 0n;
+  if (reserveDataAny?.configuration) {
+    const config = reserveDataAny.configuration as any;
+    if (typeof config === "bigint") {
+      configValue = config;
+    } else if (config.data !== undefined) {
+      configValue =
+        typeof config.data === "bigint" ? config.data : BigInt(config.data);
+    } else if (typeof config === "number" || typeof config === "string") {
+      configValue = BigInt(config);
+    }
+  }
+  const caps =
+    configValue !== 0n
+      ? decodeReserveConfiguration(configValue)
+      : { borrowCap: 0, supplyCap: 0 };
 
   // Calculate metrics
   const RAY = BigInt(10 ** 27);

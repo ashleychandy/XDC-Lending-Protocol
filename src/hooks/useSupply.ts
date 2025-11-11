@@ -57,7 +57,7 @@ export function useSupply() {
   };
 
   /**
-   * Supply native token (XDC/ETH) directly without wrapping
+   * Supply native token (XDC) directly without wrapping
    */
   const supplyNative = async (amount: string, userAddress: string) => {
     const amountInWei = parseUnits(amount, 18); // Native tokens are always 18 decimals

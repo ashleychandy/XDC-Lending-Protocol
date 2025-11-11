@@ -1,4 +1,3 @@
-import React from "react";
 import { Accordion, Box, Flex, Heading, Link, Span } from "@chakra-ui/react";
 import { BiRightArrowAlt } from "react-icons/bi";
 
@@ -47,8 +46,7 @@ const Faq = () => {
               {accordionItems.map((item, index) => (
                 <Accordion.Item
                   key={index}
-                  className="box"
-                  border="1px solid #FFFFFF05"
+                  className="box faq-item"
                   value={item.value}
                   borderRadius={"12px"}
                   p={"23px 20px"}
@@ -59,14 +57,14 @@ const Faq = () => {
                       fontWeight={"400"}
                       flex="1"
                       fontSize={{ base: "16px", md: "20px", lg: "24px" }}
-                      color="#FFFFFFA6"
+                      className="faq-title"
                     >
                       {item.title}
                     </Span>
                     <Accordion.ItemIndicator />
                   </Accordion.ItemTrigger>
                   <Accordion.ItemContent>
-                    <Accordion.ItemBody color={"#FFFFFFA6"}>
+                    <Accordion.ItemBody className="faq-body">
                       {item.text}
                     </Accordion.ItemBody>
                   </Accordion.ItemContent>

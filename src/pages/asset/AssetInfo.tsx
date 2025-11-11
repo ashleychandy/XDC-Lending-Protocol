@@ -21,13 +21,13 @@ interface Props {
   token?: string;
 }
 
-const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
+const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   const queryClient = useQueryClient();
   const { tokens } = useChainConfig();
-  // Local tab state
-  const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
-    token as "weth" | "usdc" | "eth"
-  );
+  // Local tab state - sync with token prop
+  const [selectedToken, setSelectedToken] = useState<
+    "wxdc" | "usdc" | "xdc" | "cgo"
+  >(token as "wxdc" | "usdc" | "xdc" | "cgo");
   const [amount, setAmount] = useState("");
   const [isSupplyModal, setIsSupplyModal] = useState<boolean>(false);
   const [isSupplyDoneModal, setIsSupplyDoneModal] = useState<boolean>(false);
@@ -38,46 +38,60 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
   const supplyHook = useSupply();
   const borrowHook = useBorrow();
 
+  // Sync selectedToken with token prop when it changes
+  React.useEffect(() => {
+    setSelectedToken(token as "wxdc" | "usdc" | "xdc" | "cgo");
+  }, [token]);
+
   // Balances
-  const { data: ethBalance } = useBalance({ address });
-  const { balance: wethBalance } = useTokenBalance(
-    tokens.weth.address,
-    tokens.weth.decimals
+  const { data: xdcBalance } = useBalance({ address });
+  const { balance: wxdcBalance } = useTokenBalance(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
   );
   const { balance: usdcBalance } = useTokenBalance(
     tokens.usdc.address,
     tokens.usdc.decimals
   );
+  const { balance: cgoBalance } = useTokenBalance(
+    tokens.cgo.address,
+    tokens.cgo.decimals
+  );
 
   // Prices
-  const { price: ethPrice } = useAssetPrice(tokens.weth.address);
+  const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
   const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
+  const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
 
   // Derived data
-  const borrowedEth = formatValue(
-    parseFloat(accountData.availableBorrows) / ethPrice
+  const borrowedXdc = formatValue(
+    parseFloat(accountData.availableBorrows) / xdcPrice
   );
   const borrowedUsdc = formatValue(
     parseFloat(accountData.availableBorrows) / usdcPrice
   );
+  const borrowedCgo = formatValue(
+    parseFloat(accountData.availableBorrows) / cgoPrice
+  );
 
   // Get reserve data (APY, etc.) for each asset
-  const wethReserveData = useReserveData(tokens.weth.address);
+  const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
   const usdcReserveData = useReserveData(tokens.usdc.address);
+  const cgoReserveData = useReserveData(tokens.cgo.address);
 
   // Token config — depends on selected tab, not prop
   const tokenConfig = {
-    eth: {
-      name: "ETH",
-      symbol: "ETH",
-      balance: ethBalance?.formatted || "0",
-      price: ethPrice,
+    xdc: {
+      name: "XDC",
+      symbol: "XDC",
+      balance: xdcBalance?.formatted || "0",
+      price: xdcPrice,
     },
-    weth: {
-      name: "WETH",
-      symbol: "WETH",
-      balance: wethBalance,
-      price: ethPrice,
+    wxdc: {
+      name: tokens.wrappedNative.symbol,
+      symbol: tokens.wrappedNative.symbol,
+      balance: wxdcBalance,
+      price: xdcPrice,
     },
     usdc: {
       name: "USDC",
@@ -85,11 +99,20 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
       balance: usdcBalance,
       price: usdcPrice,
     },
+    cgo: {
+      name: "CGO",
+      symbol: "CGO",
+      balance: cgoBalance,
+      price: cgoPrice,
+    },
   }[selectedToken];
 
   const handleSupply = async () => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+    const token =
+      selectedToken === "xdc" || selectedToken === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[selectedToken];
     try {
       // First, approve the tokens
       await supplyHook.approve(token.address, amount, token.decimals);
@@ -117,7 +140,10 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
 
   const handleBorrow = async () => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+    const token =
+      selectedToken === "xdc" || selectedToken === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[selectedToken];
     try {
       await borrowHook.borrow(token.address, amount, token.decimals, address);
     } catch (err) {
@@ -138,12 +164,12 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
     },
   });
 
-  const openSupplyModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
+  const openSupplyModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
     setSelectedToken(tokenSymbol);
     setIsSupplyModal(true);
   };
 
-  const openBorrowModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
+  const openBorrowModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
     setSelectedToken(tokenSymbol);
     setIsBorrowModal(true);
   };
@@ -199,7 +225,9 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
               <Button
                 size="sm"
                 onClick={() =>
-                  openSupplyModal(selectedToken as "weth" | "usdc" | "eth")
+                  openSupplyModal(
+                    selectedToken as "wxdc" | "usdc" | "xdc" | "cgo"
+                  )
                 }
               >
                 Supply
@@ -221,7 +249,9 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
               <Button
                 size="sm"
                 onClick={() =>
-                  openBorrowModal(selectedToken as "weth" | "usdc" | "eth")
+                  openBorrowModal(
+                    selectedToken as "wxdc" | "usdc" | "xdc" | "cgo"
+                  )
                 }
               >
                 Borrow
@@ -254,12 +284,15 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
               handleSupply();
             }}
             supplyApy={
-              selectedToken === "weth"
-                ? wethReserveData.supplyApy
-                : usdcReserveData.supplyApy
+              selectedToken === "wxdc" || selectedToken === "xdc"
+                ? wxdcReserveData.supplyApy
+                : selectedToken === "cgo"
+                  ? cgoReserveData.supplyApy
+                  : usdcReserveData.supplyApy
             }
-            ethPrice={ethPrice}
+            xdcPrice={xdcPrice}
             usdcPrice={usdcPrice}
+            cgoPrice={cgoPrice}
             isPending={supplyHook.isPending}
             isConfirming={supplyHook.isConfirming}
           />
@@ -290,16 +323,21 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
               handleBorrow();
             }}
             borrowedBalance={
-              selectedToken === "eth" || selectedToken === "weth"
+              selectedToken === "xdc" || selectedToken === "wxdc"
                 ? formatValue(
-                    parseFloat(accountData.availableBorrows) / ethPrice
+                    parseFloat(accountData.availableBorrows) / xdcPrice
                   )
-                : formatValue(
-                    parseFloat(accountData.availableBorrows) / usdcPrice
-                  )
+                : selectedToken === "cgo"
+                  ? formatValue(
+                      parseFloat(accountData.availableBorrows) / cgoPrice
+                    )
+                  : formatValue(
+                      parseFloat(accountData.availableBorrows) / usdcPrice
+                    )
             }
-            ethPrice={ethPrice}
+            xdcPrice={xdcPrice}
             usdcPrice={usdcPrice}
+            cgoPrice={cgoPrice}
             isPending={borrowHook.isPending}
             isConfirming={borrowHook.isConfirming}
           />
@@ -320,48 +358,60 @@ const AssetInfo: React.FC<Props> = ({ token = "eth" }) => {
           Your info
         </Heading>
 
-        {token === "eth" || token === "weth" ? (
+        {token === "xdc" || token === "wxdc" ? (
           <Tabs.Root
             defaultValue={token}
             variant="plain"
             onValueChange={(val) =>
-              setSelectedToken(val.value as "weth" | "usdc" | "eth")
+              setSelectedToken(val.value as "wxdc" | "usdc" | "xdc" | "cgo")
             }
           >
             <Tabs.List bg="bg.inverted" rounded="l3" p="1" w="100%" mb="15px">
-              <Tabs.Trigger value="weth" w="50%" justifyContent="center">
-                WETH
+              <Tabs.Trigger value="wxdc" w="50%" justifyContent="center">
+                {tokens.wrappedNative.symbol}
               </Tabs.Trigger>
-              <Tabs.Trigger value="eth" w="50%" justifyContent="center">
-                ETH
+              <Tabs.Trigger value="xdc" w="50%" justifyContent="center">
+                XDC
               </Tabs.Trigger>
               <Tabs.Indicator rounded="l2" />
             </Tabs.List>
 
-            <Tabs.Content value="weth">
+            <Tabs.Content value="wxdc">
               {renderWalletSection(
                 "Wallet balance",
-                formatValue(parseFloat(wethBalance)),
-                formatUsdValue(Number(wethBalance) * ethPrice)
+                formatValue(parseFloat(wxdcBalance)),
+                formatUsdValue(Number(wxdcBalance) * xdcPrice)
               )}
               {renderSupplyBorrow(
-                formatValue(parseFloat(wethBalance)),
-                formatValue(parseFloat(borrowedEth))
+                formatValue(parseFloat(wxdcBalance)),
+                formatValue(parseFloat(borrowedXdc))
               )}
             </Tabs.Content>
 
-            <Tabs.Content value="eth">
+            <Tabs.Content value="xdc">
               {renderWalletSection(
                 "Wallet balance",
-                formatValue(parseFloat(ethBalance?.formatted || "0")),
-                formatUsdValue(Number(ethBalance?.formatted) * ethPrice)
+                formatValue(parseFloat(xdcBalance?.formatted || "0")),
+                formatUsdValue(Number(xdcBalance?.formatted) * xdcPrice)
               )}
               {renderSupplyBorrow(
-                formatValue(parseFloat(ethBalance?.formatted || "0")),
-                formatValue(parseFloat(borrowedEth))
+                formatValue(parseFloat(xdcBalance?.formatted || "0")),
+                formatValue(parseFloat(borrowedXdc))
               )}
             </Tabs.Content>
           </Tabs.Root>
+        ) : token === "cgo" ? (
+          <>
+            {renderWalletSection(
+              "Wallet balance",
+              formatValue(parseFloat(cgoBalance)),
+              formatUsdValue(Number(cgoBalance) * cgoPrice)
+            )}
+            {renderSupplyBorrow(
+              formatValue(parseFloat(cgoBalance)),
+              borrowedCgo
+            )}
+          </>
         ) : (
           <>
             {renderWalletSection(

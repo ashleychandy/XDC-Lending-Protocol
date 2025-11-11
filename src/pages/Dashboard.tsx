@@ -16,15 +16,17 @@ const Dashboard = () => {
   const { isConnected } = useAccount();
   const { tokens, network } = useChainConfig();
 
-  const wethReserveData = useReserveData(tokens.weth.address);
+  const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
   const usdcReserveData = useReserveData(tokens.usdc.address);
+  const cgoReserveData = useReserveData(tokens.cgo.address);
 
-  const { price: ethPrice } = useAssetPrice(tokens.weth.address);
+  const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
   const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
+  const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
 
-  const wethUserData = useUserReserveData(
-    tokens.weth.address,
-    wethReserveData.aTokenAddress
+  const wxdcUserData = useUserReserveData(
+    tokens.wrappedNative.address,
+    wxdcReserveData.aTokenAddress
   );
 
   const usdcUserData = useUserReserveData(
@@ -32,16 +34,26 @@ const Dashboard = () => {
     usdcReserveData.aTokenAddress
   );
 
+  const cgoUserData = useUserReserveData(
+    tokens.cgo.address,
+    cgoReserveData.aTokenAddress
+  );
+
   const accountData = useUserAccountData();
 
-  const wethSupplied = formatUnits(
-    (wethUserData.suppliedAmount || 0n) as bigint,
-    tokens.weth.decimals
+  const wxdcSupplied = formatUnits(
+    (wxdcUserData.suppliedAmount || 0n) as bigint,
+    tokens.wrappedNative.decimals
   );
 
   const usdcSupplied = formatUnits(
     (usdcUserData.suppliedAmount || 0n) as bigint,
     tokens.usdc.decimals
+  );
+
+  const cgoSupplied = formatUnits(
+    (cgoUserData.suppliedAmount || 0n) as bigint,
+    tokens.cgo.decimals
   );
 
   const netWorth =
@@ -50,16 +62,21 @@ const Dashboard = () => {
   const healthFactorColor = getHealthFactorColor(healthFactorValue);
 
   const totalSuppliedUsd =
-    parseFloat(wethSupplied) * ethPrice + parseFloat(usdcSupplied) * usdcPrice;
+    parseFloat(wxdcSupplied) * xdcPrice +
+    parseFloat(usdcSupplied) * usdcPrice +
+    parseFloat(cgoSupplied) * cgoPrice;
   const weightedSupplyApy =
     totalSuppliedUsd > 0
       ? (
-          (parseFloat(wethSupplied) *
-            ethPrice *
-            parseFloat(wethReserveData.supplyApy) +
+          (parseFloat(wxdcSupplied) *
+            xdcPrice *
+            parseFloat(wxdcReserveData.supplyApy) +
             parseFloat(usdcSupplied) *
               usdcPrice *
-              parseFloat(usdcReserveData.supplyApy)) /
+              parseFloat(usdcReserveData.supplyApy) +
+            parseFloat(cgoSupplied) *
+              cgoPrice *
+              parseFloat(cgoReserveData.supplyApy)) /
           totalSuppliedUsd
         ).toFixed(2)
       : "0.00";

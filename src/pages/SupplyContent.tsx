@@ -36,16 +36,16 @@ import WithdrawModal from "./modal/WithdrawModal";
 const SupplyContent = () => {
   const queryClient = useQueryClient();
   const { tokens, network, contracts } = useChainConfig();
-  const [selectedToken, setSelectedToken] = useState<"weth" | "usdc" | "eth">(
-    "weth"
-  );
+  const [selectedToken, setSelectedToken] = useState<
+    "wxdc" | "usdc" | "xdc" | "cgo"
+  >("wxdc");
 
-  // Get native token symbol (XDC, ETH, etc.)
+  // Get native token symbol (XDC, XDC, etc.)
   const nativeTokenSymbol = network.nativeToken.symbol;
 
   // Get token logos dynamically
   const nativeTokenLogo = getTokenLogo(nativeTokenSymbol);
-  const wrappedTokenLogo = getTokenLogo(tokens.weth.symbol);
+  const wrappedTokenLogo = getTokenLogo(tokens.wrappedNative.symbol);
   const [amount, setAmount] = useState("");
   const [isSupplyModal, setIsSupplyModal] = useState<boolean>(false);
   const [isSupplyDoneModal, setIsSupplyDoneModal] = useState<boolean>(false);
@@ -61,25 +61,30 @@ const SupplyContent = () => {
   const { address } = useAccount();
   const accountData = useUserAccountData();
 
-  const wethReserveData = useReserveData(tokens.weth.address);
+  const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
   const usdcReserveData = useReserveData(tokens.usdc.address);
+  const cgoReserveData = useReserveData(tokens.cgo.address);
 
-  const { data: ethBalance } = useBalance({
+  const { data: xdcBalance } = useBalance({
     address: address,
   });
 
-  const { balance: wethBalance } = useTokenBalance(
-    tokens.weth.address,
-    tokens.weth.decimals
+  const { balance: wxdcBalance } = useTokenBalance(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
   );
   const { balance: usdcBalance } = useTokenBalance(
     tokens.usdc.address,
     tokens.usdc.decimals
   );
+  const { balance: cgoBalance } = useTokenBalance(
+    tokens.cgo.address,
+    tokens.cgo.decimals
+  );
 
-  const wethUserData = useUserReserveData(
-    tokens.weth.address,
-    wethReserveData.aTokenAddress
+  const wxdcUserData = useUserReserveData(
+    tokens.wrappedNative.address,
+    wxdcReserveData.aTokenAddress
   );
 
   const usdcUserData = useUserReserveData(
@@ -87,9 +92,14 @@ const SupplyContent = () => {
     usdcReserveData.aTokenAddress
   );
 
-  const wethSupplied = formatUnits(
-    wethUserData.suppliedAmount as bigint,
-    tokens.weth.decimals
+  const cgoUserData = useUserReserveData(
+    tokens.cgo.address,
+    cgoReserveData.aTokenAddress
+  );
+
+  const wxdcSupplied = formatUnits(
+    wxdcUserData.suppliedAmount as bigint,
+    tokens.wrappedNative.decimals
   );
 
   const usdcSupplied = formatUnits(
@@ -97,31 +107,45 @@ const SupplyContent = () => {
     tokens.usdc.decimals
   );
 
-  const { price: ethPrice } = useAssetPrice(tokens.weth.address);
+  const cgoSupplied = formatUnits(
+    cgoUserData.suppliedAmount as bigint,
+    tokens.cgo.decimals
+  );
+
+  const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
   const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
+  const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
 
   const totalSuppliedUsd =
-    parseFloat(wethSupplied) * ethPrice + parseFloat(usdcSupplied) * usdcPrice;
+    parseFloat(wxdcSupplied) * xdcPrice +
+    parseFloat(usdcSupplied) * usdcPrice +
+    parseFloat(cgoSupplied) * cgoPrice;
   const weightedSupplyApy =
     totalSuppliedUsd > 0
       ? (
-          (parseFloat(wethSupplied) *
-            ethPrice *
-            parseFloat(wethReserveData.supplyApy) +
+          (parseFloat(wxdcSupplied) *
+            xdcPrice *
+            parseFloat(wxdcReserveData.supplyApy) +
             parseFloat(usdcSupplied) *
               usdcPrice *
-              parseFloat(usdcReserveData.supplyApy)) /
+              parseFloat(usdcReserveData.supplyApy) +
+            parseFloat(cgoSupplied) *
+              cgoPrice *
+              parseFloat(cgoReserveData.supplyApy)) /
           totalSuppliedUsd
         ).toFixed(2)
       : "0.00";
 
   const handleSupply = async () => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+    const token =
+      selectedToken === "xdc" || selectedToken === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[selectedToken];
 
     try {
-      // If supplying native token (ETH/XDC), use native gateway
-      if (selectedToken === "eth") {
+      // If supplying native token (XDC), use native gateway
+      if (selectedToken === "xdc") {
         // Check if gateway is configured
         if (
           contracts.wrappedTokenGateway ===
@@ -159,12 +183,13 @@ const SupplyContent = () => {
 
   const handleWithdraw = async (unwrapToNative: boolean = false) => {
     if (!address || !amount) return;
-    const token = selectedToken === "eth" ? tokens.weth : tokens[selectedToken];
+    const token =
+      selectedToken === "xdc" ? tokens.wrappedNative : tokens[selectedToken];
 
     try {
-      // If withdrawing as native token (ETH/XDC) and unwrap is enabled
+      // If withdrawing as native token (XDC) and unwrap is enabled
       if (
-        (selectedToken === "eth" || selectedToken === "weth") &&
+        (selectedToken === "xdc" || selectedToken === "wxdc") &&
         unwrapToNative
       ) {
         // Check if gateway is configured
@@ -226,17 +251,17 @@ const SupplyContent = () => {
     },
   });
 
-  const openSupplyModal = (tokenSymbol: "weth" | "usdc" | "eth") => {
+  const openSupplyModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
     setSelectedToken(tokenSymbol);
     setIsSupplyModal(true);
   };
 
   const openWithdrawModal = (
     name: string,
-    tokenSymbol: "weth" | "usdc" | "eth"
+    tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo"
   ) => {
-    // Check if it's the native token (XDC, ETH, etc.)
-    const finalToken = name === nativeTokenSymbol ? "eth" : tokenSymbol;
+    // Check if it's the native token (XDC, XDC, etc.)
+    const finalToken = name === nativeTokenSymbol ? "xdc" : tokenSymbol;
     setSelectedToken(finalToken);
     setIsWithdrawModal(true);
   };
@@ -244,14 +269,14 @@ const SupplyContent = () => {
   const yourSupplies = [
     {
       id: 1,
-      name: tokens.weth.symbol, // WXDC on XDC, WETH on ETH chains
-      symbol: "weth",
-      balance: formatValue(parseFloat(wethSupplied)),
-      dollarBalance: `${formatUsdValue(parseFloat(wethSupplied) * ethPrice)}`,
-      apy: `${parseFloat(wethReserveData.supplyApy)}%`,
+      name: tokens.wrappedNative.symbol, // WXDC
+      symbol: "wxdc",
+      balance: formatValue(parseFloat(wxdcSupplied)),
+      dollarBalance: `${formatUsdValue(parseFloat(wxdcSupplied) * xdcPrice)}`,
+      apy: `${parseFloat(wxdcReserveData.supplyApy)}%`,
       img: wrappedTokenLogo,
-      isCollateral: wethUserData.isUsingAsCollateral,
-      actualAmount: wethUserData.suppliedAmount,
+      isCollateral: wxdcUserData.isUsingAsCollateral,
+      actualAmount: wxdcUserData.suppliedAmount,
     },
     {
       id: 2,
@@ -264,19 +289,30 @@ const SupplyContent = () => {
       isCollateral: usdcUserData.isUsingAsCollateral,
       actualAmount: usdcUserData.suppliedAmount,
     },
+    {
+      id: 3,
+      name: "CGO",
+      symbol: "cgo",
+      balance: formatValue(parseFloat(cgoSupplied)),
+      dollarBalance: `${formatUsdValue(parseFloat(cgoSupplied) * cgoPrice)}`,
+      apy: `${parseFloat(cgoReserveData.supplyApy)}%`,
+      img: getTokenLogo("CGO"),
+      isCollateral: cgoUserData.isUsingAsCollateral,
+      actualAmount: cgoUserData.suppliedAmount,
+    },
   ].filter((item) => (item.actualAmount as bigint) > BigInt(0));
 
   // Assets to Supply - wallet balances
   const assetsToSupply = [
     {
       id: 1,
-      name: nativeTokenSymbol, // XDC on XDC chains, ETH on ETH chains
-      symbol: "eth",
-      balance: ethBalance ? formatValue(parseFloat(ethBalance.formatted)) : "0",
-      apy: `${wethReserveData.supplyApy}%`,
+      name: nativeTokenSymbol, // XDC on XDC chains, XDC on XDC chains
+      symbol: "xdc",
+      balance: xdcBalance ? formatValue(parseFloat(xdcBalance.formatted)) : "0",
+      apy: `${wxdcReserveData.supplyApy}%`,
       img: nativeTokenLogo,
       canBeCollateral: true,
-      walletBalance: ethBalance?.formatted || "0",
+      walletBalance: xdcBalance?.formatted || "0",
     },
     {
       id: 2,
@@ -290,13 +326,23 @@ const SupplyContent = () => {
     },
     {
       id: 3,
-      name: tokens.weth.symbol, // WXDC on XDC, WETH on ETH chains
-      symbol: "weth",
-      balance: formatValue(parseFloat(wethBalance)),
-      apy: `${wethReserveData.supplyApy}%`,
+      name: tokens.wrappedNative.symbol, // WXDC
+      symbol: "wxdc",
+      balance: formatValue(parseFloat(wxdcBalance)),
+      apy: `${wxdcReserveData.supplyApy}%`,
       img: wrappedTokenLogo,
       canBeCollateral: true,
-      walletBalance: wethBalance,
+      walletBalance: wxdcBalance,
+    },
+    {
+      id: 4,
+      name: "CGO",
+      symbol: "cgo",
+      balance: formatValue(parseFloat(cgoBalance)),
+      apy: `${cgoReserveData.supplyApy}%`,
+      img: getTokenLogo("CGO"),
+      canBeCollateral: true,
+      walletBalance: cgoBalance,
     },
   ];
 
@@ -316,12 +362,15 @@ const SupplyContent = () => {
             handleSupply();
           }}
           supplyApy={
-            selectedToken === "weth"
-              ? wethReserveData.supplyApy
-              : usdcReserveData.supplyApy
+            selectedToken === "wxdc" || selectedToken === "xdc"
+              ? wxdcReserveData.supplyApy
+              : selectedToken === "cgo"
+                ? cgoReserveData.supplyApy
+                : usdcReserveData.supplyApy
           }
-          ethPrice={ethPrice}
+          xdcPrice={xdcPrice}
           usdcPrice={usdcPrice}
+          cgoPrice={cgoPrice}
           isPending={supplyHook.isPending}
           isConfirming={supplyHook.isConfirming}
         />
@@ -353,12 +402,15 @@ const SupplyContent = () => {
             handleWithdraw(unwrapToNative);
           }}
           suppliedBalance={
-            selectedToken === "eth" || selectedToken === "weth"
-              ? wethSupplied
-              : usdcSupplied
+            selectedToken === "xdc" || selectedToken === "wxdc"
+              ? wxdcSupplied
+              : selectedToken === "cgo"
+                ? cgoSupplied
+                : usdcSupplied
           }
-          ethPrice={ethPrice}
+          xdcPrice={xdcPrice}
           usdcPrice={usdcPrice}
+          cgoPrice={cgoPrice}
           isPending={withdrawHook.isPending}
           isConfirming={withdrawHook.isConfirming}
           unwrapToNative={unwrapToNative}
@@ -484,9 +536,11 @@ const SupplyContent = () => {
                         size="sm"
                         onCheckedChange={(e) =>
                           handleCollateralToggle(
-                            item.symbol === "weth"
-                              ? tokens.weth.address
-                              : tokens.usdc.address,
+                            item.symbol === "wxdc"
+                              ? tokens.wrappedNative.address
+                              : item.symbol === "cgo"
+                                ? tokens.cgo.address
+                                : tokens.usdc.address,
                             e.checked
                           )
                         }
@@ -502,7 +556,7 @@ const SupplyContent = () => {
                           size="sm"
                           onClick={() =>
                             openSupplyModal(
-                              item.symbol as "weth" | "usdc" | "eth"
+                              item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
                             )
                           }
                         >
@@ -514,7 +568,7 @@ const SupplyContent = () => {
                           onClick={() => {
                             openWithdrawModal(
                               item.name,
-                              item.symbol as "weth" | "usdc" | "eth"
+                              item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
                             );
                           }}
                         >
@@ -605,7 +659,7 @@ const SupplyContent = () => {
                         size="sm"
                         onClick={() =>
                           openSupplyModal(
-                            item.symbol as "weth" | "usdc" | "eth"
+                            item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
                           )
                         }
                         disabled={parseFloat(item.walletBalance) === 0}

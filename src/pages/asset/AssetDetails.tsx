@@ -29,7 +29,7 @@ const AssetDetails = () => {
   const { network } = useChainConfig();
   const isTabLayout = useBreakpointValue({ base: true, xl: false });
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token") || "eth";
+  const token = searchParams.get("token") || "xdc";
   const navigate = useNavigate();
 
   const {

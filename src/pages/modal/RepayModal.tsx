@@ -27,13 +27,14 @@ import usdcIcon from "../../assets/images/usdc.svg";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  tokenSymbol: "weth" | "usdc" | "eth";
+  tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo";
   amount: string;
   setAmount: (value: string) => void;
   onClickRepay: () => void;
   borrowedAmount?: string; // User's borrowed amount in token units
-  ethPrice?: number;
+  xdcPrice?: number;
   usdcPrice?: number;
+  cgoPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
   useNative?: boolean;
@@ -48,8 +49,9 @@ const RepayModal: React.FC<Props> = ({
   setAmount,
   onClickRepay,
   borrowedAmount = "0",
-  ethPrice = 2500,
+  xdcPrice = 2500,
   usdcPrice = 1,
+  cgoPrice = 1,
   isPending = false,
   isConfirming = false,
   useNative: externalUseNative,
@@ -65,33 +67,37 @@ const RepayModal: React.FC<Props> = ({
 
   // Get native token info
   const nativeTokenSymbol = network.nativeToken.symbol;
-  const wrappedTokenSymbol = tokens.weth.symbol;
+  const wrappedTokenSymbol = tokens.wrappedNative.symbol;
 
   // Get account data for health factor
   const accountData = useUserAccountData();
 
   // Get wallet balances for validation
-  const { balance: wethBalance } = useTokenBalance(
-    tokens.weth.address,
-    tokens.weth.decimals
+  const { balance: wxdcBalance } = useTokenBalance(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
   );
   const { balance: usdcBalance } = useTokenBalance(
     tokens.usdc.address,
     tokens.usdc.decimals
   );
+  const { balance: cgoBalance } = useTokenBalance(
+    tokens.cgo.address,
+    tokens.cgo.decimals
+  );
 
   // Token configuration
   const getTokenConfig = () => {
     switch (tokenSymbol) {
-      case "eth":
-      case "weth":
+      case "xdc":
+      case "wxdc":
         return {
           name: wrappedTokenSymbol,
           symbol: wrappedTokenSymbol,
           icon: getTokenLogo(wrappedTokenSymbol),
           decimals: 18,
-          price: ethPrice,
-          walletBalance: wethBalance,
+          price: xdcPrice,
+          walletBalance: wxdcBalance,
         };
       case "usdc":
         return {
@@ -102,14 +108,23 @@ const RepayModal: React.FC<Props> = ({
           price: usdcPrice,
           walletBalance: usdcBalance,
         };
+      case "cgo":
+        return {
+          name: "CGO",
+          symbol: "CGO",
+          icon: getTokenLogo("CGO"),
+          decimals: tokens.cgo.decimals,
+          price: cgoPrice,
+          walletBalance: cgoBalance,
+        };
       default:
         return {
           name: wrappedTokenSymbol,
           symbol: wrappedTokenSymbol,
           icon: getTokenLogo(wrappedTokenSymbol),
           decimals: 18,
-          price: ethPrice,
-          walletBalance: wethBalance,
+          price: xdcPrice,
+          walletBalance: wxdcBalance,
         };
     }
   };
@@ -301,8 +316,8 @@ const RepayModal: React.FC<Props> = ({
                   </Box>
                 </Box>
 
-                {/* Use native token toggle for WETH/ETH */}
-                {(tokenSymbol === "weth" || tokenSymbol === "eth") && (
+                {/* Use native token toggle for WXDC */}
+                {(tokenSymbol === "wxdc" || tokenSymbol === "xdc") && (
                   <Box mb="15px" p="12px" borderRadius="6px">
                     <Switch.Root
                       colorPalette="green"

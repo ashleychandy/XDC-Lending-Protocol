@@ -1,13 +1,11 @@
 import { Box, Button, Flex, Heading, Input, Link } from "@chakra-ui/react";
-import React from "react";
 
 const LandingFooter = () => {
   return (
     <Box as={"section"} py={{ base: "40px", md: "60px", lg: "90px" }}>
       <Box maxW={"1140px"} mx={"auto"}>
         <Flex
-          background="#FFFFFF05"
-          border="1px solid #FFFFFF05"
+          className="footer-newsletter"
           borderRadius={"15px"}
           mb={{ base: "40px", md: "60px", lg: "100px" }}
           direction={{ base: "column", md: "row" }}
@@ -30,12 +28,11 @@ const LandingFooter = () => {
             </Box>
           </Flex>
           <Flex
-            background="#FFFFFF05"
+            className="footer-email-box"
             direction={"column"}
             justifyContent={"center"}
             p={{ base: "15px", sm: "20px", md: "50px 20px", lg: "100px 50px" }}
             w={{ base: "100%", md: "60%" }}
-            border="2px solid #FFFFFF05"
             borderRadius={"15px"}
           >
             <Heading fontSize={"20px"} mb={"15px"}>
@@ -62,13 +59,13 @@ const LandingFooter = () => {
             © Creditify • Built for DeFi • Non-custodial
           </Box>
           <Flex alignItems={"center"} gap={"8px"}>
-            <Link fontSize={"13px"} color="#FFFFFFA6" href="#">
+            <Link fontSize={"13px"} className="footer-link" href="#">
               Terms
             </Link>
-            <Link fontSize={"13px"} color="#FFFFFFA6" href="#">
+            <Link fontSize={"13px"} className="footer-link" href="#">
               Privacy
             </Link>
-            <Link fontSize={"13px"} color="#FFFFFFA6" href="#">
+            <Link fontSize={"13px"} className="footer-link" href="#">
               Careers
             </Link>
           </Flex>

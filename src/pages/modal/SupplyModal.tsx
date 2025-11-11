@@ -27,13 +27,14 @@ import usdcIcon from "../../assets/images/usdc.svg";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  tokenSymbol: "weth" | "usdc" | "eth";
+  tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo";
   amount: string;
   setAmount: (value: string) => void;
   onClickSupply: () => void;
   supplyApy?: string;
-  ethPrice?: number;
+  xdcPrice?: number;
   usdcPrice?: number;
+  cgoPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
 }
@@ -46,8 +47,9 @@ const SupplyModal: React.FC<Props> = ({
   setAmount,
   onClickSupply,
   supplyApy = "0.00",
-  ethPrice = 2500,
+  xdcPrice = 2500,
   usdcPrice = 1,
+  cgoPrice = 1,
   isPending,
   isConfirming,
 }) => {
@@ -57,52 +59,56 @@ const SupplyModal: React.FC<Props> = ({
 
   // Get native token info
   const nativeTokenSymbol = network.nativeToken.symbol;
-  const wrappedTokenSymbol = tokens.weth.symbol;
+  const wrappedTokenSymbol = tokens.wrappedNative.symbol;
 
-  // Get ETH balance for native ETH
-  const { data: ethBalance } = useBalance({
+  // Get XDC balance for native XDC
+  const { data: xdcBalance } = useBalance({
     address,
   });
 
   // Get token balances
-  const { balance: wethBalance } = useTokenBalance(
-    tokens.weth.address,
-    tokens.weth.decimals
+  const { balance: wxdcBalance } = useTokenBalance(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
   );
   const { balance: usdcBalance } = useTokenBalance(
     tokens.usdc.address,
     tokens.usdc.decimals
+  );
+  const { balance: cgoBalance } = useTokenBalance(
+    tokens.cgo.address,
+    tokens.cgo.decimals
   );
 
   // Get account data for health factor
   const accountData = useUserAccountData();
 
   // Separate display token from contract token
-  // Display: Show what user selected (ETH or WETH)
-  // Contract: Use WETH for both ETH and WETH
+  // Display: Show what user selected (XDC or WXDC)
+  // Contract: Use WXDC for both XDC and WXDC
   const displayToken = tokenSymbol; // Keep original selection for display
-  const contractToken = tokenSymbol === "eth" ? "weth" : tokenSymbol; // Convert ETH to WETH for contracts
+  const contractToken = tokenSymbol === "xdc" ? "wxdc" : tokenSymbol; // Convert XDC to WXDC for contracts
 
   // Token configuration based on DISPLAY token (what user sees)
   const getTokenConfig = () => {
     switch (displayToken) {
-      case "eth":
+      case "xdc":
         return {
           name: nativeTokenSymbol,
           symbol: nativeTokenSymbol,
           icon: getTokenLogo(nativeTokenSymbol),
-          balance: ethBalance?.formatted || "0",
+          balance: xdcBalance?.formatted || "0",
           decimals: 18,
-          price: ethPrice,
+          price: xdcPrice,
         };
-      case "weth":
+      case "wxdc":
         return {
           name: wrappedTokenSymbol,
           symbol: wrappedTokenSymbol,
           icon: getTokenLogo(wrappedTokenSymbol),
-          balance: wethBalance,
-          decimals: tokens.weth.decimals,
-          price: ethPrice,
+          balance: wxdcBalance,
+          decimals: tokens.wrappedNative.decimals,
+          price: xdcPrice,
         };
       case "usdc":
         return {
@@ -113,6 +119,15 @@ const SupplyModal: React.FC<Props> = ({
           decimals: tokens.usdc.decimals,
           price: usdcPrice,
         };
+      case "cgo":
+        return {
+          name: "CGO",
+          symbol: "CGO",
+          icon: getTokenLogo("CGO"),
+          balance: cgoBalance,
+          decimals: tokens.cgo.decimals,
+          price: cgoPrice,
+        };
       default:
         return {
           name: nativeTokenSymbol,
@@ -120,7 +135,7 @@ const SupplyModal: React.FC<Props> = ({
           icon: getTokenLogo(nativeTokenSymbol),
           balance: "0",
           decimals: 18,
-          price: ethPrice,
+          price: xdcPrice,
         };
     }
   };
@@ -269,9 +284,9 @@ const SupplyModal: React.FC<Props> = ({
                           colorPalette="blue"
                           onClick={() => {
                             const maxAmount = parseFloat(tokenConfig.balance);
-                            // Leave a small amount for gas if it's native ETH
+                            // Leave a small amount for gas if it's native XDC
                             const finalAmount =
-                              displayToken === "eth"
+                              displayToken === "xdc"
                                 ? Math.max(0, maxAmount - 0.01)
                                 : maxAmount;
                             setAmount(formatValue(finalAmount));

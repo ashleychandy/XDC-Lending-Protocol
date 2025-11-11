@@ -86,3 +86,157 @@ tr:last-child > td {
 .landing-page .primary-btn.radius5px {
   border-radius: 5px !important;
 }
+
+/* Light Theme Styles */
+.landing-page-light {
+  color: #1a202c !important;
+  background: #ffffff !important;
+}
+
+.landing-page-light p,
+.landing-page-light .p {
+  color: #4a5568 !important;
+}
+
+.landing-page-light h1,
+.landing-page-light h2,
+.landing-page-light h3,
+.landing-page-light h4,
+.landing-page-light h5,
+.landing-page-light h6 {
+  color: #1a202c !important;
+}
+
+.landing-page-light .secondary-btn,
+.landing-page-light .secondary-btn-lg {
+  box-shadow: 0px 6px 18px 0px rgba(99, 102, 241, 0.12);
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 10px;
+  color: #4a5568;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: "Inter", sans-serif;
+}
+
+.landing-page-light .secondary-btn:hover,
+.landing-page-light .secondary-btn-lg:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.landing-page-light .box2 {
+  color: #2d3748 !important;
+  background: #f7fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.landing-page-light .box {
+  background: linear-gradient(
+    180deg,
+    rgba(99, 102, 241, 0.03) 0%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  border: 1px solid #e2e8f0;
+  backdrop-filter: blur(8px);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.landing-page-light .box .chakra-flex {
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* FAQ Accordion Light Theme */
+.landing-page-light .chakra-accordion__item-trigger span {
+  color: #2d3748 !important;
+}
+
+.landing-page-light .chakra-accordion__item-body {
+  color: #4a5568 !important;
+}
+
+/* Footer Light Theme */
+.landing-page-light a {
+  color: #4a5568 !important;
+}
+
+.landing-page-light a:hover {
+  color: #2d3748 !important;
+}
+
+/* Input Light Theme */
+.landing-page-light input {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1a202c !important;
+}
+
+.landing-page-light input::placeholder {
+  color: #a0aec0 !important;
+}
+
+/* Divider Light Theme */
+.landing-page-light .chakra-box[style*="border-bottom"] {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+/* FAQ Light Theme */
+.landing-page-light .faq-item {
+  border: 1px solid #e2e8f0 !important;
+}
+
+.landing-page-light .faq-title {
+  color: #2d3748 !important;
+}
+
+.landing-page-light .faq-body {
+  color: #4a5568 !important;
+}
+
+/* Token Icon Background Light Theme */
+.landing-page-light .token-icon-bg {
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* CTA Box Light Theme */
+.landing-page-light .cta-box {
+  border: 1px solid #e2e8f0 !important;
+  background: linear-gradient(
+    90deg,
+    rgba(99, 102, 241, 0.06) 0%,
+    rgba(6, 182, 212, 0.03) 100%
+  ) !important;
+}
+
+/* Link Colors Light Theme */
+.landing-page-light a[href="#"] {
+  color: #06b6d4 !important;
+}
+
+/* Footer Newsletter Light Theme */
+.landing-page-light .footer-newsletter {
+  background: #f7fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.landing-page-light .footer-email-box {
+  background: #ffffff !important;
+  border: 2px solid #e2e8f0 !important;
+}
+
+.landing-page-light .footer-link {
+  color: #718096 !important;
+}
+
+.landing-page-light .footer-link:hover {
+  color: #4a5568 !important;
+}
+
+/* Governance List Light Theme */
+.landing-page-light .governance-list {
+  color: #2d3748 !important;
+}
+
+.landing-page-light .governance-list li {
+  color: #4a5568 !important;
+}

@@ -26,7 +26,7 @@ interface Props {
   token?: string;
 }
 
-const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
+const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
   const {
     tokenInfo,
     reserveSize,
@@ -49,14 +49,24 @@ const AssetOverview: React.FC<Props> = ({ token = "weth" }) => {
     borrowApy,
     reserveData,
     isLoading,
-  } = useAssetDetails(token || "weth");
+  } = useAssetDetails(token || "wxdc");
 
   // Configuration is a nested tuple with a 'data' field
   const reserveDataAny = reserveData as any;
-  const configData = reserveDataAny?.configuration
-    ? (reserveDataAny.configuration as any).data || reserveDataAny.configuration
-    : 0n;
-  const config = BigInt(configData || 0);
+  let config = 0n;
+  if (reserveDataAny?.configuration) {
+    const configObj = reserveDataAny.configuration as any;
+    if (typeof configObj === "bigint") {
+      config = configObj;
+    } else if (configObj.data !== undefined) {
+      config =
+        typeof configObj.data === "bigint"
+          ? configObj.data
+          : BigInt(configObj.data || 0);
+    } else if (typeof configObj === "number" || typeof configObj === "string") {
+      config = BigInt(configObj);
+    }
+  }
   const ltv = config & 0xffffn;
   const liquidationThreshold = (config >> 16n) & 0xffffn;
   const liquidationBonus = (config >> 32n) & 0xffffn;
