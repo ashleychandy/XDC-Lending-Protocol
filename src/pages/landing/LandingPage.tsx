@@ -12,16 +12,12 @@ import {
   Container,
   Flex,
   Heading,
-  HStack,
   Image,
-  Progress,
   SimpleGrid,
-  Text,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import section1Img from "../../assets/images/landing/section1Img.png";
 import LandingHeader from "./LandingHeader";
-import { useUserAccountData } from "@/hooks/useUserAccountData";
 import HowCreditifyWorks from "./HowCreditifyWorks";
 import MarketOverview from "./MarketOverview";
 import type { TokenDetailsDTO } from "./types/type";
@@ -48,9 +44,6 @@ const LandingPage = () => {
 
   const { supplyApy: usdcSupplyApy, borrowApy: usdcBorrowApy } =
     useAssetDetails("usdc");
-
-  const accountData = useUserAccountData();
-  console.log("accountData", accountData);
 
   const tokenDetails: TokenDetailsDTO[] = [
     {
@@ -114,13 +107,20 @@ const LandingPage = () => {
             xl: "container.xl",
             "2xl": "1340px",
           }}
-          px={{ base: 4, md: 6 }}
-          py={{ base: 4, lg: 10 }}
+          px={{ base: 4, lg: 6 }}
+          pt={{ base: 4, lg: 10 }}
+          pb={{ base: 2, lg: 6 }}
           h="100%"
         >
           <LandingHeader />
-          <Flex as={"section"} gap={"20px"} alignItems={"center"} py={"100px"}>
-            <Box w={"55%"}>
+          <Flex
+            as={"section"}
+            gap={{ lg: "20px" }}
+            alignItems={"center"}
+            direction={{ base: "column", lg: "row" }}
+            py={{ base: "40px", md: "60px", lg: "100px" }}
+          >
+            <Box w={{ base: "100%", lg: "55%" }}>
               <Box as={"p"} fontSize={"13px"} mb={"20px"}>
                 Decentralized Liquidity Protocol
               </Box>
@@ -138,7 +138,7 @@ const LandingPage = () => {
                   className="primary-btn"
                   onClick={() => navigate(ROUTES.DASHBOARD)}
                 >
-                  Get Started
+                  Launch xVault
                 </Button>
                 <Button
                   className="secondary-btn"
@@ -179,7 +179,7 @@ const LandingPage = () => {
                           </Box>
                         </Flex>
                       </Flex>
-                      <SimpleGrid columns={{ base: 1, md: 2 }} gap="10px">
+                      <SimpleGrid columns={{ base: 1, sm: 2 }} gap="10px">
                         {x.tokenInfo.map((y, index) => {
                           return (
                             <Box
@@ -199,12 +199,14 @@ const LandingPage = () => {
                 })}
               </Flex>
             </Box>
-            <Box w={"45%"}>
+            <Box w={{ base: "100%", lg: "45%" }}>
               <Image
-                // w={"45%"}
                 src={section1Img}
                 alt="section1Img"
                 maxW={"100%"}
+                width={{ base: "500px", lg: "100%" }}
+                height={{ base: "400px", lg: "auto" }}
+                mx={"auto"}
               ></Image>
             </Box>
           </Flex>
@@ -213,10 +215,11 @@ const LandingPage = () => {
           {/* Market Overview section */}
           <MarketOverview tokenDetails={tokenDetails} />
           <Box
-            pt={"120px"}
+            pt={{ base: "60px", md: "80px", lg: "120px" }}
             maxW={"1054px"}
             w={"100%"}
-            m={"0 auto 150px"}
+            mx={"auto"}
+            mb={{ base: "60px", md: "80px", lg: "150px" }}
             borderBottom={"1px solid #404040"}
           ></Box>
           {/* Your assets, your control */}

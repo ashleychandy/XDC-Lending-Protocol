@@ -66,10 +66,7 @@ tr:last-child > td {
 }
 .landing-page .big-heading {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 128px;
   box-shadow: 0px 4px 4px 0px #00000040;
-  font-weight: 700;
-  line-height: 128px;
   font-weight: 700;
   background: linear-gradient(90deg, #06b6d4 0%, #6366f1 100%);
   -webkit-background-clip: text;

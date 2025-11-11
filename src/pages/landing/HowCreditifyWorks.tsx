@@ -13,51 +13,90 @@ const HowCreditifyWorks = () => {
         Simple steps to supply and borrow — automated protection and transparent
         economics.
       </Box>
-      <Flex wrap={"wrap"} pb={"100px"}>
-        <Box p={"25px 50px"} w={"50%"}>
-          <Heading className="big-heading">1</Heading>
+      <Flex wrap={"wrap"} pb={{ base: "40px", md: "60px", lg: "100px" }}>
+        <Box
+          p={{ base: "15px", xl: "25px 50px" }}
+          w={{ base: "100%", lg: "50%" }}
+        >
+          <Heading
+            className="big-heading"
+            fontSize={{ base: "100px", lg: "128px" }}
+            lineHeight={{ base: "100px", lg: "128px" }}
+          >
+            1
+          </Heading>
           <Heading
             ml={"-40px"}
             display={"inline-block"}
             verticalAlign={"super"}
-            fontSize={"48px"}
+            fontSize={{ base: "30px", sm: "32px", md: "40px", lg: "48px" }}
           >
             Supply Assets
           </Heading>
-          <Box as={"p"} fontSize={"22px"} p={"15px 40px"}>
+          <Box
+            as={"p"}
+            fontSize={{ base: "14px", sm: "18px", lg: "22px" }}
+            p={"15px 40px"}
+          >
             Deposit USDC or WETH into the reserve and receive
             <br />
             xTokens (xUSDC/xWETH) that accrue yield automatically.
           </Box>
         </Box>
-        <Box p={"25px 50px"} w={"50%"}>
-          <Heading className="big-heading">2</Heading>
+        <Box
+          p={{ base: "15px", xl: "25px 50px" }}
+          w={{ base: "100%", lg: "50%" }}
+        >
+          <Heading
+            className="big-heading"
+            fontSize={{ base: "100px", lg: "128px" }}
+            lineHeight={{ base: "100px", lg: "128px" }}
+          >
+            2
+          </Heading>
           <Heading
             ml={"-40px"}
             display={"inline-block"}
             verticalAlign={"super"}
-            fontSize={"48px"}
+            fontSize={{ base: "30px", sm: "32px", md: "40px", lg: "48px" }}
           >
             Borrow Instantly
           </Heading>
-          <Box as={"p"} fontSize={"22px"} p={"15px 40px"}>
+          <Box
+            as={"p"}
+            fontSize={{ base: "14px", sm: "18px", lg: "22px" }}
+            p={"15px 40px"}
+          >
             Use your xTokens as collateral to borrow other assets.
             <br />
             Interest is algorithmic and tied to utilization.
           </Box>
         </Box>
         <Flex w={"100%"} justifyContent={"center"}>
-          <Box p={"25px 50px"} w={"53%"}>
-            <Heading className="big-heading">3</Heading>
+          <Box
+            p={{ base: "15px", xl: "25px 50px" }}
+            w={{ base: "100%", lg: "63%", xl: "53%" }}
+          >
+            <Heading
+              className="big-heading"
+              fontSize={{ base: "100px", lg: "128px" }}
+              lineHeight={{ base: "100px", lg: "128px" }}
+            >
+              3
+            </Heading>
             <Heading
               ml={"-40px"}
               display={"inline-block"}
               verticalAlign={"super"}
-              fontSize={"48px"}
+              fontSize={{ base: "30px", sm: "32px", md: "40px", lg: "48px" }}
             >
               Automated Protection
             </Heading>
-            <Box as={"p"} fontSize={"22px"} p={"15px 40px"}>
+            <Box
+              as={"p"}
+              fontSize={{ base: "14px", sm: "18px", lg: "22px" }}
+              p={"15px 40px"}
+            >
               Health Factor monitoring and automated liquidation
               <br />
               safeguards help maintain solvency and protect lenders
@@ -65,7 +104,11 @@ const HowCreditifyWorks = () => {
           </Box>
         </Flex>
       </Flex>
-      <SimpleGrid columns={{ base: 1, md: 2 }} gap={"80px"} py={"100px"}>
+      <SimpleGrid
+        columns={2}
+        gap={{ base: "40px", md: "60px", lg: "80px" }}
+        py={{ base: "40px", md: "60px", lg: "100px" }}
+      >
         <Flex direction={"column"}>
           <Image
             src={supplyImg}

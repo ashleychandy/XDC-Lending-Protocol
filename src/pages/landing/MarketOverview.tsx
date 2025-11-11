@@ -8,7 +8,7 @@ interface Props {
 
 const MarketOverview: React.FC<Props> = ({ tokenDetails }) => {
   return (
-    <Box as={"section"} gap={"20px"}>
+    <Box as={"section"} pt={{ base: "25px", lg: "50px" }}>
       <Heading fontSize={"32px"} mb={"20px"}>
         Market Overview
       </Heading>
@@ -16,14 +16,18 @@ const MarketOverview: React.FC<Props> = ({ tokenDetails }) => {
         Live reserve data — supply APY, borrow APR, available liquidity and
         utilization.
       </Box>
-      <Flex alignItems={"center"} gap={"80px"}>
+      <Flex
+        alignItems={"center"}
+        flexWrap={{ base: "wrap", lg: "nowrap" }}
+        gap={{ base: "30px", lg: "80px" }}
+      >
         {tokenDetails.map((x, i) => {
           return (
             <Box
               p="20px"
               className="box"
               borderRadius={"14px"}
-              w={"50%"}
+              w={{ base: "100%", lg: "50%" }}
               key={i}
             >
               <Flex mb={"15px"} justifyContent={"space-between"}>
@@ -67,7 +71,7 @@ const MarketOverview: React.FC<Props> = ({ tokenDetails }) => {
                   </Button>
                 </Flex>
               </Flex>
-              <SimpleGrid columns={{ base: 1, md: 2 }} gap="10px" mb={"30px"}>
+              <SimpleGrid columns={2} gap="10px" mb={"30px"}>
                 {x.tokenInfo.map((y, index) => {
                   return (
                     <Box
