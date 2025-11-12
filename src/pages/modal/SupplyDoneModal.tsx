@@ -7,11 +7,13 @@ import {
   HStack,
   Icon,
   Portal,
+  Text,
 } from "@chakra-ui/react";
-import { FaCheck } from "react-icons/fa6";
+import { FaCheck, FaWallet } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import { useAccount } from "wagmi";
+import { useChainConfig } from "../../hooks/useChainConfig";
 
 interface Props {
   isOpen: boolean;
@@ -29,11 +31,48 @@ const SupplyDoneModal: React.FC<Props> = ({
   txHash,
 }) => {
   const { chain } = useAccount();
+  const { tokens } = useChainConfig();
 
   const handleOpenExplorer = () => {
     if (!txHash || !chain?.blockExplorers?.default?.url) return;
     const explorerUrl = `${chain.blockExplorers.default.url}/tx/${txHash}`;
     window.open(explorerUrl, "_blank");
+  };
+
+  const handleAddToWallet = async () => {
+    if (!window.ethereum) return;
+
+    // Map token symbol to aToken address
+    const aTokenAddresses: Record<string, string> = {
+      wxdc: tokens.wrappedNative.aToken,
+      xdc: tokens.wrappedNative.aToken,
+      usdc: tokens.usdc.aToken,
+      cgo: tokens.cgo.aToken,
+    };
+
+    const normalizedSymbol = tokenSymbol.toLowerCase();
+    const aTokenAddress = aTokenAddresses[normalizedSymbol];
+
+    if (!aTokenAddress) {
+      console.error("aToken address not found for", tokenSymbol);
+      return;
+    }
+
+    try {
+      await window.ethereum.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: aTokenAddress,
+            symbol: `a${tokenSymbol.toUpperCase()}`,
+            decimals: 18,
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Failed to add token to wallet:", error);
+    }
   };
 
   return (
@@ -77,12 +116,26 @@ const SupplyDoneModal: React.FC<Props> = ({
                   <Heading size="xl" mb="7px">
                     All done
                   </Heading>
-                  <Box>
+                  <Box mb="10px">
                     You Supplied {amount || "0.00"} {tokenSymbol?.toUpperCase()}
                   </Box>
+                  <Text fontSize="sm" color="gray.500">
+                    Add cToken to wallet to track your balance.
+                  </Text>
                 </Box>
               </Dialog.Body>
               <Dialog.Footer flexDirection="column" gap="8px">
+                <Button
+                  variant="outline"
+                  w="100%"
+                  fontSize="16px"
+                  onClick={handleAddToWallet}
+                >
+                  <Icon size="md" mr="2">
+                    <FaWallet />
+                  </Icon>
+                  Add to wallet
+                </Button>
                 <Button
                   variant="subtle"
                   w="100%"

@@ -7,11 +7,13 @@ import {
   HStack,
   Icon,
   Portal,
+  Text,
 } from "@chakra-ui/react";
-import { FaCheck } from "react-icons/fa6";
+import { FaCheck, FaWallet } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import { useAccount } from "wagmi";
+import { useChainConfig } from "../../hooks/useChainConfig";
 
 interface Props {
   isOpen: boolean;
@@ -29,11 +31,48 @@ const BorrowDoneModal: React.FC<Props> = ({
   txHash,
 }) => {
   const { chain } = useAccount();
+  const { tokens } = useChainConfig();
 
   const handleOpenExplorer = () => {
     if (!txHash || !chain?.blockExplorers?.default?.url) return;
     const explorerUrl = `${chain.blockExplorers.default.url}/tx/${txHash}`;
     window.open(explorerUrl, "_blank");
+  };
+
+  const handleAddToWallet = async () => {
+    if (!window.ethereum) return;
+
+    // Map token symbol to variable debt token address
+    const debtTokenAddresses: Record<string, string> = {
+      wxdc: tokens.wrappedNative.variableDebtToken,
+      xdc: tokens.wrappedNative.variableDebtToken,
+      usdc: tokens.usdc.variableDebtToken,
+      cgo: tokens.cgo.variableDebtToken,
+    };
+
+    const normalizedSymbol = tokenSymbol.toLowerCase();
+    const debtTokenAddress = debtTokenAddresses[normalizedSymbol];
+
+    if (!debtTokenAddress) {
+      console.error("Debt token address not found for", tokenSymbol);
+      return;
+    }
+
+    try {
+      await window.ethereum.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: debtTokenAddress,
+            symbol: `variableDebt${tokenSymbol.toUpperCase()}`,
+            decimals: 18,
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Failed to add token to wallet:", error);
+    }
   };
   return (
     <HStack wrap="wrap" gap="4">
@@ -76,12 +115,26 @@ const BorrowDoneModal: React.FC<Props> = ({
                   <Heading size="xl" mb="7px">
                     All done
                   </Heading>
-                  <Box>
+                  <Box mb="10px">
                     You Borrowed {amount || "0.00"} {tokenSymbol?.toUpperCase()}
                   </Box>
+                  <Text fontSize="sm" color="gray.500">
+                    Add debt token to wallet to track your balance.
+                  </Text>
                 </Box>
               </Dialog.Body>
               <Dialog.Footer flexDirection="column" gap="8px">
+                <Button
+                  variant="outline"
+                  w="100%"
+                  fontSize="16px"
+                  onClick={handleAddToWallet}
+                >
+                  <Icon size="md" mr="2">
+                    <FaWallet />
+                  </Icon>
+                  Add to wallet
+                </Button>
                 <Button
                   variant="subtle"
                   w="100%"

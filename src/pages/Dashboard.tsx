@@ -99,12 +99,14 @@ const Dashboard = () => {
           <Flex gap="2" alignItems="center" mb="15px">
             <Image
               src={network.icon}
-              width="48px"
-              height="48px"
+              width="100px"
+              height="100px"
               objectFit="contain"
               flexShrink={0}
             />
-            <Heading size="3xl">{network.name} Market</Heading>
+            <Heading size="4xl">
+              {network.name.replace(/^XDC\s+/i, "")} Market
+            </Heading>
           </Flex>
 
           <Flex gap="6" alignItems="center" mb="50px" flexWrap="wrap">

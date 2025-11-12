@@ -46,6 +46,10 @@ const customConfig = defineConfig({
           emphasized: { value: "{colors.brand.300}" },
           focusRing: { value: "{colors.brand.500}" },
         },
+        bg: {
+          panel: { value: { base: "#ffffff", _dark: "#1a202c" } },
+          muted: { value: { base: "#f7fafc", _dark: "#2d3748" } },
+        },
       },
     },
   },
