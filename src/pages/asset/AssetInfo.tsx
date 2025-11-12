@@ -5,6 +5,7 @@ import { useChainConfig } from "@/hooks/useChainConfig";
 import { useReserveBorrowed } from "@/hooks/useReserveBorrowed";
 import { useReserveCaps } from "@/hooks/useReserveCaps";
 import { useReserveData } from "@/hooks/useReserveData";
+import { useReserveLiquidity } from "@/hooks/useReserveLiquidity";
 import { useSupply } from "@/hooks/useSupply";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
@@ -71,6 +72,20 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   const usdcReserveData = useReserveData(tokens.usdc.address);
   const cgoReserveData = useReserveData(tokens.cgo.address);
 
+  // Get available liquidity for each reserve
+  const wxdcLiquidity = useReserveLiquidity(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
+  );
+  const usdcLiquidity = useReserveLiquidity(
+    tokens.usdc.address,
+    tokens.usdc.decimals
+  );
+  const cgoLiquidity = useReserveLiquidity(
+    tokens.cgo.address,
+    tokens.cgo.decimals
+  );
+
   // Get borrow caps and total borrowed - must be declared before use
   const wxdcCaps = useReserveCaps(
     tokens.wrappedNative.address,
@@ -92,10 +107,11 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     tokens.cgo.decimals
   );
 
-  // Calculate available to borrow considering borrow cap
+  // Calculate available to borrow considering borrow cap and available liquidity
   const getAvailableToBorrow = (
     capStr: string,
     totalBorrowedStr: string,
+    availableLiquidityStr: string,
     price: number
   ) => {
     const userAvailableInUsd = parseFloat(accountData.availableBorrows);
@@ -103,20 +119,20 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
 
     const cap = parseFloat(capStr || "0");
     const totalBorrowed = parseFloat(totalBorrowedStr || "0");
+    const availableLiquidity = parseFloat(availableLiquidityStr || "0");
 
-    // If there's a cap, limit by remaining capacity
-    if (cap > 0) {
-      const remainingCap = Math.max(0, cap - totalBorrowed);
-      return Math.min(userAvailableInToken, remainingCap);
-    }
+    // Calculate remaining borrow cap
+    const remainingCap = cap > 0 ? Math.max(0, cap - totalBorrowed) : Infinity;
 
-    return userAvailableInToken;
+    // Return minimum of: user capacity, remaining cap, and available liquidity
+    return Math.min(userAvailableInToken, remainingCap, availableLiquidity);
   };
 
   const borrowedXdc = formatValue(
     getAvailableToBorrow(
       wxdcCaps.borrowCap,
       wxdcTotalBorrowed.totalBorrowed,
+      wxdcLiquidity.availableLiquidity,
       xdcPrice
     )
   );
@@ -124,6 +140,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     getAvailableToBorrow(
       usdcCaps.borrowCap,
       usdcTotalBorrowed.totalBorrowed,
+      usdcLiquidity.availableLiquidity,
       usdcPrice
     )
   );
@@ -131,6 +148,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     getAvailableToBorrow(
       cgoCaps.borrowCap,
       cgoTotalBorrowed.totalBorrowed,
+      cgoLiquidity.availableLiquidity,
       cgoPrice
     )
   );

@@ -8,6 +8,7 @@ import { useRepay } from "@/hooks/useRepay";
 import { useReserveBorrowed } from "@/hooks/useReserveBorrowed";
 import { useReserveCaps } from "@/hooks/useReserveCaps";
 import { useReserveData } from "@/hooks/useReserveData";
+import { useReserveLiquidity } from "@/hooks/useReserveLiquidity";
 import { useTokenAllowance } from "@/hooks/useTokenAllowance";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
@@ -98,6 +99,20 @@ function BorrowContent() {
   const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
   const usdcReserveData = useReserveData(tokens.usdc.address);
   const cgoReserveData = useReserveData(tokens.cgo.address);
+
+  // Get available liquidity for each reserve
+  const wxdcLiquidity = useReserveLiquidity(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
+  );
+  const usdcLiquidity = useReserveLiquidity(
+    tokens.usdc.address,
+    tokens.usdc.decimals
+  );
+  const cgoLiquidity = useReserveLiquidity(
+    tokens.cgo.address,
+    tokens.cgo.decimals
+  );
 
   // Get borrow caps
   const wxdcCaps = useReserveCaps(
@@ -541,13 +556,45 @@ function BorrowContent() {
           }
           availableToBorrow={
             selectedToken === "xdc" || selectedToken === "wxdc"
-              ? formatValue(parseFloat(accountData.availableBorrows) / xdcPrice)
+              ? formatValue(
+                  Math.min(
+                    parseFloat(accountData.availableBorrows) / xdcPrice,
+                    parseFloat(wxdcLiquidity.availableLiquidity),
+                    parseFloat(wxdcCaps.borrowCap || "0") > 0
+                      ? Math.max(
+                          0,
+                          parseFloat(wxdcCaps.borrowCap) -
+                            parseFloat(wxdcTotalBorrowed.totalBorrowed)
+                        )
+                      : Infinity
+                  )
+                )
               : selectedToken === "cgo"
                 ? formatValue(
-                    parseFloat(accountData.availableBorrows) / cgoPrice
+                    Math.min(
+                      parseFloat(accountData.availableBorrows) / cgoPrice,
+                      parseFloat(cgoLiquidity.availableLiquidity),
+                      parseFloat(cgoCaps.borrowCap || "0") > 0
+                        ? Math.max(
+                            0,
+                            parseFloat(cgoCaps.borrowCap) -
+                              parseFloat(cgoTotalBorrowed.totalBorrowed)
+                          )
+                        : Infinity
+                    )
                   )
                 : formatValue(
-                    parseFloat(accountData.availableBorrows) / usdcPrice
+                    Math.min(
+                      parseFloat(accountData.availableBorrows) / usdcPrice,
+                      parseFloat(usdcLiquidity.availableLiquidity),
+                      parseFloat(usdcCaps.borrowCap || "0") > 0
+                        ? Math.max(
+                            0,
+                            parseFloat(usdcCaps.borrowCap) -
+                              parseFloat(usdcTotalBorrowed.totalBorrowed)
+                          )
+                        : Infinity
+                    )
                   )
           }
           xdcPrice={xdcPrice}
