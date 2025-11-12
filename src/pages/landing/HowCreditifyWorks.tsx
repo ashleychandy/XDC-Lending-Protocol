@@ -39,7 +39,7 @@ const HowCreditifyWorks = () => {
           >
             Deposit USDC or XDC into the reserve and receive
             <br />
-            xTokens (xUSDC/xXDC) that accrue yield automatically.
+            cTokens (cUSDC/xXDC) that accrue yield automatically.
           </Box>
         </Box>
         <Box

@@ -30,7 +30,13 @@ interface Props {
   tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo";
   amount: string;
   setAmount: (value: string) => void;
+  onClickApprove: () => void;
   onClickSupply: () => void;
+  isApproved: boolean;
+  isApprovePending: boolean;
+  allowance?: bigint;
+  supplyCap?: string;
+  totalSupplied?: string;
   supplyApy?: string;
   xdcPrice?: number;
   usdcPrice?: number;
@@ -45,7 +51,13 @@ const SupplyModal: React.FC<Props> = ({
   tokenSymbol,
   amount,
   setAmount,
+  allowance,
+  supplyCap = "0",
+  totalSupplied = "0",
+  onClickApprove,
   onClickSupply,
+  isApproved,
+  isApprovePending,
   supplyApy = "0.00",
   xdcPrice = 2500,
   usdcPrice = 1,
@@ -283,12 +295,34 @@ const SupplyModal: React.FC<Props> = ({
                           h="auto"
                           colorPalette="blue"
                           onClick={() => {
-                            const maxAmount = parseFloat(tokenConfig.balance);
+                            const walletBalance = parseFloat(
+                              tokenConfig.balance
+                            );
+                            const supplyCapNum = parseFloat(supplyCap);
+                            const totalSuppliedNum = parseFloat(totalSupplied);
+
+                            // Calculate remaining capacity
+                            // Subtract a small amount (0.01) to account for rounding errors
+                            const remainingCapacity =
+                              supplyCapNum > 0
+                                ? Math.max(
+                                    0,
+                                    supplyCapNum - totalSuppliedNum - 0.01
+                                  )
+                                : walletBalance; // If no cap, use wallet balance
+
+                            // Take minimum of wallet balance and remaining capacity
+                            let maxAmount = Math.min(
+                              walletBalance,
+                              remainingCapacity
+                            );
+
                             // Leave a small amount for gas if it's native XDC
                             const finalAmount =
                               displayToken === "xdc"
                                 ? Math.max(0, maxAmount - 0.01)
                                 : maxAmount;
+
                             setAmount(formatValue(finalAmount));
                           }}
                         >
@@ -354,23 +388,87 @@ const SupplyModal: React.FC<Props> = ({
                 </Flex>
               </Dialog.Body>
               <Dialog.Footer>
-                <Button
-                  disabled={
-                    !amount ||
-                    amount.trim() === "" ||
-                    parseFloat(amount) === 0 ||
-                    isPending ||
-                    isConfirming
+                {(() => {
+                  // Check if supply would exceed cap
+                  const supplyCapNum = parseFloat(supplyCap || "0");
+                  const totalSuppliedNum = parseFloat(totalSupplied || "0");
+                  const supplyAmount = parseFloat(amount || "0");
+
+                  // Only check cap if it's set (> 0)
+                  // Cap of 0 means unlimited
+                  // Add small buffer (0.01) to account for rounding errors
+                  const exceedsSupplyCap =
+                    supplyCapNum > 0 &&
+                    totalSuppliedNum + supplyAmount > supplyCapNum + 0.01;
+
+                  // For native token (XDC), no approval needed
+                  if (tokenSymbol === "xdc") {
+                    return (
+                      <Button
+                        disabled={
+                          !amount ||
+                          amount.trim() === "" ||
+                          parseFloat(amount) === 0 ||
+                          exceedsSupplyCap ||
+                          isPending ||
+                          isConfirming
+                        }
+                        w="100%"
+                        fontSize="18px"
+                        onClick={onClickSupply}
+                        colorPalette="blue"
+                        loading={isPending || isConfirming}
+                      >
+                        {!amount ||
+                        amount.trim() === "" ||
+                        parseFloat(amount) === 0
+                          ? "Enter an amount"
+                          : exceedsSupplyCap
+                            ? "Exceeds supply cap"
+                            : `Supply ${tokenConfig.symbol}`}
+                      </Button>
+                    );
                   }
-                  w="100%"
-                  fontSize="18px"
-                  onClick={onClickSupply}
-                  colorPalette="blue"
-                >
-                  {!amount || amount.trim() === "" || parseFloat(amount) === 0
-                    ? "Enter an amount"
-                    : `Supply ${tokenConfig.symbol}`}
-                </Button>
+
+                  // Check if allowance is sufficient for the input amount
+                  const amountInWei = amount
+                    ? BigInt(
+                        Math.floor(
+                          parseFloat(amount) * 10 ** tokenConfig.decimals
+                        )
+                      )
+                    : BigInt(0);
+                  const needsApproval = !allowance || allowance < amountInWei;
+
+                  return (
+                    <Button
+                      disabled={
+                        !amount ||
+                        amount.trim() === "" ||
+                        parseFloat(amount) === 0 ||
+                        exceedsSupplyCap ||
+                        isPending ||
+                        isConfirming ||
+                        isApprovePending
+                      }
+                      w="100%"
+                      fontSize="18px"
+                      onClick={needsApproval ? onClickApprove : onClickSupply}
+                      colorPalette="blue"
+                      loading={isApprovePending || isPending || isConfirming}
+                    >
+                      {!amount ||
+                      amount.trim() === "" ||
+                      parseFloat(amount) === 0
+                        ? "Enter an amount"
+                        : exceedsSupplyCap
+                          ? "Exceeds supply cap"
+                          : needsApproval
+                            ? `Approve ${tokenConfig.symbol}`
+                            : `Supply ${tokenConfig.symbol}`}
+                    </Button>
+                  );
+                })()}
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>

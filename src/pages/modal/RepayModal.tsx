@@ -30,7 +30,11 @@ interface Props {
   tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo";
   amount: string;
   setAmount: (value: string) => void;
+  onClickApprove: () => void;
   onClickRepay: () => void;
+  isApproved: boolean;
+  isApprovePending: boolean;
+  allowance?: bigint;
   borrowedAmount?: string; // User's borrowed amount in token units
   xdcPrice?: number;
   usdcPrice?: number;
@@ -45,9 +49,13 @@ const RepayModal: React.FC<Props> = ({
   isOpen,
   onClose,
   tokenSymbol,
+  allowance,
   amount,
   setAmount,
+  onClickApprove,
   onClickRepay,
+  isApproved,
+  isApprovePending,
   borrowedAmount = "0",
   xdcPrice = 2500,
   usdcPrice = 1,
@@ -423,31 +431,75 @@ const RepayModal: React.FC<Props> = ({
               </Dialog.Body>
 
               <Dialog.Footer>
-                <Button
-                  disabled={
-                    !amount ||
-                    amount.trim() === "" ||
-                    parseFloat(amount) === 0 ||
-                    insufficientBalance ||
-                    isPending ||
-                    isConfirming
-                  }
-                  w="100%"
-                  fontSize="18px"
-                  onClick={onClickRepay}
-                  colorPalette="blue"
-                  loading={isPending || isConfirming}
-                >
-                  {isPending || isConfirming
-                    ? "Repaying..."
-                    : !amount ||
+                {(() => {
+                  // For native token repay, no approval needed
+                  if (useNative) {
+                    return (
+                      <Button
+                        disabled={
+                          !amount ||
+                          amount.trim() === "" ||
+                          parseFloat(amount) === 0 ||
+                          insufficientBalance ||
+                          isPending ||
+                          isConfirming
+                        }
+                        w="100%"
+                        fontSize="18px"
+                        onClick={onClickRepay}
+                        colorPalette="blue"
+                        loading={isPending || isConfirming}
+                      >
+                        {!amount ||
                         amount.trim() === "" ||
                         parseFloat(amount) === 0
-                      ? "Enter an amount"
-                      : insufficientBalance
-                        ? "Insufficient balance"
-                        : `Repay ${tokenConfig.symbol}`}
-                </Button>
+                          ? "Enter an amount"
+                          : insufficientBalance
+                            ? "Insufficient balance"
+                            : `Repay ${tokenConfig.symbol}`}
+                      </Button>
+                    );
+                  }
+
+                  // Check if allowance is sufficient for the input amount
+                  const amountInWei = amount
+                    ? BigInt(
+                        Math.floor(
+                          parseFloat(amount) * 10 ** tokenConfig.decimals
+                        )
+                      )
+                    : BigInt(0);
+                  const needsApproval = !allowance || allowance < amountInWei;
+
+                  return (
+                    <Button
+                      disabled={
+                        !amount ||
+                        amount.trim() === "" ||
+                        parseFloat(amount) === 0 ||
+                        insufficientBalance ||
+                        isPending ||
+                        isConfirming ||
+                        isApprovePending
+                      }
+                      w="100%"
+                      fontSize="18px"
+                      onClick={needsApproval ? onClickApprove : onClickRepay}
+                      colorPalette="blue"
+                      loading={isApprovePending || isPending || isConfirming}
+                    >
+                      {!amount ||
+                      amount.trim() === "" ||
+                      parseFloat(amount) === 0
+                        ? "Enter an amount"
+                        : insufficientBalance
+                          ? "Insufficient balance"
+                          : needsApproval
+                            ? `Approve ${tokenConfig.symbol}`
+                            : `Repay ${tokenConfig.symbol}`}
+                    </Button>
+                  );
+                })()}
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>

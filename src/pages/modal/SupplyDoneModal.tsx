@@ -40,7 +40,13 @@ const SupplyDoneModal: React.FC<Props> = ({
   };
 
   const handleAddToWallet = async () => {
-    if (!window.ethereum) return;
+    console.log("Add to wallet clicked");
+
+    if (!window.ethereum) {
+      console.error("MetaMask not detected");
+      alert("Please install MetaMask to add tokens to your wallet");
+      return;
+    }
 
     // Map token symbol to aToken address
     const aTokenAddresses: Record<string, string> = {
@@ -53,25 +59,34 @@ const SupplyDoneModal: React.FC<Props> = ({
     const normalizedSymbol = tokenSymbol.toLowerCase();
     const aTokenAddress = aTokenAddresses[normalizedSymbol];
 
-    if (!aTokenAddress) {
-      console.error("aToken address not found for", tokenSymbol);
+    console.log("Token symbol:", tokenSymbol);
+    console.log("Normalized symbol:", normalizedSymbol);
+    console.log("aToken address:", aTokenAddress);
+
+    if (
+      !aTokenAddress ||
+      aTokenAddress === "0x0000000000000000000000000000000000000000"
+    ) {
+      console.error("aToken address not configured for", tokenSymbol);
+      alert(`aToken address not configured for ${tokenSymbol}`);
       return;
     }
 
     try {
-      await window.ethereum.request({
+      // Don't specify symbol/decimals - let MetaMask read them from the contract
+      const result = await window.ethereum.request({
         method: "wallet_watchAsset",
         params: {
           type: "ERC20",
           options: {
             address: aTokenAddress,
-            symbol: `a${tokenSymbol.toUpperCase()}`,
-            decimals: 18,
           },
         },
       });
+      console.log("Add token result:", result);
     } catch (error) {
       console.error("Failed to add token to wallet:", error);
+      alert("Failed to add token to wallet. Check console for details.");
     }
   };
 

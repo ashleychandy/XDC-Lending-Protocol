@@ -40,7 +40,13 @@ const BorrowDoneModal: React.FC<Props> = ({
   };
 
   const handleAddToWallet = async () => {
-    if (!window.ethereum) return;
+    console.log("Add debt token to wallet clicked");
+
+    if (!window.ethereum) {
+      console.error("MetaMask not detected");
+      alert("Please install MetaMask to add tokens to your wallet");
+      return;
+    }
 
     // Map token symbol to variable debt token address
     const debtTokenAddresses: Record<string, string> = {
@@ -53,25 +59,34 @@ const BorrowDoneModal: React.FC<Props> = ({
     const normalizedSymbol = tokenSymbol.toLowerCase();
     const debtTokenAddress = debtTokenAddresses[normalizedSymbol];
 
-    if (!debtTokenAddress) {
-      console.error("Debt token address not found for", tokenSymbol);
+    console.log("Token symbol:", tokenSymbol);
+    console.log("Normalized symbol:", normalizedSymbol);
+    console.log("Debt token address:", debtTokenAddress);
+
+    if (
+      !debtTokenAddress ||
+      debtTokenAddress === "0x0000000000000000000000000000000000000000"
+    ) {
+      console.error("Debt token address not configured for", tokenSymbol);
+      alert(`Debt token address not configured for ${tokenSymbol}`);
       return;
     }
 
     try {
-      await window.ethereum.request({
+      // Don't specify symbol/decimals - let MetaMask read them from the contract
+      const result = await window.ethereum.request({
         method: "wallet_watchAsset",
         params: {
           type: "ERC20",
           options: {
             address: debtTokenAddress,
-            symbol: `variableDebt${tokenSymbol.toUpperCase()}`,
-            decimals: 18,
           },
         },
       });
+      console.log("Add debt token result:", result);
     } catch (error) {
       console.error("Failed to add token to wallet:", error);
+      alert("Failed to add token to wallet. Check console for details.");
     }
   };
   return (

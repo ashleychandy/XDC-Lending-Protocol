@@ -200,6 +200,34 @@ const WithdrawModal: React.FC<Props> = ({
   const healthFactorValue = parseFloat(accountData.healthFactor);
   const newHealthFactorValue = parseFloat(getNewHealthFactor());
 
+  // Calculate safe max withdraw amount (keeping HF > 1.1)
+  const getSafeMaxWithdraw = () => {
+    const currentCollateralUsd = parseFloat(accountData.totalCollateral);
+    const currentDebtUsd = parseFloat(accountData.totalDebt);
+    const avgLiquidationThreshold = parseFloat(
+      accountData.currentLiquidationThreshold
+    );
+    const minHealthFactor = 1.1; // Keep HF above 1.1 for safety
+
+    // If no debt, can withdraw all
+    if (currentDebtUsd === 0 || currentDebtUsd < 0.01) {
+      return parseFloat(suppliedBalance);
+    }
+
+    // Min collateral needed = (debt * minHealthFactor) / liquidationThreshold%
+    const minCollateralNeeded =
+      (currentDebtUsd * minHealthFactor * 100) / avgLiquidationThreshold;
+    const maxWithdrawUsd = Math.max(
+      0,
+      currentCollateralUsd - minCollateralNeeded
+    );
+    const maxWithdrawInToken = maxWithdrawUsd / tokenConfig.price;
+
+    // Also respect the supplied balance
+    const supplied = parseFloat(suppliedBalance);
+    return Math.min(maxWithdrawInToken, supplied);
+  };
+
   const endElement = amount ? (
     <CloseButton
       size="xs"
@@ -214,6 +242,8 @@ const WithdrawModal: React.FC<Props> = ({
   // Check if withdrawal would make health factor too low
   const isWithdrawalRisky =
     newHealthFactorValue < 1.5 && newHealthFactorValue !== Infinity;
+  const isWithdrawalDangerous =
+    newHealthFactorValue < 1.05 && newHealthFactorValue !== Infinity;
 
   return (
     <HStack wrap="wrap" gap="4">
@@ -300,7 +330,8 @@ const WithdrawModal: React.FC<Props> = ({
                           h="auto"
                           colorPalette="blue"
                           onClick={() => {
-                            setAmount(formatValue(parseFloat(suppliedBalance)));
+                            const safeMax = getSafeMaxWithdraw();
+                            setAmount(formatValue(safeMax));
                           }}
                         >
                           MAX
@@ -391,6 +422,7 @@ const WithdrawModal: React.FC<Props> = ({
                     amount.trim() === "" ||
                     parseFloat(amount) === 0 ||
                     parseFloat(amount) > parseFloat(suppliedBalance) ||
+                    isWithdrawalDangerous ||
                     isPending ||
                     isConfirming
                   }
@@ -403,7 +435,9 @@ const WithdrawModal: React.FC<Props> = ({
                     ? "Enter an amount"
                     : parseFloat(amount) > parseFloat(suppliedBalance)
                       ? "Insufficient balance"
-                      : `Withdraw ${tokenConfig.symbol}`}
+                      : isWithdrawalDangerous
+                        ? "Health factor too low"
+                        : `Withdraw ${tokenConfig.symbol}`}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>

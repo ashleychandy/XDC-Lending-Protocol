@@ -9,29 +9,29 @@ import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export function useRepay() {
   const { contracts } = useChainConfig();
-  const {
-    data: hash,
-    writeContract,
-    writeContractAsync,
-    isPending,
-    error,
-  } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
+
+  // Separate hook for approval transactions
+  const approveContract = useWriteContract();
+  const approveReceipt = useWaitForTransactionReceipt({
+    hash: approveContract.data,
   });
 
-  const approve = async (
-    tokenAddress: string,
-    amount: string,
-    decimals: number
-  ) => {
-    const amountInWei = parseUnits(amount, decimals);
+  // Separate hook for repay transactions
+  const repayContract = useWriteContract();
+  const repayReceipt = useWaitForTransactionReceipt({
+    hash: repayContract.data,
+  });
 
-    return writeContractAsync({
+  /**
+   * Approve tokens for repay
+   * Approves max uint256 for unlimited allowance
+   */
+  const approve = async (tokenAddress: string) => {
+    return approveContract.writeContractAsync({
       address: tokenAddress as `0x${string}`,
       abi: ERC20_ABI,
       functionName: "approve",
-      args: [contracts.pool, amountInWei],
+      args: [contracts.pool, maxUint256],
     });
   };
 
@@ -45,7 +45,7 @@ export function useRepay() {
   ) => {
     const amountInWei = repayAll ? maxUint256 : parseUnits(amount, decimals);
 
-    return writeContractAsync({
+    return repayContract.writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "repay",
@@ -68,7 +68,7 @@ export function useRepay() {
   ) => {
     const amountInWei = repayAll ? maxUint256 : parseUnits(amount, 18);
 
-    return writeContractAsync({
+    return repayContract.writeContractAsync({
       address: contracts.wrappedTokenGateway,
       abi: WRAPPED_TOKEN_GATEWAY_V3_ABI,
       functionName: "repayETH",
@@ -104,7 +104,7 @@ export function useRepay() {
   ) => {
     const amountInWei = repayAll ? maxUint256 : parseUnits(amount, decimals);
 
-    return writeContractAsync({
+    return repayContract.writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "repayWithPermit",
@@ -126,10 +126,17 @@ export function useRepay() {
     repay,
     repayNative,
     repayWithPermit,
-    hash,
-    isPending,
-    isConfirming,
-    isSuccess,
-    error,
+    // Approval transaction state
+    approveHash: approveContract.data,
+    approveIsPending: approveContract.isPending,
+    approveIsConfirming: approveReceipt.isLoading,
+    approveIsSuccess: approveReceipt.isSuccess,
+    approveError: approveContract.error,
+    // Repay transaction state
+    hash: repayContract.data,
+    isPending: repayContract.isPending,
+    isConfirming: repayReceipt.isLoading,
+    isSuccess: repayReceipt.isSuccess,
+    error: repayContract.error,
   };
 }

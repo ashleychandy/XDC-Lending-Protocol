@@ -3,8 +3,11 @@ import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { useCollateral } from "@/hooks/useCollateral";
+import { useReserveCaps } from "@/hooks/useReserveCaps";
 import { useReserveData } from "@/hooks/useReserveData";
+import { useReserveSupply } from "@/hooks/useReserveSupply";
 import { useSupply } from "@/hooks/useSupply";
+import { useTokenAllowance } from "@/hooks/useTokenAllowance";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
@@ -53,6 +56,7 @@ const SupplyContent = () => {
   const [isWithdrawDoneModal, setIsWithdrawDoneModal] =
     useState<boolean>(false);
   const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
+  const [isApproved, setIsApproved] = useState<boolean>(false);
 
   // Sorting state for Your Supplies table
   const [suppliesSortField, setSuppliesSortField] = useState<
@@ -73,9 +77,44 @@ const SupplyContent = () => {
   const { address } = useAccount();
   const accountData = useUserAccountData();
 
+  // Get current token for allowance check
+  const currentToken =
+    selectedToken === "xdc" || selectedToken === "wxdc"
+      ? tokens.wrappedNative
+      : tokens[selectedToken];
+
+  // Check token allowance
+  const { allowance, refetch: refetchAllowance } = useTokenAllowance(
+    currentToken.address,
+    address,
+    contracts.pool
+  );
+
   const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
   const usdcReserveData = useReserveData(tokens.usdc.address);
   const cgoReserveData = useReserveData(tokens.cgo.address);
+
+  // Get supply caps
+  const wxdcCaps = useReserveCaps(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
+  );
+  const usdcCaps = useReserveCaps(tokens.usdc.address, tokens.usdc.decimals);
+  const cgoCaps = useReserveCaps(tokens.cgo.address, tokens.cgo.decimals);
+
+  // Get total supplied amounts
+  const wxdcSupply = useReserveSupply(
+    wxdcReserveData.aTokenAddress,
+    tokens.wrappedNative.decimals
+  );
+  const usdcSupply = useReserveSupply(
+    usdcReserveData.aTokenAddress,
+    tokens.usdc.decimals
+  );
+  const cgoSupply = useReserveSupply(
+    cgoReserveData.aTokenAddress,
+    tokens.cgo.decimals
+  );
 
   const { data: xdcBalance } = useBalance({
     address: address,
@@ -148,6 +187,21 @@ const SupplyContent = () => {
         ).toFixed(2)
       : "0.00";
 
+  const handleApprove = async () => {
+    if (!address) return;
+    const token =
+      selectedToken === "xdc" || selectedToken === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[selectedToken];
+
+    try {
+      // Approve max tokens for unlimited allowance
+      await supplyHook.approve(token.address);
+    } catch (err) {
+      console.error("Approve error:", err);
+    }
+  };
+
   const handleSupply = async () => {
     if (!address || !amount) return;
     const token =
@@ -168,11 +222,7 @@ const SupplyContent = () => {
         }
         await supplyHook.supplyNative(amount, address);
       } else {
-        // Standard ERC20 flow: approve then supply
-        // First, approve the tokens and wait for confirmation
-        await supplyHook.approve(token.address, amount, token.decimals);
-
-        // Then call supply (writeContractAsync waits for user confirmation)
+        // Standard ERC20 flow: supply after approval
         await supplyHook.supply(token.address, amount, token.decimals, address);
       }
     } catch (err) {
@@ -180,6 +230,20 @@ const SupplyContent = () => {
     }
   };
 
+  // Watch approval transaction
+  useTransactionFlow({
+    hash: supplyHook.approveHash,
+    onSuccess: () => {
+      setIsApproved(true);
+      // Refetch allowance after approval
+      refetchAllowance();
+    },
+    onError: (err) => {
+      console.log("error in approval transaction", err);
+    },
+  });
+
+  // Watch supply transaction
   useTransactionFlow({
     hash: supplyHook.hash,
     onSuccess: () => {
@@ -268,6 +332,9 @@ const SupplyContent = () => {
   const openSupplyModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
     setSelectedToken(tokenSymbol);
     setIsSupplyModal(true);
+    // Reset approval state when opening modal
+    // Will be checked dynamically based on input amount
+    setIsApproved(false);
   };
 
   const openWithdrawModal = (
@@ -463,13 +530,32 @@ const SupplyContent = () => {
           onClose={() => {
             setIsSupplyModal(false);
             setAmount("");
+            setIsApproved(false);
           }}
           tokenSymbol={selectedToken}
           amount={amount}
           setAmount={setAmount}
-          onClickSupply={() => {
-            handleSupply();
-          }}
+          onClickApprove={handleApprove}
+          onClickSupply={handleSupply}
+          isApproved={isApproved}
+          isApprovePending={
+            supplyHook.approveIsPending || supplyHook.approveIsConfirming
+          }
+          allowance={allowance}
+          supplyCap={
+            selectedToken === "wxdc" || selectedToken === "xdc"
+              ? wxdcCaps.supplyCap || "0"
+              : selectedToken === "cgo"
+                ? cgoCaps.supplyCap || "0"
+                : usdcCaps.supplyCap || "0"
+          }
+          totalSupplied={
+            selectedToken === "wxdc" || selectedToken === "xdc"
+              ? wxdcSupply.totalSupply || "0"
+              : selectedToken === "cgo"
+                ? cgoSupply.totalSupply || "0"
+                : usdcSupply.totalSupply || "0"
+          }
           supplyApy={
             selectedToken === "wxdc" || selectedToken === "xdc"
               ? wxdcReserveData.supplyApy

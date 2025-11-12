@@ -4,34 +4,34 @@ import {
   WRAPPED_TOKEN_GATEWAY_V3_ABI,
 } from "@/config/abis";
 import { useChainConfig } from "@/hooks/useChainConfig";
-import { parseUnits } from "viem";
+import { maxUint256, parseUnits } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 export function useSupply() {
   const { contracts } = useChainConfig();
-  const {
-    data: hash,
-    writeContract,
-    writeContractAsync,
-    isPending,
-    error,
-  } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
+
+  // Separate hook for approval transactions
+  const approveContract = useWriteContract();
+  const approveReceipt = useWaitForTransactionReceipt({
+    hash: approveContract.data,
   });
 
-  const approve = async (
-    tokenAddress: string,
-    amount: string,
-    decimals: number
-  ) => {
-    const amountInWei = parseUnits(amount, decimals);
+  // Separate hook for supply transactions
+  const supplyContract = useWriteContract();
+  const supplyReceipt = useWaitForTransactionReceipt({
+    hash: supplyContract.data,
+  });
 
-    return writeContractAsync({
+  /**
+   * Approve tokens for supply
+   * Approves max uint256 for unlimited allowance
+   */
+  const approve = async (tokenAddress: string) => {
+    return approveContract.writeContractAsync({
       address: tokenAddress as `0x${string}`,
       abi: ERC20_ABI,
       functionName: "approve",
-      args: [contracts.pool, amountInWei],
+      args: [contracts.pool, maxUint256],
     });
   };
 
@@ -43,7 +43,7 @@ export function useSupply() {
   ) => {
     const amountInWei = parseUnits(amount, decimals);
 
-    return writeContractAsync({
+    return supplyContract.writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "supply",
@@ -62,7 +62,7 @@ export function useSupply() {
   const supplyNative = async (amount: string, userAddress: string) => {
     const amountInWei = parseUnits(amount, 18); // Native tokens are always 18 decimals
 
-    return writeContractAsync({
+    return supplyContract.writeContractAsync({
       address: contracts.wrappedTokenGateway,
       abi: WRAPPED_TOKEN_GATEWAY_V3_ABI,
       functionName: "depositETH",
@@ -98,7 +98,7 @@ export function useSupply() {
   ) => {
     const amountInWei = parseUnits(amount, decimals);
 
-    return writeContractAsync({
+    return supplyContract.writeContractAsync({
       address: contracts.pool,
       abi: POOL_ABI,
       functionName: "supplyWithPermit",
@@ -120,10 +120,17 @@ export function useSupply() {
     supply,
     supplyNative,
     supplyWithPermit,
-    hash,
-    isPending,
-    isConfirming,
-    isSuccess,
-    error,
+    // Approval transaction state
+    approveHash: approveContract.data,
+    approveIsPending: approveContract.isPending,
+    approveIsConfirming: approveReceipt.isLoading,
+    approveIsSuccess: approveReceipt.isSuccess,
+    approveError: approveContract.error,
+    // Supply transaction state
+    hash: supplyContract.data,
+    isPending: supplyContract.isPending,
+    isConfirming: supplyReceipt.isLoading,
+    isSuccess: supplyReceipt.isSuccess,
+    error: supplyContract.error,
   };
 }

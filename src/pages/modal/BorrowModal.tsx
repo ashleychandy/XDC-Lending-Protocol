@@ -29,7 +29,11 @@ interface Props {
   tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo";
   amount: string;
   setAmount: (value: string) => void;
+  onClickDelegationApprove?: () => void;
   onClickBorrow: () => void;
+  isDelegationApproved?: boolean;
+  isDelegationApprovePending?: boolean;
+  delegationAllowance?: bigint;
   borrowedBalance?: string;
   xdcPrice?: number;
   usdcPrice?: number;
@@ -45,8 +49,12 @@ const BorrowModal: React.FC<Props> = ({
   onClose,
   tokenSymbol,
   amount,
+  delegationAllowance,
   setAmount,
+  onClickDelegationApprove,
   onClickBorrow,
+  isDelegationApproved = false,
+  isDelegationApprovePending = false,
   borrowedBalance = "0",
   xdcPrice = 2500,
   usdcPrice = 1,
@@ -169,6 +177,26 @@ const BorrowModal: React.FC<Props> = ({
   const healthFactorValue = parseFloat(accountData.healthFactor);
   const newHealthFactorValue = parseFloat(getNewHealthFactor());
 
+  // Calculate safe max borrow amount (keeping HF > 1.1)
+  const getSafeMaxBorrow = () => {
+    const currentCollateralUsd = parseFloat(accountData.totalCollateral);
+    const currentDebtUsd = parseFloat(accountData.totalDebt);
+    const avgLiquidationThreshold = parseFloat(
+      accountData.currentLiquidationThreshold
+    );
+    const minHealthFactor = 1.1; // Keep HF above 1.1 for safety
+
+    // Max debt = (collateral * liquidationThreshold%) / minHealthFactor
+    const maxTotalDebt =
+      (currentCollateralUsd * avgLiquidationThreshold) / 100 / minHealthFactor;
+    const maxAdditionalDebt = Math.max(0, maxTotalDebt - currentDebtUsd);
+    const maxBorrowInToken = maxAdditionalDebt / tokenConfig.price;
+
+    // Also respect the available borrow limit
+    const availableBorrow = parseFloat(borrowedBalance);
+    return Math.min(maxBorrowInToken, availableBorrow);
+  };
+
   const endElement = amount ? (
     <CloseButton
       size="xs"
@@ -183,6 +211,8 @@ const BorrowModal: React.FC<Props> = ({
   // Check if borrow would make health factor too low
   const isBorrowRisky =
     newHealthFactorValue < 1.5 && newHealthFactorValue !== Infinity;
+  const isBorrowDangerous =
+    newHealthFactorValue < 1.05 && newHealthFactorValue !== Infinity;
 
   return (
     <HStack wrap="wrap" gap="4">
@@ -268,7 +298,8 @@ const BorrowModal: React.FC<Props> = ({
                           h="auto"
                           colorPalette="blue"
                           onClick={() => {
-                            setAmount(formatValue(parseFloat(borrowedBalance)));
+                            const safeMax = getSafeMaxBorrow();
+                            setAmount(formatValue(safeMax));
                           }}
                         >
                           MAX
@@ -343,26 +374,65 @@ const BorrowModal: React.FC<Props> = ({
               </Dialog.Body>
 
               <Dialog.Footer>
-                <Button
-                  disabled={
-                    !amount ||
-                    amount.trim() === "" ||
-                    parseFloat(amount) === 0 ||
-                    parseFloat(amount) > parseFloat(borrowedBalance) ||
-                    isPending ||
-                    isConfirming
+                {(() => {
+                  // For native token borrowing with unwrap, check delegation allowance
+                  if (
+                    (tokenSymbol === "wxdc" || tokenSymbol === "xdc") &&
+                    unwrapToNative
+                  ) {
+                    // Check if delegation allowance is sufficient for the input amount
+                    const amountInWei = amount
+                      ? BigInt(Math.floor(parseFloat(amount) * 10 ** 18))
+                      : BigInt(0);
+                    const needsDelegation =
+                      !delegationAllowance || delegationAllowance < amountInWei;
+
+                    if (needsDelegation) {
+                      return (
+                        <Button
+                          disabled={isDelegationApprovePending}
+                          w="100%"
+                          fontSize="18px"
+                          onClick={onClickDelegationApprove}
+                          colorPalette="blue"
+                        >
+                          {isDelegationApprovePending
+                            ? "Approving delegation..."
+                            : "Approve delegation"}
+                        </Button>
+                      );
+                    }
                   }
-                  w="100%"
-                  fontSize="18px"
-                  onClick={onClickBorrow}
-                  colorPalette={isBorrowRisky ? "orange" : "blue"}
-                >
-                  {!amount || amount.trim() === "" || parseFloat(amount) === 0
-                    ? "Enter an amount"
-                    : parseFloat(amount) > parseFloat(borrowedBalance)
-                      ? "Insufficient balance"
-                      : `Borrow ${tokenConfig.symbol}`}
-                </Button>
+
+                  // Show borrow button
+                  return (
+                    <Button
+                      disabled={
+                        !amount ||
+                        amount.trim() === "" ||
+                        parseFloat(amount) === 0 ||
+                        parseFloat(amount) > parseFloat(borrowedBalance) ||
+                        isBorrowDangerous ||
+                        isPending ||
+                        isConfirming
+                      }
+                      w="100%"
+                      fontSize="18px"
+                      onClick={onClickBorrow}
+                      colorPalette={isBorrowRisky ? "orange" : "blue"}
+                    >
+                      {!amount ||
+                      amount.trim() === "" ||
+                      parseFloat(amount) === 0
+                        ? "Enter an amount"
+                        : parseFloat(amount) > parseFloat(borrowedBalance)
+                          ? "Insufficient balance"
+                          : isBorrowDangerous
+                            ? "Health factor too low"
+                            : `Borrow ${tokenConfig.symbol}`}
+                    </Button>
+                  );
+                })()}
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>

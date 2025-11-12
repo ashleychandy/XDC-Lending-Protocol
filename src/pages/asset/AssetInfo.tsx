@@ -33,6 +33,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   const [isSupplyDoneModal, setIsSupplyDoneModal] = useState<boolean>(false);
   const [isBorrowModal, setIsBorrowModal] = useState<boolean>(false);
   const [isBorrowDoneModal, setIsBorrowDoneModal] = useState<boolean>(false);
+  const [isApproved, setIsApproved] = useState<boolean>(false);
   const { address } = useAccount();
   const accountData = useUserAccountData();
   const supplyHook = useSupply();
@@ -107,6 +108,20 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     },
   }[selectedToken];
 
+  const handleApprove = async () => {
+    if (!address || !amount) return;
+    const token =
+      selectedToken === "xdc" || selectedToken === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[selectedToken];
+
+    try {
+      await supplyHook.approve(token.address, amount, token.decimals);
+    } catch (err) {
+      console.error("Approve error:", err);
+    }
+  };
+
   const handleSupply = async () => {
     if (!address || !amount) return;
     const token =
@@ -114,17 +129,24 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
         ? tokens.wrappedNative
         : tokens[selectedToken];
     try {
-      // First, approve the tokens
-      await supplyHook.approve(token.address, amount, token.decimals);
-
-      // Wait for approval to be confirmed (wagmi handles this automatically)
-      // Then call supply
       await supplyHook.supply(token.address, amount, token.decimals, address);
     } catch (err) {
       console.error("Supply error:", err);
     }
   };
 
+  // Watch approval transaction
+  useTransactionFlow({
+    hash: supplyHook.approveHash,
+    onSuccess: () => {
+      setIsApproved(true);
+    },
+    onError: (err) => {
+      console.log("error in approval transaction", err);
+    },
+  });
+
+  // Watch supply transaction
   useTransactionFlow({
     hash: supplyHook.hash,
     onSuccess: () => {
@@ -167,6 +189,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   const openSupplyModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
     setSelectedToken(tokenSymbol);
     setIsSupplyModal(true);
+    setIsApproved(false);
   };
 
   const openBorrowModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
@@ -276,13 +299,17 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             onClose={() => {
               setIsSupplyModal(false);
               setAmount("");
+              setIsApproved(false);
             }}
             tokenSymbol={selectedToken}
             amount={amount}
             setAmount={setAmount}
-            onClickSupply={() => {
-              handleSupply();
-            }}
+            onClickApprove={handleApprove}
+            onClickSupply={handleSupply}
+            isApproved={isApproved}
+            isApprovePending={
+              supplyHook.approveIsPending || supplyHook.approveIsConfirming
+            }
             supplyApy={
               selectedToken === "wxdc" || selectedToken === "xdc"
                 ? wxdcReserveData.supplyApy

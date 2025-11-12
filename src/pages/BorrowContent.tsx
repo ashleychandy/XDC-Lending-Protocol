@@ -2,9 +2,11 @@ import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useBorrow } from "@/hooks/useBorrow";
+import { useBorrowAllowance } from "@/hooks/useBorrowAllowance";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { useRepay } from "@/hooks/useRepay";
 import { useReserveData } from "@/hooks/useReserveData";
+import { useTokenAllowance } from "@/hooks/useTokenAllowance";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
 import { useUserReserveData } from "@/hooks/useUserReserveData";
@@ -49,6 +51,9 @@ function BorrowContent() {
   const [isRepayDoneModal, setIsRepayDoneModal] = useState<boolean>(false);
   const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
   const [useNativeForRepay, setUseNativeForRepay] = useState<boolean>(false);
+  const [isRepayApproved, setIsRepayApproved] = useState<boolean>(false);
+  const [isDelegationApproved, setIsDelegationApproved] =
+    useState<boolean>(false);
 
   // Sorting state for Your Borrows table
   const [borrowsSortField, setBorrowsSortField] = useState<
@@ -71,6 +76,18 @@ function BorrowContent() {
   const borrowHook = useBorrow();
   const repayHook = useRepay();
   const accountData = useUserAccountData();
+  const { allowance: borrowAllowance, refetch: refetchBorrowAllowance } =
+    useBorrowAllowance(address);
+
+  // Get current token for repay allowance check
+  const currentRepayToken =
+    selectedToken === "xdc" || selectedToken === "wxdc"
+      ? tokens.wrappedNative
+      : tokens[selectedToken];
+
+  // Check token allowance for repay
+  const { allowance: repayAllowance, refetch: refetchRepayAllowance } =
+    useTokenAllowance(currentRepayToken.address, address, contracts.pool);
 
   const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
   const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
@@ -140,6 +157,17 @@ function BorrowContent() {
         ).toFixed(2)
       : "0.00";
 
+  const handleDelegationApprove = async () => {
+    if (!address) return;
+
+    try {
+      // Approve unlimited delegation to the gateway for native token borrowing
+      await borrowHook.approveDelegation();
+    } catch (err) {
+      console.error("Delegation approval error:", err);
+    }
+  };
+
   const handleBorrow = async (unwrapToNative: boolean = false) => {
     if (!address || !amount) return;
     const token =
@@ -168,9 +196,38 @@ function BorrowContent() {
       }
     } catch (err) {
       console.error("Borrow error:", err);
+      console.error("Error details:", {
+        name: (err as Error).name,
+        message: (err as Error).message,
+        cause: (err as any).cause,
+      });
+
+      // Show user-friendly error for unwrap failures
+      if (
+        unwrapToNative &&
+        (err as Error).message.includes("Internal JSON-RPC error")
+      ) {
+        alert(
+          "Unable to unwrap WXDC to native XDC. The WXDC contract doesn't have enough native XDC balance. Please try borrowing WXDC directly (disable unwrap toggle)."
+        );
+      }
     }
   };
 
+  // Watch delegation approval transaction
+  useTransactionFlow({
+    hash: borrowHook.delegationHash,
+    onSuccess: () => {
+      setIsDelegationApproved(true);
+      // Refetch allowance after approval
+      refetchBorrowAllowance();
+    },
+    onError: (err) => {
+      console.log("error in delegation approval transaction", err);
+    },
+  });
+
+  // Watch borrow transaction
   useTransactionFlow({
     hash: borrowHook.hash,
     onSuccess: () => {
@@ -183,6 +240,21 @@ function BorrowContent() {
       setAmount("");
     },
   });
+
+  const handleRepayApprove = async () => {
+    if (!address) return;
+    const token =
+      selectedToken === "xdc" || selectedToken === "wxdc"
+        ? tokens.wrappedNative
+        : tokens[selectedToken];
+
+    try {
+      // Approve max tokens for unlimited allowance
+      await repayHook.approve(token.address);
+    } catch (err) {
+      console.error("Repay approve error:", err);
+    }
+  };
 
   const handleRepay = async (useNative: boolean = false) => {
     if (!address || !amount) return;
@@ -204,11 +276,7 @@ function BorrowContent() {
         }
         await repayHook.repayNative(amount, address);
       } else {
-        // Standard ERC20 flow: approve then repay
-        // First, approve the tokens and wait for confirmation
-        await repayHook.approve(token.address, amount, token.decimals);
-
-        // Then call repay (writeContractAsync waits for user confirmation)
+        // Standard ERC20 flow: repay after approval
         await repayHook.repay(token.address, amount, token.decimals, address);
       }
     } catch (err) {
@@ -216,6 +284,20 @@ function BorrowContent() {
     }
   };
 
+  // Watch approval transaction
+  useTransactionFlow({
+    hash: repayHook.approveHash,
+    onSuccess: () => {
+      setIsRepayApproved(true);
+      // Refetch allowance after approval
+      refetchRepayAllowance();
+    },
+    onError: (err) => {
+      console.log("error in repay approval transaction", err);
+    },
+  });
+
+  // Watch repay transaction
   useTransactionFlow({
     hash: repayHook.hash,
     onSuccess: () => {
@@ -232,11 +314,15 @@ function BorrowContent() {
   const openBorrowModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
     setSelectedToken(tokenSymbol);
     setIsBorrowModal(true);
+    // Reset delegation approval state - will be checked dynamically based on input amount
+    setIsDelegationApproved(false);
   };
 
   const openRepayModal = (tokenSymbol: "wxdc" | "usdc" | "xdc" | "cgo") => {
     setSelectedToken(tokenSymbol);
     setIsRepayModal(true);
+    // Reset approval state - will be checked dynamically based on input amount
+    setIsRepayApproved(false);
   };
 
   const yourBorrowsBase = [
@@ -416,13 +502,20 @@ function BorrowContent() {
             setIsBorrowModal(false);
             setAmount("");
             setUnwrapToNative(true);
+            setIsDelegationApproved(false);
           }}
           tokenSymbol={selectedToken}
           amount={amount}
           setAmount={setAmount}
+          onClickDelegationApprove={handleDelegationApprove}
           onClickBorrow={() => {
             handleBorrow(unwrapToNative);
           }}
+          isDelegationApproved={isDelegationApproved}
+          isDelegationApprovePending={
+            borrowHook.delegationIsPending || borrowHook.delegationIsConfirming
+          }
+          delegationAllowance={borrowAllowance}
           borrowedBalance={
             selectedToken === "xdc" || selectedToken === "wxdc"
               ? formatValue(parseFloat(accountData.availableBorrows) / xdcPrice)
@@ -462,13 +555,20 @@ function BorrowContent() {
             setIsRepayModal(false);
             setAmount("");
             setUseNativeForRepay(false);
+            setIsRepayApproved(false);
           }}
           tokenSymbol={selectedToken}
           amount={amount}
           setAmount={setAmount}
+          onClickApprove={handleRepayApprove}
           onClickRepay={() => {
             handleRepay(useNativeForRepay);
           }}
+          isApproved={isRepayApproved}
+          isApprovePending={
+            repayHook.approveIsPending || repayHook.approveIsConfirming
+          }
+          allowance={repayAllowance}
           borrowedAmount={
             selectedToken === "xdc" || selectedToken === "wxdc"
               ? wxdcBorrowed

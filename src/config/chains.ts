@@ -113,14 +113,14 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
         symbol: "WXDC",
         decimals: 18,
         aToken: "0x09Fa3c5452Ad7da2B0041B2E92b1caDCA8aA15Fc",
-        variableDebtToken: "0xC47EEfAd9c7Fe28FB1829cA5ec731a88050AD788",
+        variableDebtToken: "0xe82a3BE1d9606ad54cb6c572e4Dc034545D079b0",
       },
       usdc: {
         address: "0xE899E6C96dD269E1ea613F0B95dCB6411A510eca",
         symbol: "USDC",
         decimals: 6,
         aToken: "0xc87b0EF1327CBae802Eb8a65212B20628Ed84Ffc",
-        variableDebtToken: "0xb05F802a093033bc13b3D85A00111E11315c1Ea5",
+        variableDebtToken: "0x095d1870d1ebb9997472C8C188AaAA9Cd0824Bd7",
       },
       cgo: {
         address: "0x394Dbd36Bf533cD4769FDc121EAb73A6f8Ad5040",
