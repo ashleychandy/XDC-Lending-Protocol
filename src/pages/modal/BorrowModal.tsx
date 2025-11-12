@@ -34,7 +34,9 @@ interface Props {
   isDelegationApproved?: boolean;
   isDelegationApprovePending?: boolean;
   delegationAllowance?: bigint;
-  borrowedBalance?: string;
+  borrowCap?: string;
+  totalBorrowed?: string;
+  availableToBorrow?: string;
   xdcPrice?: number;
   usdcPrice?: number;
   cgoPrice?: number;
@@ -50,12 +52,14 @@ const BorrowModal: React.FC<Props> = ({
   tokenSymbol,
   amount,
   delegationAllowance,
+  borrowCap = "0",
+  totalBorrowed = "0",
   setAmount,
   onClickDelegationApprove,
   onClickBorrow,
   isDelegationApproved = false,
   isDelegationApprovePending = false,
-  borrowedBalance = "0",
+  availableToBorrow = "0",
   xdcPrice = 2500,
   usdcPrice = 1,
   cgoPrice = 1,
@@ -177,24 +181,26 @@ const BorrowModal: React.FC<Props> = ({
   const healthFactorValue = parseFloat(accountData.healthFactor);
   const newHealthFactorValue = parseFloat(getNewHealthFactor());
 
-  // Calculate safe max borrow amount (keeping HF > 1.1)
+  // Calculate safe max borrow amount (respecting available borrow and borrow cap)
   const getSafeMaxBorrow = () => {
-    const currentCollateralUsd = parseFloat(accountData.totalCollateral);
-    const currentDebtUsd = parseFloat(accountData.totalDebt);
-    const avgLiquidationThreshold = parseFloat(
-      accountData.currentLiquidationThreshold
-    );
-    const minHealthFactor = 1.1; // Keep HF above 1.1 for safety
+    // The availableToBorrow already accounts for:
+    // - Current collateral
+    // - Current debt
+    // - LTV limits
+    // - Health factor
+    // So we just need to respect it and the borrow cap
+    const availableBorrow = parseFloat(availableToBorrow);
 
-    // Max debt = (collateral * liquidationThreshold%) / minHealthFactor
-    const maxTotalDebt =
-      (currentCollateralUsd * avgLiquidationThreshold) / 100 / minHealthFactor;
-    const maxAdditionalDebt = Math.max(0, maxTotalDebt - currentDebtUsd);
-    const maxBorrowInToken = maxAdditionalDebt / tokenConfig.price;
+    // Check borrow cap
+    const borrowCapNum = parseFloat(borrowCap || "0");
+    const totalBorrowedNum = parseFloat(totalBorrowed || "0");
+    const remainingBorrowCap =
+      borrowCapNum > 0
+        ? Math.max(0, borrowCapNum - totalBorrowedNum - 0.01) // Subtract buffer for rounding
+        : Infinity;
 
-    // Also respect the available borrow limit
-    const availableBorrow = parseFloat(borrowedBalance);
-    return Math.min(maxBorrowInToken, availableBorrow);
+    // Return the minimum of available borrow and remaining cap
+    return Math.min(availableBorrow, remainingBorrowCap);
   };
 
   const endElement = amount ? (
@@ -288,7 +294,7 @@ const BorrowModal: React.FC<Props> = ({
                       <Box fontSize="sm">{getDollarValue()}</Box>
                       <Flex alignItems="center" gap="5px">
                         <Box fontSize="13px">
-                          Available {formatValue(parseFloat(borrowedBalance))}
+                          Available {formatValue(parseFloat(availableToBorrow))}
                         </Box>
                         <Button
                           variant="plain"
@@ -381,20 +387,31 @@ const BorrowModal: React.FC<Props> = ({
                     unwrapToNative
                   ) {
                     // Check if delegation allowance is sufficient for the input amount
-                    const amountInWei = amount
-                      ? BigInt(Math.floor(parseFloat(amount) * 10 ** 18))
-                      : BigInt(0);
+                    // If no amount entered, check if any delegation exists
+                    const amountInWei =
+                      amount && parseFloat(amount) > 0
+                        ? BigInt(Math.floor(parseFloat(amount) * 10 ** 18))
+                        : BigInt(1); // Check for at least 1 wei of delegation
+
                     const needsDelegation =
                       !delegationAllowance || delegationAllowance < amountInWei;
 
                     if (needsDelegation) {
                       return (
                         <Button
-                          disabled={isDelegationApprovePending}
+                          disabled={
+                            isDelegationApprovePending ||
+                            !onClickDelegationApprove
+                          }
                           w="100%"
                           fontSize="18px"
-                          onClick={onClickDelegationApprove}
+                          onClick={() => {
+                            if (onClickDelegationApprove) {
+                              onClickDelegationApprove();
+                            }
+                          }}
                           colorPalette="blue"
+                          loading={isDelegationApprovePending}
                         >
                           {isDelegationApprovePending
                             ? "Approving delegation..."
@@ -404,6 +421,14 @@ const BorrowModal: React.FC<Props> = ({
                     }
                   }
 
+                  // Check if borrow would exceed cap
+                  const borrowCapNum = parseFloat(borrowCap || "0");
+                  const totalBorrowedNum = parseFloat(totalBorrowed || "0");
+                  const borrowAmount = parseFloat(amount || "0");
+                  const exceedsBorrowCap =
+                    borrowCapNum > 0 &&
+                    totalBorrowedNum + borrowAmount > borrowCapNum + 0.01;
+
                   // Show borrow button
                   return (
                     <Button
@@ -411,7 +436,8 @@ const BorrowModal: React.FC<Props> = ({
                         !amount ||
                         amount.trim() === "" ||
                         parseFloat(amount) === 0 ||
-                        parseFloat(amount) > parseFloat(borrowedBalance) ||
+                        parseFloat(amount) > parseFloat(availableToBorrow) ||
+                        exceedsBorrowCap ||
                         isBorrowDangerous ||
                         isPending ||
                         isConfirming
@@ -425,11 +451,13 @@ const BorrowModal: React.FC<Props> = ({
                       amount.trim() === "" ||
                       parseFloat(amount) === 0
                         ? "Enter an amount"
-                        : parseFloat(amount) > parseFloat(borrowedBalance)
-                          ? "Insufficient balance"
-                          : isBorrowDangerous
-                            ? "Health factor too low"
-                            : `Borrow ${tokenConfig.symbol}`}
+                        : exceedsBorrowCap
+                          ? "Exceeds borrow cap"
+                          : parseFloat(amount) > parseFloat(availableToBorrow)
+                            ? "Insufficient borrow capacity"
+                            : isBorrowDangerous
+                              ? "Health factor too low"
+                              : `Borrow ${tokenConfig.symbol}`}
                     </Button>
                   );
                 })()}

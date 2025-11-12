@@ -5,6 +5,8 @@ import { useBorrow } from "@/hooks/useBorrow";
 import { useBorrowAllowance } from "@/hooks/useBorrowAllowance";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { useRepay } from "@/hooks/useRepay";
+import { useReserveBorrowed } from "@/hooks/useReserveBorrowed";
+import { useReserveCaps } from "@/hooks/useReserveCaps";
 import { useReserveData } from "@/hooks/useReserveData";
 import { useTokenAllowance } from "@/hooks/useTokenAllowance";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
@@ -96,6 +98,28 @@ function BorrowContent() {
   const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
   const usdcReserveData = useReserveData(tokens.usdc.address);
   const cgoReserveData = useReserveData(tokens.cgo.address);
+
+  // Get borrow caps
+  const wxdcCaps = useReserveCaps(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
+  );
+  const usdcCaps = useReserveCaps(tokens.usdc.address, tokens.usdc.decimals);
+  const cgoCaps = useReserveCaps(tokens.cgo.address, tokens.cgo.decimals);
+
+  // Get total borrowed amounts (for the entire reserve)
+  const wxdcTotalBorrowed = useReserveBorrowed(
+    tokens.wrappedNative.variableDebtToken,
+    tokens.wrappedNative.decimals
+  );
+  const usdcTotalBorrowed = useReserveBorrowed(
+    tokens.usdc.variableDebtToken,
+    tokens.usdc.decimals
+  );
+  const cgoTotalBorrowed = useReserveBorrowed(
+    tokens.cgo.variableDebtToken,
+    tokens.cgo.decimals
+  );
 
   const wxdcUserData = useUserReserveData(
     tokens.wrappedNative.address,
@@ -196,21 +220,6 @@ function BorrowContent() {
       }
     } catch (err) {
       console.error("Borrow error:", err);
-      console.error("Error details:", {
-        name: (err as Error).name,
-        message: (err as Error).message,
-        cause: (err as any).cause,
-      });
-
-      // Show user-friendly error for unwrap failures
-      if (
-        unwrapToNative &&
-        (err as Error).message.includes("Internal JSON-RPC error")
-      ) {
-        alert(
-          "Unable to unwrap WXDC to native XDC. The WXDC contract doesn't have enough native XDC balance. Please try borrowing WXDC directly (disable unwrap toggle)."
-        );
-      }
     }
   };
 
@@ -516,7 +525,21 @@ function BorrowContent() {
             borrowHook.delegationIsPending || borrowHook.delegationIsConfirming
           }
           delegationAllowance={borrowAllowance}
-          borrowedBalance={
+          borrowCap={
+            selectedToken === "xdc" || selectedToken === "wxdc"
+              ? wxdcCaps.borrowCap || "0"
+              : selectedToken === "cgo"
+                ? cgoCaps.borrowCap || "0"
+                : usdcCaps.borrowCap || "0"
+          }
+          totalBorrowed={
+            selectedToken === "xdc" || selectedToken === "wxdc"
+              ? wxdcTotalBorrowed.totalBorrowed || "0"
+              : selectedToken === "cgo"
+                ? cgoTotalBorrowed.totalBorrowed || "0"
+                : usdcTotalBorrowed.totalBorrowed || "0"
+          }
+          availableToBorrow={
             selectedToken === "xdc" || selectedToken === "wxdc"
               ? formatValue(parseFloat(accountData.availableBorrows) / xdcPrice)
               : selectedToken === "cgo"

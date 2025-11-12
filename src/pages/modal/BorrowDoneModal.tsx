@@ -44,7 +44,6 @@ const BorrowDoneModal: React.FC<Props> = ({
 
     if (!window.ethereum) {
       console.error("MetaMask not detected");
-      alert("Please install MetaMask to add tokens to your wallet");
       return;
     }
 
@@ -68,7 +67,6 @@ const BorrowDoneModal: React.FC<Props> = ({
       debtTokenAddress === "0x0000000000000000000000000000000000000000"
     ) {
       console.error("Debt token address not configured for", tokenSymbol);
-      alert(`Debt token address not configured for ${tokenSymbol}`);
       return;
     }
 
@@ -86,7 +84,6 @@ const BorrowDoneModal: React.FC<Props> = ({
       console.log("Add debt token result:", result);
     } catch (error) {
       console.error("Failed to add token to wallet:", error);
-      alert("Failed to add token to wallet. Check console for details.");
     }
   };
   return (

@@ -44,7 +44,6 @@ const SupplyDoneModal: React.FC<Props> = ({
 
     if (!window.ethereum) {
       console.error("MetaMask not detected");
-      alert("Please install MetaMask to add tokens to your wallet");
       return;
     }
 
@@ -68,7 +67,6 @@ const SupplyDoneModal: React.FC<Props> = ({
       aTokenAddress === "0x0000000000000000000000000000000000000000"
     ) {
       console.error("aToken address not configured for", tokenSymbol);
-      alert(`aToken address not configured for ${tokenSymbol}`);
       return;
     }
 
@@ -86,7 +84,6 @@ const SupplyDoneModal: React.FC<Props> = ({
       console.log("Add token result:", result);
     } catch (error) {
       console.error("Failed to add token to wallet:", error);
-      alert("Failed to add token to wallet. Check console for details.");
     }
   };
 

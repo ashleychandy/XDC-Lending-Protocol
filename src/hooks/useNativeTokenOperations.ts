@@ -170,9 +170,9 @@ export function useNativeTokenOperations() {
         : tokens[tokenSymbol as "usdc" | "cgo"];
 
     if (operation === "supply") {
-      return supplyHook.approve(token.address, amount, token.decimals);
+      return supplyHook.approve(token.address);
     } else {
-      return repayHook.approve(token.address, amount, token.decimals);
+      return repayHook.approve(token.address);
     }
   };
 

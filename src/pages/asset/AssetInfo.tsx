@@ -2,6 +2,8 @@ import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useBorrow } from "@/hooks/useBorrow";
 import { useChainConfig } from "@/hooks/useChainConfig";
+import { useReserveBorrowed } from "@/hooks/useReserveBorrowed";
+import { useReserveCaps } from "@/hooks/useReserveCaps";
 import { useReserveData } from "@/hooks/useReserveData";
 import { useSupply } from "@/hooks/useSupply";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
@@ -64,21 +66,74 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
   const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
 
-  // Derived data
-  const borrowedXdc = formatValue(
-    parseFloat(accountData.availableBorrows) / xdcPrice
-  );
-  const borrowedUsdc = formatValue(
-    parseFloat(accountData.availableBorrows) / usdcPrice
-  );
-  const borrowedCgo = formatValue(
-    parseFloat(accountData.availableBorrows) / cgoPrice
-  );
-
   // Get reserve data (APY, etc.) for each asset
   const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
   const usdcReserveData = useReserveData(tokens.usdc.address);
   const cgoReserveData = useReserveData(tokens.cgo.address);
+
+  // Get borrow caps and total borrowed - must be declared before use
+  const wxdcCaps = useReserveCaps(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
+  );
+  const usdcCaps = useReserveCaps(tokens.usdc.address, tokens.usdc.decimals);
+  const cgoCaps = useReserveCaps(tokens.cgo.address, tokens.cgo.decimals);
+
+  const wxdcTotalBorrowed = useReserveBorrowed(
+    tokens.wrappedNative.variableDebtToken,
+    tokens.wrappedNative.decimals
+  );
+  const usdcTotalBorrowed = useReserveBorrowed(
+    tokens.usdc.variableDebtToken,
+    tokens.usdc.decimals
+  );
+  const cgoTotalBorrowed = useReserveBorrowed(
+    tokens.cgo.variableDebtToken,
+    tokens.cgo.decimals
+  );
+
+  // Calculate available to borrow considering borrow cap
+  const getAvailableToBorrow = (
+    capStr: string,
+    totalBorrowedStr: string,
+    price: number
+  ) => {
+    const userAvailableInUsd = parseFloat(accountData.availableBorrows);
+    const userAvailableInToken = userAvailableInUsd / price;
+
+    const cap = parseFloat(capStr || "0");
+    const totalBorrowed = parseFloat(totalBorrowedStr || "0");
+
+    // If there's a cap, limit by remaining capacity
+    if (cap > 0) {
+      const remainingCap = Math.max(0, cap - totalBorrowed);
+      return Math.min(userAvailableInToken, remainingCap);
+    }
+
+    return userAvailableInToken;
+  };
+
+  const borrowedXdc = formatValue(
+    getAvailableToBorrow(
+      wxdcCaps.borrowCap,
+      wxdcTotalBorrowed.totalBorrowed,
+      xdcPrice
+    )
+  );
+  const borrowedUsdc = formatValue(
+    getAvailableToBorrow(
+      usdcCaps.borrowCap,
+      usdcTotalBorrowed.totalBorrowed,
+      usdcPrice
+    )
+  );
+  const borrowedCgo = formatValue(
+    getAvailableToBorrow(
+      cgoCaps.borrowCap,
+      cgoTotalBorrowed.totalBorrowed,
+      cgoPrice
+    )
+  );
 
   // Token config — depends on selected tab, not prop
   const tokenConfig = {
@@ -116,7 +171,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
         : tokens[selectedToken];
 
     try {
-      await supplyHook.approve(token.address, amount, token.decimals);
+      await supplyHook.approve(token.address);
     } catch (err) {
       console.error("Approve error:", err);
     }
@@ -349,7 +404,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             onClickBorrow={() => {
               handleBorrow();
             }}
-            borrowedBalance={
+            availableToBorrow={
               selectedToken === "xdc" || selectedToken === "wxdc"
                 ? formatValue(
                     parseFloat(accountData.availableBorrows) / xdcPrice
