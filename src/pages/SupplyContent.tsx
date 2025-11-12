@@ -5,6 +5,7 @@ import { useChainConfig } from "@/hooks/useChainConfig";
 import { useCollateral } from "@/hooks/useCollateral";
 import { useReserveCaps } from "@/hooks/useReserveCaps";
 import { useReserveData } from "@/hooks/useReserveData";
+import { useReserveLiquidity } from "@/hooks/useReserveLiquidity";
 import { useReserveSupply } from "@/hooks/useReserveSupply";
 import { useSupply } from "@/hooks/useSupply";
 import { useTokenAllowance } from "@/hooks/useTokenAllowance";
@@ -93,6 +94,20 @@ const SupplyContent = () => {
   const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
   const usdcReserveData = useReserveData(tokens.usdc.address);
   const cgoReserveData = useReserveData(tokens.cgo.address);
+
+  // Get available liquidity for each reserve
+  const wxdcLiquidity = useReserveLiquidity(
+    tokens.wrappedNative.address,
+    tokens.wrappedNative.decimals
+  );
+  const usdcLiquidity = useReserveLiquidity(
+    tokens.usdc.address,
+    tokens.usdc.decimals
+  );
+  const cgoLiquidity = useReserveLiquidity(
+    tokens.cgo.address,
+    tokens.cgo.decimals
+  );
 
   // Get supply caps
   const wxdcCaps = useReserveCaps(
@@ -602,6 +617,13 @@ const SupplyContent = () => {
               : selectedToken === "cgo"
                 ? cgoSupplied
                 : usdcSupplied
+          }
+          availableLiquidity={
+            selectedToken === "xdc" || selectedToken === "wxdc"
+              ? wxdcLiquidity.availableLiquidity
+              : selectedToken === "cgo"
+                ? cgoLiquidity.availableLiquidity
+                : usdcLiquidity.availableLiquidity
           }
           xdcPrice={xdcPrice}
           usdcPrice={usdcPrice}

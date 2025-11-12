@@ -31,6 +31,7 @@ interface Props {
   setAmount: (value: string) => void;
   onClickWithdraw: () => void;
   suppliedBalance?: string;
+  availableLiquidity?: string;
   xdcPrice?: number;
   usdcPrice?: number;
   cgoPrice?: number;
@@ -48,6 +49,7 @@ const WithdrawModal: React.FC<Props> = ({
   setAmount,
   onClickWithdraw,
   suppliedBalance = "0",
+  availableLiquidity = "0",
   xdcPrice = 2500,
   usdcPrice = 1,
   cgoPrice = 1,
@@ -209,9 +211,12 @@ const WithdrawModal: React.FC<Props> = ({
     );
     const minHealthFactor = 1.1; // Keep HF above 1.1 for safety
 
-    // If no debt, can withdraw all
+    const supplied = parseFloat(suppliedBalance);
+    const liquidity = parseFloat(availableLiquidity);
+
+    // If no debt, can withdraw min of supplied balance and available liquidity
     if (currentDebtUsd === 0 || currentDebtUsd < 0.01) {
-      return parseFloat(suppliedBalance);
+      return Math.min(supplied, liquidity);
     }
 
     // Min collateral needed = (debt * minHealthFactor) / liquidationThreshold%
@@ -223,9 +228,8 @@ const WithdrawModal: React.FC<Props> = ({
     );
     const maxWithdrawInToken = maxWithdrawUsd / tokenConfig.price;
 
-    // Also respect the supplied balance
-    const supplied = parseFloat(suppliedBalance);
-    return Math.min(maxWithdrawInToken, supplied);
+    // Return minimum of: health factor limit, supplied balance, and available liquidity
+    return Math.min(maxWithdrawInToken, supplied, liquidity);
   };
 
   const endElement = amount ? (

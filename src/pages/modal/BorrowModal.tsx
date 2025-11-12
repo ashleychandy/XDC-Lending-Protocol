@@ -181,26 +181,14 @@ const BorrowModal: React.FC<Props> = ({
   const healthFactorValue = parseFloat(accountData.healthFactor);
   const newHealthFactorValue = parseFloat(getNewHealthFactor());
 
-  // Calculate safe max borrow amount (respecting available borrow and borrow cap)
+  // Calculate safe max borrow amount
   const getSafeMaxBorrow = () => {
-    // The availableToBorrow already accounts for:
-    // - Current collateral
-    // - Current debt
-    // - LTV limits
-    // - Health factor
-    // So we just need to respect it and the borrow cap
-    const availableBorrow = parseFloat(availableToBorrow);
-
-    // Check borrow cap
-    const borrowCapNum = parseFloat(borrowCap || "0");
-    const totalBorrowedNum = parseFloat(totalBorrowed || "0");
-    const remainingBorrowCap =
-      borrowCapNum > 0
-        ? Math.max(0, borrowCapNum - totalBorrowedNum - 0.01) // Subtract buffer for rounding
-        : Infinity;
-
-    // Return the minimum of available borrow and remaining cap
-    return Math.min(availableBorrow, remainingBorrowCap);
+    // The availableToBorrow prop already accounts for ALL constraints:
+    // - User's borrow capacity (based on collateral × LTV)
+    // - Remaining borrow cap (protocol limit)
+    // - Available liquidity in the pool (actual tokens available)
+    // So we can just use it directly
+    return parseFloat(availableToBorrow);
   };
 
   const endElement = amount ? (

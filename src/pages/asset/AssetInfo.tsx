@@ -10,6 +10,7 @@ import { useSupply } from "@/hooks/useSupply";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
+import { useUserReserveData } from "@/hooks/useUserReserveData";
 import { Box, Button, Flex, Heading, Icon, Tabs } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
@@ -84,6 +85,20 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   const cgoLiquidity = useReserveLiquidity(
     tokens.cgo.address,
     tokens.cgo.decimals
+  );
+
+  // Get user reserve data (supplied amounts)
+  const wxdcUserData = useUserReserveData(
+    tokens.wrappedNative.address,
+    wxdcReserveData.aTokenAddress
+  );
+  const usdcUserData = useUserReserveData(
+    tokens.usdc.address,
+    usdcReserveData.aTokenAddress
+  );
+  const cgoUserData = useUserReserveData(
+    tokens.cgo.address,
+    cgoReserveData.aTokenAddress
   );
 
   // Get borrow caps and total borrowed - must be declared before use
