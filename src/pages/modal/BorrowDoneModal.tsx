@@ -47,37 +47,58 @@ const BorrowDoneModal: React.FC<Props> = ({
       return;
     }
 
-    // Map token symbol to variable debt token address
-    const debtTokenAddresses: Record<string, string> = {
-      wxdc: tokens.wrappedNative.variableDebtToken,
-      xdc: tokens.wrappedNative.variableDebtToken,
-      usdc: tokens.usdc.variableDebtToken,
-      cgo: tokens.cgo.variableDebtToken,
+    // Map token symbol to variable debt token address and custom symbol
+    const debtTokenConfig: Record<
+      string,
+      { address: string; symbol: string; decimals: number }
+    > = {
+      wxdc: {
+        address: tokens.wrappedNative.variableDebtToken,
+        symbol: "vdWXDC",
+        decimals: tokens.wrappedNative.decimals,
+      },
+      xdc: {
+        address: tokens.wrappedNative.variableDebtToken,
+        symbol: "vdWXDC",
+        decimals: tokens.wrappedNative.decimals,
+      },
+      usdc: {
+        address: tokens.usdc.variableDebtToken,
+        symbol: "vdUSDC",
+        decimals: tokens.usdc.decimals,
+      },
+      cgo: {
+        address: tokens.cgo.variableDebtToken,
+        symbol: "vdCGO",
+        decimals: tokens.cgo.decimals,
+      },
     };
 
     const normalizedSymbol = tokenSymbol.toLowerCase();
-    const debtTokenAddress = debtTokenAddresses[normalizedSymbol];
+    const debtToken = debtTokenConfig[normalizedSymbol];
 
     console.log("Token symbol:", tokenSymbol);
     console.log("Normalized symbol:", normalizedSymbol);
-    console.log("Debt token address:", debtTokenAddress);
+    console.log("Debt token config:", debtToken);
 
     if (
-      !debtTokenAddress ||
-      debtTokenAddress === "0x0000000000000000000000000000000000000000"
+      !debtToken ||
+      debtToken.address === "0x0000000000000000000000000000000000000000"
     ) {
       console.error("Debt token address not configured for", tokenSymbol);
       return;
     }
 
     try {
-      // Don't specify symbol/decimals - let MetaMask read them from the contract
+      // Specify custom symbol to avoid MetaMask's 11-character limit
       const result = await window.ethereum.request({
         method: "wallet_watchAsset",
         params: {
           type: "ERC20",
           options: {
-            address: debtTokenAddress,
+            address: debtToken.address,
+            symbol: debtToken.symbol,
+            decimals: debtToken.decimals,
           },
         },
       });

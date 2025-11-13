@@ -22,7 +22,7 @@ const Header = () => {
   return (
     <>
       {/* Logo - Left */}
-      <Box position="fixed" top="8px" left="20px" zIndex="1000">
+      <Box position="fixed" top="16px" left="24px" zIndex="1000">
         <NavLink to={ROUTES.HOME}>
           <Box w="120px" cursor="pointer">
             <img src={creditify} alt="Creditify Logo" />
@@ -31,8 +31,8 @@ const Header = () => {
       </Box>
 
       {/* Buttons - Right */}
-      <Box position="fixed" top="8px" right="20px" zIndex="1000">
-        <Flex alignItems="center" gap="10px">
+      <Box position="fixed" top="16px" right="24px" zIndex="1000">
+        <Flex alignItems="center" gap="12px">
           <ConnectButton
             label="Connect Wallet"
             chainStatus="none"
@@ -41,7 +41,7 @@ const Header = () => {
           />
           <Menu.MenuRoot>
             <Menu.MenuTrigger asChild>
-              <IconButton variant="ghost" size="sm" aria-label="Settings">
+              <IconButton variant="subtle" size="sm" aria-label="Settings">
                 <LuSettings />
               </IconButton>
             </Menu.MenuTrigger>

@@ -847,6 +847,24 @@ function BorrowContent() {
         <Heading size="xl" p="16px 24px" className="title-text-1">
           Assets to borrow
         </Heading>
+        {parseFloat(accountData.healthFactor) < 1.1 &&
+          parseFloat(accountData.healthFactor) > 0 && (
+            <Box
+              mx="24px"
+              mb="16px"
+              p="12px 16px"
+              bg="red.50"
+              borderRadius="8px"
+              borderLeft="4px solid"
+              borderColor="red.500"
+            >
+              <Box fontSize="sm" color="red.700" fontWeight="medium">
+                ⚠️ Be careful - You are very close to liquidation. Consider
+                depositing more collateral or paying down some of your borrowed
+                positions.
+              </Box>
+            </Box>
+          )}
         <Box p="15px" overflowX="auto">
           <Table.Root size="sm">
             <Table.Header>

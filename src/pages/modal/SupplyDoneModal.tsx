@@ -47,37 +47,58 @@ const SupplyDoneModal: React.FC<Props> = ({
       return;
     }
 
-    // Map token symbol to aToken address
-    const aTokenAddresses: Record<string, string> = {
-      wxdc: tokens.wrappedNative.aToken,
-      xdc: tokens.wrappedNative.aToken,
-      usdc: tokens.usdc.aToken,
-      cgo: tokens.cgo.aToken,
+    // Map token symbol to aToken address and custom symbol
+    const aTokenConfig: Record<
+      string,
+      { address: string; symbol: string; decimals: number }
+    > = {
+      wxdc: {
+        address: tokens.wrappedNative.aToken,
+        symbol: "cWXDC",
+        decimals: tokens.wrappedNative.decimals,
+      },
+      xdc: {
+        address: tokens.wrappedNative.aToken,
+        symbol: "cWXDC",
+        decimals: tokens.wrappedNative.decimals,
+      },
+      usdc: {
+        address: tokens.usdc.aToken,
+        symbol: "cUSDC",
+        decimals: tokens.usdc.decimals,
+      },
+      cgo: {
+        address: tokens.cgo.aToken,
+        symbol: "cCGO",
+        decimals: tokens.cgo.decimals,
+      },
     };
 
     const normalizedSymbol = tokenSymbol.toLowerCase();
-    const aTokenAddress = aTokenAddresses[normalizedSymbol];
+    const aToken = aTokenConfig[normalizedSymbol];
 
     console.log("Token symbol:", tokenSymbol);
     console.log("Normalized symbol:", normalizedSymbol);
-    console.log("aToken address:", aTokenAddress);
+    console.log("aToken config:", aToken);
 
     if (
-      !aTokenAddress ||
-      aTokenAddress === "0x0000000000000000000000000000000000000000"
+      !aToken ||
+      aToken.address === "0x0000000000000000000000000000000000000000"
     ) {
       console.error("aToken address not configured for", tokenSymbol);
       return;
     }
 
     try {
-      // Don't specify symbol/decimals - let MetaMask read them from the contract
+      // Specify custom symbol for consistency and to ensure it works with MetaMask
       const result = await window.ethereum.request({
         method: "wallet_watchAsset",
         params: {
           type: "ERC20",
           options: {
-            address: aTokenAddress,
+            address: aToken.address,
+            symbol: aToken.symbol,
+            decimals: aToken.decimals,
           },
         },
       });
