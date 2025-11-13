@@ -8,14 +8,27 @@ export const formatValue = (value: number, maxDecimals = 7): string => {
   // Medium-small values (less than 1) — show useful precision
   if (value < 1) return value.toPrecision(7);
 
-  // Whole numbers — show 2 decimals (like 10.00)
-  if (Number.isInteger(value)) return value.toFixed(2);
+  // Whole numbers — show 2 decimals with thousand separators
+  if (Number.isInteger(value)) {
+    return value.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
 
-  // Normal decimals — show 2 decimals (like 5.68)
-  return value.toFixed(2);
+  // Normal decimals — show 2 decimals with thousand separators
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
 export const formatUsdValue = (value: number) => {
+  if (isNaN(value) || value === null || value === undefined) return "$0.00";
   if (value < 0.01) return "< $0.01";
-  return `$${value.toFixed(2)}`;
+
+  return `$${value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 };

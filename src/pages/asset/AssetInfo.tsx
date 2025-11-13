@@ -377,7 +377,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     </Flex>
   );
 
-  const renderSupplyBorrow = (available: string, borrowed: string) => (
+  const renderSupplyBorrow = (availableNum: number, borrowedNum: number) => (
     <>
       {tokenConfig && (
         <>
@@ -386,10 +386,10 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             <Flex justifyContent="space-between" alignItems="center">
               <Flex direction="column">
                 <Box>
-                  {available} {tokenConfig.symbol}
+                  {formatValue(availableNum)} {tokenConfig.symbol}
                 </Box>
                 <Box fontSize="13px">
-                  {formatUsdValue(Number(available) * tokenConfig.price)}
+                  {formatUsdValue(availableNum * tokenConfig.price)}
                 </Box>
               </Flex>
               <Button
@@ -410,10 +410,10 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             <Flex justifyContent="space-between" alignItems="center">
               <Flex direction="column">
                 <Box>
-                  {borrowed} {tokenConfig.symbol}
+                  {formatValue(borrowedNum)} {tokenConfig.symbol}
                 </Box>
                 <Box fontSize="13px">
-                  {formatUsdValue(Number(borrowed) * tokenConfig.price)}
+                  {formatUsdValue(borrowedNum * tokenConfig.price)}
                 </Box>
               </Flex>
               <Button
@@ -530,8 +530,8 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
                 formatUsdValue(Number(wxdcBalance) * xdcPrice)
               )}
               {renderSupplyBorrow(
-                formatValue(parseFloat(wxdcBalance)),
-                formatValue(parseFloat(borrowedXdc))
+                parseFloat(wxdcBalance),
+                parseFloat(borrowedXdc)
               )}
             </Tabs.Content>
 
@@ -542,8 +542,8 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
                 formatUsdValue(Number(xdcBalance) * xdcPrice)
               )}
               {renderSupplyBorrow(
-                formatValue(parseFloat(xdcBalance)),
-                formatValue(parseFloat(borrowedXdc))
+                parseFloat(xdcBalance),
+                parseFloat(borrowedXdc)
               )}
             </Tabs.Content>
           </Tabs.Root>
@@ -555,8 +555,8 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
               formatUsdValue(Number(cgoBalance) * cgoPrice)
             )}
             {renderSupplyBorrow(
-              formatValue(parseFloat(cgoBalance)),
-              borrowedCgo
+              parseFloat(cgoBalance),
+              parseFloat(borrowedCgo)
             )}
           </>
         ) : (
@@ -567,8 +567,8 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
               formatUsdValue(Number(usdcBalance) * usdcPrice)
             )}
             {renderSupplyBorrow(
-              formatValue(parseFloat(usdcBalance)),
-              borrowedUsdc
+              parseFloat(usdcBalance),
+              parseFloat(borrowedUsdc)
             )}
           </>
         )}
