@@ -7,8 +7,14 @@ const Layout = () => {
     <Box className="page-content-wrapper">
       <Flex>
         <Box bg="bg.panel" flex="1">
-          <Flex direction="column" h="100vh">
-            <Box as="main" id="main-content" flex="1" bg="bg.panel">
+          <Flex direction="column">
+            <Box
+              as="main"
+              id="main-content"
+              flex="1"
+              bg="#f1f1f3
+"
+            >
               <Routes>{routes}</Routes>
             </Box>
           </Flex>

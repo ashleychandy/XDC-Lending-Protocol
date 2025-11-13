@@ -647,11 +647,13 @@ function BorrowContent() {
       )}
 
       <Box
-        shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
+        shadow="rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
+        bg={"#fff"}
+        border={"1px solid #eaebef"}
         borderRadius="5px"
         mb="20px"
       >
-        <Heading size="xl" p="16px 24px">
+        <Heading size="xl" p="16px 24px" className="title-text-1">
           Your borrows
         </Heading>
         {yourBorrows.length !== 0 && (
@@ -662,11 +664,15 @@ function BorrowContent() {
               border="1px solid #eaebef"
               fontSize="sm"
             >
-              Balance $
-              {parseFloat(accountData.totalDebt).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              <Box as={"span"} className="light-text-2">
+                Balance $
+              </Box>
+              <Box as={"span"} className="title-text-1">
+                {parseFloat(accountData.totalDebt).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Box>
             </Box>
             <Box
               p="4px 8px"
@@ -674,7 +680,15 @@ function BorrowContent() {
               border="1px solid #eaebef"
               fontSize="sm"
             >
-              APY {weightedBorrowApy}%
+              <Box as={"span"} className="light-text-2" mr={"2px"}>
+                APY
+              </Box>
+              <Box as={"span"} className="title-text-1">
+                {weightedBorrowApy}
+              </Box>
+              <Box as={"span"} className="light-text-2" ml={"2px"}>
+                %
+              </Box>
             </Box>
             <Box
               p="4px 8px"
@@ -682,7 +696,15 @@ function BorrowContent() {
               border="1px solid #eaebef"
               fontSize="sm"
             >
-              Borrow power used {borrowPowerUsed}%
+              <Box as={"span"} className="light-text-2" mr={"3px"}>
+                Borrow power used
+              </Box>
+              <Box as={"span"} className="title-text-1">
+                {borrowPowerUsed}
+              </Box>
+              <Box as={"span"} className="light-text-2" ml={"2px"}>
+                %
+              </Box>
             </Box>
           </Flex>
         )}
@@ -691,7 +713,11 @@ function BorrowContent() {
             <Table.Root size="sm">
               <Table.Header>
                 <Table.Row>
-                  <Table.ColumnHeader w="30%" minW="100px">
+                  <Table.ColumnHeader
+                    w="30%"
+                    minW="100px"
+                    className="light-text-2"
+                  >
                     Asset
                   </Table.ColumnHeader>
                   <Table.ColumnHeader
@@ -701,7 +727,11 @@ function BorrowContent() {
                     onClick={() => handleBorrowsSort("debt")}
                     _hover={{ bg: "gray.50" }}
                   >
-                    <Flex alignItems="center" gap="5px">
+                    <Flex
+                      alignItems="center"
+                      gap="5px"
+                      className="light-text-2"
+                    >
                       Debt
                       <Icon fontSize="xs" color="gray.500">
                         {getBorrowsSortIcon("debt")}
@@ -715,7 +745,11 @@ function BorrowContent() {
                     onClick={() => handleBorrowsSort("apy")}
                     _hover={{ bg: "gray.50" }}
                   >
-                    <Flex alignItems="center" gap="5px">
+                    <Flex
+                      alignItems="center"
+                      gap="5px"
+                      className="light-text-2"
+                    >
                       APY
                       <Icon fontSize="xs" color="gray.500">
                         {getBorrowsSortIcon("apy")}
@@ -745,6 +779,7 @@ function BorrowContent() {
                           onClick={() =>
                             navigate(buildAssetDetailsRoute(item.symbol))
                           }
+                          className="title-text-1"
                           _hover={{ textDecoration: "underline" }}
                         >
                           {item.name}
@@ -753,11 +788,15 @@ function BorrowContent() {
                     </Table.Cell>
                     <Table.Cell w="25%">
                       <Flex direction="column">
-                        <Box fontSize="sm">{item.debt}</Box>
-                        <Box fontSize="xs">{item.dollarDebt}</Box>
+                        <Box fontSize="sm" className="title-text-1">
+                          {item.debt}
+                        </Box>
+                        <Box fontSize="xs" className="light-text-2">
+                          {item.dollarDebt}
+                        </Box>
                       </Flex>
                     </Table.Cell>
-                    <Table.Cell w="15%" fontSize="sm">
+                    <Table.Cell w="15%" fontSize="sm" className="title-text-1">
                       {item.apy}
                     </Table.Cell>
                     <Table.Cell w="30%">
@@ -791,24 +830,32 @@ function BorrowContent() {
             </Table.Root>
           </Box>
         ) : (
-          <Box p="16px 24px">Nothing borrowed yet</Box>
+          <Box p="16px 24px" className="light-text-2">
+            Nothing borrowed yet
+          </Box>
         )}
       </Box>
 
       {/* Assets to Borrow */}
       <Box
-        shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
+        shadow="rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
+        bg={"#fff"}
+        border={"1px solid #eaebef"}
         borderRadius="5px"
         mb="20px"
       >
-        <Heading size="xl" p="16px 24px">
+        <Heading size="xl" p="16px 24px" className="title-text-1">
           Assets to borrow
         </Heading>
         <Box p="15px" overflowX="auto">
           <Table.Root size="sm">
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader w="30%" minW="100px">
+                <Table.ColumnHeader
+                  w="30%"
+                  minW="100px"
+                  className="light-text-2"
+                >
                   Asset
                 </Table.ColumnHeader>
                 <Table.ColumnHeader
@@ -818,7 +865,7 @@ function BorrowContent() {
                   onClick={() => handleAssetsSort("available")}
                   _hover={{ bg: "gray.50" }}
                 >
-                  <Flex alignItems="center" gap="5px">
+                  <Flex alignItems="center" gap="5px" className="light-text-2">
                     Available
                     <Icon fontSize="xs" color="gray.500">
                       {getAssetsSortIcon("available")}
@@ -832,7 +879,7 @@ function BorrowContent() {
                   onClick={() => handleAssetsSort("apy")}
                   _hover={{ bg: "gray.50" }}
                 >
-                  <Flex alignItems="center" gap="5px">
+                  <Flex alignItems="center" gap="5px" className="light-text-2">
                     APY, variable
                     <Icon fontSize="xs" color="gray.500">
                       {getAssetsSortIcon("apy")}
@@ -863,6 +910,7 @@ function BorrowContent() {
                           navigate(buildAssetDetailsRoute(item.symbol))
                         }
                         _hover={{ textDecoration: "underline" }}
+                        className="title-text-1"
                       >
                         {item.name}
                       </Box>
@@ -870,11 +918,15 @@ function BorrowContent() {
                   </Table.Cell>
                   <Table.Cell w="25%">
                     <Flex direction="column">
-                      <Box fontSize="sm">{item.available}</Box>
-                      <Box fontSize="xs">{item.dollarAvailable}</Box>
+                      <Box fontSize="sm" className="title-text-1">
+                        {item.available}
+                      </Box>
+                      <Box fontSize="xs" className="light-text-2">
+                        {item.dollarAvailable}
+                      </Box>
                     </Flex>
                   </Table.Cell>
-                  <Table.Cell w="18%" fontSize="sm">
+                  <Table.Cell w="18%" fontSize="sm" className="title-text-1">
                     {item.apy}
                   </Table.Cell>
                   <Table.Cell w="27%">

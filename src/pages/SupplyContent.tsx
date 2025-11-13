@@ -606,11 +606,13 @@ const SupplyContent = () => {
       )}
       {/* Your Supplies */}
       <Box
-        shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
+        shadow="rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
+        bg={"#fff"}
+        border={"1px solid #eaebef"}
         borderRadius="5px"
         mb="20px"
       >
-        <Heading size="xl" p="16px 24px">
+        <Heading size="xl" p="16px 24px" className="title-text-1">
           Your supplies
         </Heading>
         {yourSupplies.length !== 0 && (
@@ -621,11 +623,18 @@ const SupplyContent = () => {
               border="1px solid #eaebef"
               fontSize="sm"
             >
-              Balance $
-              {parseFloat(accountData.totalCollateral).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              <Box as={"span"} className="light-text-2">
+                Balance $
+              </Box>
+              <Box as={"span"} className="title-text-1">
+                {parseFloat(accountData.totalCollateral).toLocaleString(
+                  "en-US",
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }
+                )}
+              </Box>
             </Box>
             <Box
               p="4px 8px"
@@ -633,7 +642,15 @@ const SupplyContent = () => {
               border="1px solid #eaebef"
               fontSize="sm"
             >
-              APY {weightedSupplyApy}%
+              <Box as={"span"} className="light-text-2" mr={"2px"}>
+                APY
+              </Box>
+              <Box as={"span"} className="title-text-1">
+                {weightedSupplyApy}
+              </Box>
+              <Box as={"span"} className="light-text-2" ml={"2px"}>
+                %
+              </Box>
             </Box>
             <Box
               p="4px 8px"
@@ -641,11 +658,18 @@ const SupplyContent = () => {
               border="1px solid #eaebef"
               fontSize="sm"
             >
-              Collateral $
-              {parseFloat(accountData.totalCollateral).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              <Box as={"span"} className="light-text-2">
+                Collateral $
+              </Box>
+              <Box as={"span"} className="title-text-1">
+                {parseFloat(accountData.totalCollateral).toLocaleString(
+                  "en-US",
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }
+                )}
+              </Box>
             </Box>
           </Flex>
         )}
@@ -654,7 +678,11 @@ const SupplyContent = () => {
             <Table.Root size="sm">
               <Table.Header>
                 <Table.Row>
-                  <Table.ColumnHeader w="25%" minW="100px">
+                  <Table.ColumnHeader
+                    w="25%"
+                    minW="100px"
+                    className="light-text-2"
+                  >
                     Asset
                   </Table.ColumnHeader>
                   <Table.ColumnHeader
@@ -664,7 +692,11 @@ const SupplyContent = () => {
                     onClick={() => handleSuppliesSort("balance")}
                     _hover={{ bg: "gray.50" }}
                   >
-                    <Flex alignItems="center" gap="5px">
+                    <Flex
+                      alignItems="center"
+                      gap="5px"
+                      className="light-text-2"
+                    >
                       Balance
                       <Icon fontSize="xs" color="gray.500">
                         {getSuppliesSortIcon("balance")}
@@ -678,14 +710,22 @@ const SupplyContent = () => {
                     onClick={() => handleSuppliesSort("apy")}
                     _hover={{ bg: "gray.50" }}
                   >
-                    <Flex alignItems="center" gap="5px">
+                    <Flex
+                      alignItems="center"
+                      gap="5px"
+                      className="light-text-2"
+                    >
                       APY
                       <Icon fontSize="xs" color="gray.500">
                         {getSuppliesSortIcon("apy")}
                       </Icon>
                     </Flex>
                   </Table.ColumnHeader>
-                  <Table.ColumnHeader w="12%" minW="80px">
+                  <Table.ColumnHeader
+                    w="12%"
+                    minW="80px"
+                    className="light-text-2"
+                  >
                     Collateral
                   </Table.ColumnHeader>
                   <Table.ColumnHeader w="30%" minW="150px"></Table.ColumnHeader>
@@ -708,6 +748,7 @@ const SupplyContent = () => {
                         />
                         <Box
                           cursor="pointer"
+                          className="title-text-1"
                           onClick={() =>
                             navigate(buildAssetDetailsRoute(item.symbol))
                           }
@@ -719,11 +760,15 @@ const SupplyContent = () => {
                     </Table.Cell>
                     <Table.Cell w="20%">
                       <Flex direction="column">
-                        <Box fontSize="sm">{item.balance}</Box>
-                        <Box fontSize="xs">{item.dollarBalance}</Box>
+                        <Box fontSize="sm" className="title-text-1">
+                          {item.balance}
+                        </Box>
+                        <Box fontSize="xs" className="light-text-2">
+                          {item.dollarBalance}
+                        </Box>
                       </Flex>
                     </Table.Cell>
-                    <Table.Cell w="13%" fontSize="sm">
+                    <Table.Cell w="13%" fontSize="sm" className="title-text-1">
                       {item.apy}
                     </Table.Cell>
                     <Table.Cell w="12%">
@@ -779,24 +824,32 @@ const SupplyContent = () => {
             </Table.Root>
           </Box>
         ) : (
-          <Box p="16px 24px">Nothing supplied yet</Box>
+          <Box p="16px 24px" className="light-text-2">
+            Nothing supplied yet
+          </Box>
         )}
       </Box>
 
       {/* Assets to Supply */}
       <Box
-        shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
+        shadow="rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
+        bg={"#fff"}
+        border={"1px solid #eaebef"}
         borderRadius="5px"
         mb="20px"
       >
-        <Heading size="xl" p="16px 24px">
+        <Heading size="xl" p="16px 24px" className="title-text-1">
           Assets to supply
         </Heading>
         <Box p="15px" overflowX="auto">
           <Table.Root size="sm">
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader w="23%" minW="100px">
+                <Table.ColumnHeader
+                  w="23%"
+                  minW="100px"
+                  className="light-text-2"
+                >
                   Assets
                 </Table.ColumnHeader>
                 <Table.ColumnHeader
@@ -806,7 +859,7 @@ const SupplyContent = () => {
                   onClick={() => handleSort("balance")}
                   _hover={{ bg: "gray.50" }}
                 >
-                  <Flex alignItems="center" gap="5px">
+                  <Flex alignItems="center" gap="5px" className="light-text-2">
                     Wallet Balance
                     <Icon fontSize="xs" color="gray.500">
                       {getSortIcon("balance")}
@@ -820,14 +873,18 @@ const SupplyContent = () => {
                   onClick={() => handleSort("apy")}
                   _hover={{ bg: "gray.50" }}
                 >
-                  <Flex alignItems="center" gap="5px">
+                  <Flex alignItems="center" gap="5px" className="light-text-2">
                     APY
                     <Icon fontSize="xs" color="gray.500">
                       {getSortIcon("apy")}
                     </Icon>
                   </Flex>
                 </Table.ColumnHeader>
-                <Table.ColumnHeader w="12%" minW="80px">
+                <Table.ColumnHeader
+                  w="12%"
+                  minW="80px"
+                  className="light-text-2"
+                >
                   Can be collateral
                 </Table.ColumnHeader>
                 <Table.ColumnHeader w="27%" minW="150px"></Table.ColumnHeader>
@@ -853,6 +910,7 @@ const SupplyContent = () => {
                         onClick={() =>
                           navigate(buildAssetDetailsRoute(item.symbol))
                         }
+                        className="title-text-1"
                         _hover={{ textDecoration: "underline" }}
                       >
                         {item.name}
@@ -860,9 +918,11 @@ const SupplyContent = () => {
                     </Flex>
                   </Table.Cell>
                   <Table.Cell w="23%">
-                    <Box fontSize="sm">{item.balance}</Box>
+                    <Box fontSize="sm" className="title-text-1">
+                      {item.balance}
+                    </Box>
                   </Table.Cell>
-                  <Table.Cell w="15%" fontSize="sm">
+                  <Table.Cell w="15%" fontSize="sm" className="title-text-1">
                     {item.apy}
                   </Table.Cell>
                   <Table.Cell w="12%">

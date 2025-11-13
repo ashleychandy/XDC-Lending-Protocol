@@ -131,36 +131,35 @@ const Dashboard = () => {
   return (
     <>
       <Header />
-      <Container
-        maxW={{
-          base: "100%",
-          md: "container.md",
-          lg: "container.lg",
-          xl: "container.xl",
-        }}
-        px={{ base: 4, md: 6 }}
-        py={4}
-        h="100%"
-      >
-        <Box h="100%" p="30px 0">
+      <Box p={"48px 0 94px"} bg={"#2b2d3c"}>
+        <Container
+          maxW={{
+            md: "container.md",
+            lg: "container.lg",
+            xl: "container.xl",
+          }}
+          h="100%"
+        >
           <Flex gap="2" alignItems="center" mb="15px">
             <Image
               src={network.icon}
               width="100px"
-              height="100px"
+              height="50px"
               objectFit="contain"
               flexShrink={0}
             />
-            <Heading size="4xl">
+            <Heading size="4xl" className="text-white-1">
               {network.name.replace(/^XDC\s+/i, "")} Market
             </Heading>
           </Flex>
 
-          <Flex gap="6" alignItems="center" mb="50px" flexWrap="wrap">
+          <Flex gap="6" alignItems="center" flexWrap="wrap">
             <Flex direction="column">
-              <Box>Net worth</Box>
-              <Heading size="2xl">
-                $
+              <Box className="light-text-1">Net worth</Box>
+              <Heading size="2xl" className="text-white-2">
+                <Box as={"span"} className="light-text-1" mr={"2px"}>
+                  $
+                </Box>
                 {netWorth.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -168,22 +167,36 @@ const Dashboard = () => {
               </Heading>
             </Flex>
             <Flex direction="column">
-              <Box>Net APY</Box>
+              <Box className="light-text-1">Net APY</Box>
               <Heading
                 size="2xl"
-                color={parseFloat(netApy) < 0 ? "red.500" : "inherit"}
+                className="text-white-2"
+                color={parseFloat(netApy) < 0 ? "red.500" : "text-white-2"}
               >
-                {netApy}%
+                {netApy}
+                <Box as={"span"} className="light-text-1" ml={"2px"}>
+                  %
+                </Box>
               </Heading>
             </Flex>
             <Flex direction="column">
-              <Box>Health factor</Box>
+              <Box className="light-text-1">Health factor</Box>
               <Heading size="2xl" color={healthFactorColor}>
                 {healthFactorValue > 1000 ? "∞" : healthFactorValue.toFixed(2)}
               </Heading>
             </Flex>
           </Flex>
-
+        </Container>
+      </Box>
+      <Container
+        maxW={{
+          md: "container.md",
+          lg: "container.lg",
+          xl: "container.xl",
+        }}
+        h="100%"
+      >
+        <Box mt={"-50px"}>
           {isConnected ? (
             <Flex gap="4" direction={{ base: "column", lg: "row" }}>
               {/* LEFT CONTENT - SUPPLY */}
