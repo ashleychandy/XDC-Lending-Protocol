@@ -1,16 +1,16 @@
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
+import {
+  NATIVE_TOKEN_ADDRESS,
+  useAllWalletBalances,
+} from "@/hooks/useAllWalletBalances";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useBorrow } from "@/hooks/useBorrow";
 import { useBorrowAllowance } from "@/hooks/useBorrowAllowance";
 import { useChainConfig } from "@/hooks/useChainConfig";
-import { useReserveBorrowed } from "@/hooks/useReserveBorrowed";
+import { useProtocolReserveData } from "@/hooks/useProtocolReserveData";
 import { useReserveCaps } from "@/hooks/useReserveCaps";
-import { useReserveData } from "@/hooks/useReserveData";
-import { useReserveLiquidity } from "@/hooks/useReserveLiquidity";
-import { useReserveSupply } from "@/hooks/useReserveSupply";
 import { useSupply } from "@/hooks/useSupply";
 import { useTokenAllowance } from "@/hooks/useTokenAllowance";
-import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
 import { useUserReserveData } from "@/hooks/useUserReserveData";
@@ -18,7 +18,8 @@ import { Box, Button, Flex, Heading, Icon, Tabs } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { IoWalletOutline } from "react-icons/io5";
-import { useAccount, useBalance } from "wagmi";
+import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
 import BorrowDoneModal from "../modal/BorrowDoneModal";
 import BorrowModal from "../modal/BorrowModal";
 import SupplyDoneModal from "../modal/SupplyDoneModal";
@@ -69,58 +70,54 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     setSelectedToken(token as "wxdc" | "usdc" | "xdc" | "cgo");
   }, [token]);
 
-  // Balances
-  const { data: xdcBalance } = useBalance({ address });
-  const { balance: wxdcBalance } = useTokenBalance(
-    tokens.wrappedNative.address,
-    tokens.wrappedNative.decimals
-  );
-  const { balance: usdcBalance } = useTokenBalance(
-    tokens.usdc.address,
-    tokens.usdc.decimals
-  );
-  const { balance: cgoBalance } = useTokenBalance(
-    tokens.cgo.address,
-    tokens.cgo.decimals
-  );
+  // Fetch all wallet balances in a single call (replaces useBalance + 3x useTokenBalance)
+  const { balances } = useAllWalletBalances();
+
+  // Extract individual balances from the batch result
+  const xdcBalance = balances[NATIVE_TOKEN_ADDRESS]?.formattedBalance || "0";
+  const wxdcBalance =
+    balances[tokens.wrappedNative.address]?.formattedBalance || "0";
+  const usdcBalance = balances[tokens.usdc.address]?.formattedBalance || "0";
+  const cgoBalance = balances[tokens.cgo.address]?.formattedBalance || "0";
 
   // Prices
   const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
   const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
   const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
 
-  // Get reserve data (APY, etc.) for each asset
-  const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
-  const usdcReserveData = useReserveData(tokens.usdc.address);
-  const cgoReserveData = useReserveData(tokens.cgo.address);
+  // Use Protocol Data Provider for reserve data (includes totalAToken and totalVariableDebt)
+  const wxdcReserveData = useProtocolReserveData(tokens.wrappedNative.address);
+  const usdcReserveData = useProtocolReserveData(tokens.usdc.address);
+  const cgoReserveData = useProtocolReserveData(tokens.cgo.address);
 
-  // Get available liquidity for each reserve
-  const wxdcLiquidity = useReserveLiquidity(
-    tokens.wrappedNative.address,
-    tokens.wrappedNative.decimals
-  );
-  const usdcLiquidity = useReserveLiquidity(
-    tokens.usdc.address,
-    tokens.usdc.decimals
-  );
-  const cgoLiquidity = useReserveLiquidity(
-    tokens.cgo.address,
-    tokens.cgo.decimals
-  );
+  // Calculate available liquidity from Protocol Data Provider data
+  // Available liquidity = totalAToken - totalVariableDebt
+  const wxdcLiquidity = {
+    availableLiquidity: formatUnits(
+      wxdcReserveData.totalAToken - wxdcReserveData.totalVariableDebt,
+      tokens.wrappedNative.decimals
+    ),
+  };
+  const usdcLiquidity = {
+    availableLiquidity: formatUnits(
+      usdcReserveData.totalAToken - usdcReserveData.totalVariableDebt,
+      tokens.usdc.decimals
+    ),
+  };
+  const cgoLiquidity = {
+    availableLiquidity: formatUnits(
+      cgoReserveData.totalAToken - cgoReserveData.totalVariableDebt,
+      tokens.cgo.decimals
+    ),
+  };
 
   // Get user reserve data (supplied amounts)
   const wxdcUserData = useUserReserveData(
     tokens.wrappedNative.address,
-    wxdcReserveData.aTokenAddress
+    "" // No longer needed
   );
-  const usdcUserData = useUserReserveData(
-    tokens.usdc.address,
-    usdcReserveData.aTokenAddress
-  );
-  const cgoUserData = useUserReserveData(
-    tokens.cgo.address,
-    cgoReserveData.aTokenAddress
-  );
+  const usdcUserData = useUserReserveData(tokens.usdc.address, "");
+  const cgoUserData = useUserReserveData(tokens.cgo.address, "");
 
   // Get supply and borrow caps
   const wxdcCaps = useReserveCaps(
@@ -130,32 +127,39 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   const usdcCaps = useReserveCaps(tokens.usdc.address, tokens.usdc.decimals);
   const cgoCaps = useReserveCaps(tokens.cgo.address, tokens.cgo.decimals);
 
-  // Get total supplied amounts
-  const wxdcSupply = useReserveSupply(
-    wxdcReserveData.aTokenAddress,
-    tokens.wrappedNative.decimals
-  );
-  const usdcSupply = useReserveSupply(
-    usdcReserveData.aTokenAddress,
-    tokens.usdc.decimals
-  );
-  const cgoSupply = useReserveSupply(
-    cgoReserveData.aTokenAddress,
-    tokens.cgo.decimals
-  );
+  // Extract total supplied and borrowed from Protocol Data Provider
+  // (replaces useReserveSupply and useReserveBorrowed hooks)
+  const wxdcSupply = {
+    totalSupply: formatUnits(
+      wxdcReserveData.totalAToken,
+      tokens.wrappedNative.decimals
+    ),
+  };
+  const usdcSupply = {
+    totalSupply: formatUnits(usdcReserveData.totalAToken, tokens.usdc.decimals),
+  };
+  const cgoSupply = {
+    totalSupply: formatUnits(cgoReserveData.totalAToken, tokens.cgo.decimals),
+  };
 
-  const wxdcTotalBorrowed = useReserveBorrowed(
-    tokens.wrappedNative.variableDebtToken,
-    tokens.wrappedNative.decimals
-  );
-  const usdcTotalBorrowed = useReserveBorrowed(
-    tokens.usdc.variableDebtToken,
-    tokens.usdc.decimals
-  );
-  const cgoTotalBorrowed = useReserveBorrowed(
-    tokens.cgo.variableDebtToken,
-    tokens.cgo.decimals
-  );
+  const wxdcTotalBorrowed = {
+    totalBorrowed: formatUnits(
+      wxdcReserveData.totalVariableDebt,
+      tokens.wrappedNative.decimals
+    ),
+  };
+  const usdcTotalBorrowed = {
+    totalBorrowed: formatUnits(
+      usdcReserveData.totalVariableDebt,
+      tokens.usdc.decimals
+    ),
+  };
+  const cgoTotalBorrowed = {
+    totalBorrowed: formatUnits(
+      cgoReserveData.totalVariableDebt,
+      tokens.cgo.decimals
+    ),
+  };
 
   // Calculate available to borrow considering borrow cap and available liquidity
   const getAvailableToBorrow = (
@@ -208,7 +212,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     xdc: {
       name: "XDC",
       symbol: "XDC",
-      balance: xdcBalance?.formatted || "0",
+      balance: xdcBalance,
       price: xdcPrice,
     },
     wxdc: {
@@ -534,11 +538,11 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             <Tabs.Content value="xdc">
               {renderWalletSection(
                 "Wallet balance",
-                formatValue(parseFloat(xdcBalance?.formatted || "0")),
-                formatUsdValue(Number(xdcBalance?.formatted) * xdcPrice)
+                formatValue(parseFloat(xdcBalance)),
+                formatUsdValue(Number(xdcBalance) * xdcPrice)
               )}
               {renderSupplyBorrow(
-                formatValue(parseFloat(xdcBalance?.formatted || "0")),
+                formatValue(parseFloat(xdcBalance)),
                 formatValue(parseFloat(borrowedXdc))
               )}
             </Tabs.Content>

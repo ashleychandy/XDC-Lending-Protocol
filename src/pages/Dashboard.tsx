@@ -1,9 +1,11 @@
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import { useAllReserves } from "@/hooks/useAllReserves";
+import { useAllWalletBalances } from "@/hooks/useAllWalletBalances";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useChainConfig } from "@/hooks/useChainConfig";
-import { useReserveData } from "@/hooks/useReserveData";
+import { useProtocolReserveData } from "@/hooks/useProtocolReserveData";
+import { useProtocolUserReserveData } from "@/hooks/useProtocolUserReserveData";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { useUserReserveData } from "@/hooks/useUserReserveData";
 import { Box, Container, Flex, Heading, Image } from "@chakra-ui/react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -16,28 +18,25 @@ const Dashboard = () => {
   const { isConnected } = useAccount();
   const { tokens, network } = useChainConfig();
 
-  const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
-  const usdcReserveData = useReserveData(tokens.usdc.address);
-  const cgoReserveData = useReserveData(tokens.cgo.address);
+  // Fetch all reserves and aTokens for mapping token addresses
+  const { reserves, aTokens } = useAllReserves();
+
+  // Fetch all wallet balances in a single call (reduces RPC calls)
+  const { balances } = useAllWalletBalances();
+
+  // Use Protocol Data Provider for reserve data (more efficient than Pool contract)
+  const wxdcReserveData = useProtocolReserveData(tokens.wrappedNative.address);
+  const usdcReserveData = useProtocolReserveData(tokens.usdc.address);
+  const cgoReserveData = useProtocolReserveData(tokens.cgo.address);
 
   const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
   const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
   const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
 
-  const wxdcUserData = useUserReserveData(
-    tokens.wrappedNative.address,
-    wxdcReserveData.aTokenAddress
-  );
-
-  const usdcUserData = useUserReserveData(
-    tokens.usdc.address,
-    usdcReserveData.aTokenAddress
-  );
-
-  const cgoUserData = useUserReserveData(
-    tokens.cgo.address,
-    cgoReserveData.aTokenAddress
-  );
+  // Use Protocol Data Provider for user reserve data (single call per asset)
+  const wxdcUserData = useProtocolUserReserveData(tokens.wrappedNative.address);
+  const usdcUserData = useProtocolUserReserveData(tokens.usdc.address);
+  const cgoUserData = useProtocolUserReserveData(tokens.cgo.address);
 
   const accountData = useUserAccountData();
 
