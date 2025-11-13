@@ -436,7 +436,9 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   return (
     <Box width={{ base: "100%", xl: "35%" }}>
       <Box
-        shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
+        shadow="rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
+        bg={"#fff"}
+        border={"1px solid #eaebef"}
         borderRadius="5px"
         p="16px 24px"
       >
@@ -501,7 +503,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             txHash={borrowHook.hash as `0x${string}`}
           />
         )}
-        <Heading size="xl" mb="20px">
+        <Heading size="xl" mb="20px" className="title-text-1">
           Your info
         </Heading>
 

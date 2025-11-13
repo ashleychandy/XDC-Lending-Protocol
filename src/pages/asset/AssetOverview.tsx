@@ -100,7 +100,9 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
     return (
       <Box width={{ base: "100%", xl: "65%" }}>
         <Flex
-          shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
+          shadow="rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
+          bg={"#fff"}
+          border={"1px solid #eaebef"}
           borderRadius="5px"
           p="16px 24px"
           minH="500px"
@@ -116,11 +118,13 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
   return (
     <Box width={{ base: "100%", xl: "65%" }}>
       <Box
-        shadow="rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"
+        shadow="rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
+        bg={"#fff"}
+        border={"1px solid #eaebef"}
         borderRadius="5px"
         p="16px 24px"
       >
-        <Heading size="xl" mb="30px">
+        <Heading size="xl" mb="30px" className="title-text-1">
           Reserve status & configuration
         </Heading>
         <Flex direction="column" gap="35px">

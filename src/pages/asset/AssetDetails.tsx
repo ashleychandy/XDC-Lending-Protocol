@@ -93,18 +93,15 @@ const AssetDetails = () => {
   return (
     <>
       <Header />
-      <Container
-        maxW={{
-          base: "100%",
-          lg: "container.lg",
-          xl: "container.xl",
-        }}
-        pt="60px"
-        px={{ base: 4, md: 6 }}
-        py={4}
-        h="100%"
-      >
-        <Box h="100%" p="30px 0">
+      <Box pt={"60px"} pb={"94px"} bg={"#2b2d3c"}>
+        <Container
+          maxW={{
+            base: "100%",
+            lg: "container.lg",
+            xl: "container.xl",
+          }}
+          h="100%"
+        >
           <Flex alignItems="center" gap="10px" mb="15px">
             <Button size="sm" onClick={() => navigate(-1)}>
               <Icon size="md">
@@ -120,7 +117,9 @@ const AssetDetails = () => {
                 objectFit="contain"
                 flexShrink={0}
               />
-              <Heading size="lg">{network.name} Market</Heading>
+              <Heading size="lg" className="text-white-1">
+                {network.name} Market
+              </Heading>
             </Flex>
           </Flex>
 
@@ -138,9 +137,11 @@ const AssetDetails = () => {
                 alt={tokenInfo.symbol}
               />
               <Flex direction="column">
-                <Heading size="md">{tokenInfo.symbol}</Heading>
+                <Heading size="md" className="text-white-2">
+                  {tokenInfo.symbol}
+                </Heading>
                 <Flex gap="2" alignItems="center">
-                  <Heading size="xl" fontWeight="700">
+                  <Heading size="xl" fontWeight="700" className="text-white-1">
                     {tokenInfo.fullName}
                   </Heading>
                   <Button
@@ -184,31 +185,53 @@ const AssetDetails = () => {
 
             <Flex gap={{ base: "15px", md: "32px" }} flexWrap="wrap" flex="1">
               <Flex direction="column">
-                <Box fontSize="sm">Reserve Size</Box>
-                <Heading size="2xl">{formatCurrency(reserveSize)}</Heading>
+                <Box fontSize="sm" className="light-text-1">
+                  Reserve Size
+                </Box>
+                <Heading size="2xl" className="text-white-2">
+                  {formatCurrency(reserveSize)}
+                </Heading>
               </Flex>
 
               <Flex direction="column">
-                <Box fontSize="sm">Available liquidity</Box>
-                <Heading size="2xl">
+                <Box fontSize="sm" className="light-text-1">
+                  Available liquidity
+                </Box>
+                <Heading size="2xl" className="text-white-2">
                   {formatCurrency(availableLiquidity)}
                 </Heading>
               </Flex>
 
               <Flex direction="column">
-                <Box fontSize="sm">Utilization Rate</Box>
-                <Heading size="2xl">
+                <Box fontSize="sm" className="light-text-1">
+                  Utilization Rate
+                </Box>
+                <Heading size="2xl" className="text-white-2">
                   {formatPercentage(utilizationRate)}
                 </Heading>
               </Flex>
 
               <Flex direction="column">
-                <Box fontSize="sm">Oracle price</Box>
-                <Heading size="2xl">${oraclePrice.toFixed(4)}</Heading>
+                <Box fontSize="sm" className="light-text-1">
+                  Oracle price
+                </Box>
+                <Heading size="2xl" className="text-white-2">
+                  ${oraclePrice.toFixed(4)}
+                </Heading>
               </Flex>
             </Flex>
           </Flex>
-
+        </Container>
+      </Box>
+      <Container
+        maxW={{
+          base: "100%",
+          lg: "container.lg",
+          xl: "container.xl",
+        }}
+        h="100%"
+      >
+        <Box mt={"-50px"}>
           {isTabLayout ? (
             <Tabs.Root defaultValue="overview" variant="plain" w="100%">
               <Tabs.List bg="bg.inverted" w="50%" rounded="l3" p="1" mb="15px">
