@@ -5,7 +5,7 @@ a {
 body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff !important;
+  background-color: #f1f1f3;
 }
 
 tr:last-child > td {
@@ -239,4 +239,28 @@ tr:last-child > td {
 
 .landing-page-light .governance-list li {
   color: #4a5568 !important;
+}
+
+.light-text-1 {
+  color: #a5a8b6;
+}
+.light-text-2 {
+  color: #62677b;
+}
+.text-white-1 {
+  color: #fff;
+}
+.text-white-2 {
+  color: #f1f1f3;
+}
+.title-text-1 {
+  color: #303549;
+}
+.btn-color-dark-1 {
+  background-color: #383d51;
+  color: #fff;
+}
+.btn-color-light-1 {
+  background-color: #f7f7f9;
+  color: #383d51;
 }

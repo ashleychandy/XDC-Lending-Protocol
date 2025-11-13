@@ -10,7 +10,10 @@ const ConnectYourWalletContent = () => {
       justifyContent="center"
       p="20px"
       h="60vh"
-      bg="bg.muted"
+      bg="#fff"
+      boxShadow={
+        "rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
+      }
       borderRadius="5px"
     >
       <Heading mb="15px">Please, connect your wallet</Heading>

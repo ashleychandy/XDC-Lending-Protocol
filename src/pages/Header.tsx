@@ -23,7 +23,8 @@ const Header = () => {
     <Box
       as="header"
       p="8px 20px"
-      bg="transparent"
+      bg="#fff"
+      boxShadow={"rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"}
       position="sticky"
       top="0"
       zIndex="1000"
