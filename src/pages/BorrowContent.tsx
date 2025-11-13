@@ -525,85 +525,14 @@ function BorrowContent() {
           onClose={() => {
             setIsBorrowModal(false);
             setAmount("");
-            setUnwrapToNative(true);
-            setIsDelegationApproved(false);
           }}
           tokenSymbol={selectedToken}
           amount={amount}
           setAmount={setAmount}
           onClickDelegationApprove={handleDelegationApprove}
-          onClickBorrow={() => {
-            handleBorrow(unwrapToNative);
-          }}
-          isDelegationApproved={isDelegationApproved}
-          isDelegationApprovePending={
-            borrowHook.delegationIsPending || borrowHook.delegationIsConfirming
-          }
-          delegationAllowance={borrowAllowance}
-          borrowCap={
-            selectedToken === "xdc" || selectedToken === "wxdc"
-              ? wxdcCaps.borrowCap || "0"
-              : selectedToken === "cgo"
-                ? cgoCaps.borrowCap || "0"
-                : usdcCaps.borrowCap || "0"
-          }
-          totalBorrowed={
-            selectedToken === "xdc" || selectedToken === "wxdc"
-              ? wxdcTotalBorrowed.totalBorrowed || "0"
-              : selectedToken === "cgo"
-                ? cgoTotalBorrowed.totalBorrowed || "0"
-                : usdcTotalBorrowed.totalBorrowed || "0"
-          }
-          availableToBorrow={
-            selectedToken === "xdc" || selectedToken === "wxdc"
-              ? formatValue(
-                  Math.min(
-                    parseFloat(accountData.availableBorrows) / xdcPrice,
-                    parseFloat(wxdcLiquidity.availableLiquidity),
-                    parseFloat(wxdcCaps.borrowCap || "0") > 0
-                      ? Math.max(
-                          0,
-                          parseFloat(wxdcCaps.borrowCap) -
-                            parseFloat(wxdcTotalBorrowed.totalBorrowed)
-                        )
-                      : Infinity
-                  )
-                )
-              : selectedToken === "cgo"
-                ? formatValue(
-                    Math.min(
-                      parseFloat(accountData.availableBorrows) / cgoPrice,
-                      parseFloat(cgoLiquidity.availableLiquidity),
-                      parseFloat(cgoCaps.borrowCap || "0") > 0
-                        ? Math.max(
-                            0,
-                            parseFloat(cgoCaps.borrowCap) -
-                              parseFloat(cgoTotalBorrowed.totalBorrowed)
-                          )
-                        : Infinity
-                    )
-                  )
-                : formatValue(
-                    Math.min(
-                      parseFloat(accountData.availableBorrows) / usdcPrice,
-                      parseFloat(usdcLiquidity.availableLiquidity),
-                      parseFloat(usdcCaps.borrowCap || "0") > 0
-                        ? Math.max(
-                            0,
-                            parseFloat(usdcCaps.borrowCap) -
-                              parseFloat(usdcTotalBorrowed.totalBorrowed)
-                          )
-                        : Infinity
-                    )
-                  )
-          }
-          xdcPrice={xdcPrice}
-          usdcPrice={usdcPrice}
-          cgoPrice={cgoPrice}
+          onClickBorrow={handleBorrow}
           isPending={borrowHook.isPending}
           isConfirming={borrowHook.isConfirming}
-          unwrapToNative={unwrapToNative}
-          setUnwrapToNative={setUnwrapToNative}
         />
       )}
       {isBorrowDoneModal && (
@@ -634,21 +563,9 @@ function BorrowContent() {
           onClickRepay={() => {
             handleRepay(useNativeForRepay);
           }}
-          isApproved={isRepayApproved}
           isApprovePending={
             repayHook.approveIsPending || repayHook.approveIsConfirming
           }
-          allowance={repayAllowance}
-          borrowedAmount={
-            selectedToken === "xdc" || selectedToken === "wxdc"
-              ? wxdcBorrowed
-              : selectedToken === "cgo"
-                ? cgoBorrowed
-                : usdcBorrowed
-          }
-          xdcPrice={xdcPrice}
-          usdcPrice={usdcPrice}
-          cgoPrice={cgoPrice}
           isPending={repayHook.isPending}
           isConfirming={repayHook.isConfirming}
           useNative={useNativeForRepay}

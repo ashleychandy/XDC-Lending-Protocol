@@ -1,9 +1,13 @@
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useChainConfig } from "@/hooks/useChainConfig";
+import { useReserveData } from "@/hooks/useReserveData";
+import { useTokenAllowance } from "@/hooks/useTokenAllowance";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
+import { useUserReserveData } from "@/hooks/useUserReserveData";
 import {
   Box,
   Button,
@@ -22,6 +26,8 @@ import {
 import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
+import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
 import usdcIcon from "../../assets/images/usdc.svg";
 
 interface Props {
@@ -32,13 +38,7 @@ interface Props {
   setAmount: (value: string) => void;
   onClickApprove: () => void;
   onClickRepay: () => void;
-  isApproved: boolean;
   isApprovePending: boolean;
-  allowance?: bigint;
-  borrowedAmount?: string; // User's borrowed amount in token units
-  xdcPrice?: number;
-  usdcPrice?: number;
-  cgoPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
   useNative?: boolean;
@@ -49,23 +49,18 @@ const RepayModal: React.FC<Props> = ({
   isOpen,
   onClose,
   tokenSymbol,
-  allowance,
   amount,
   setAmount,
   onClickApprove,
   onClickRepay,
-  isApproved,
   isApprovePending,
-  borrowedAmount = "0",
-  xdcPrice = 2500,
-  usdcPrice = 1,
-  cgoPrice = 1,
   isPending = false,
   isConfirming = false,
   useNative: externalUseNative,
   setUseNative: externalSetUseNative,
 }) => {
-  const { tokens, network } = useChainConfig();
+  const { tokens, network, contracts } = useChainConfig();
+  const { address } = useAccount();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [internalUseNative, setInternalUseNative] = useState<boolean>(false);
 
@@ -80,6 +75,32 @@ const RepayModal: React.FC<Props> = ({
   // Get account data for health factor
   const accountData = useUserAccountData();
 
+  // Fetch data internally based on tokenSymbol
+  const currentToken =
+    tokenSymbol === "xdc" || tokenSymbol === "wxdc"
+      ? tokens.wrappedNative
+      : tokens[tokenSymbol];
+
+  // Get reserve data
+  const reserveData = useReserveData(currentToken.address);
+
+  // Get user reserve data
+  const userReserveData = useUserReserveData(
+    currentToken.address,
+    reserveData.aTokenAddress
+  );
+
+  // Get asset prices
+  const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
+  const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
+  const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
+
+  // Format borrowed amount
+  const borrowedAmount = formatUnits(
+    userReserveData.borrowedAmount as bigint,
+    currentToken.decimals
+  );
+
   // Get wallet balances for validation
   const { balance: wxdcBalance } = useTokenBalance(
     tokens.wrappedNative.address,
@@ -92,6 +113,13 @@ const RepayModal: React.FC<Props> = ({
   const { balance: cgoBalance } = useTokenBalance(
     tokens.cgo.address,
     tokens.cgo.decimals
+  );
+
+  // Check token allowance for repay
+  const { allowance } = useTokenAllowance(
+    currentToken.address,
+    address,
+    contracts.pool
   );
 
   // Token configuration

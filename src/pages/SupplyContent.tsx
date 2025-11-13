@@ -556,31 +556,6 @@ const SupplyContent = () => {
           isApprovePending={
             supplyHook.approveIsPending || supplyHook.approveIsConfirming
           }
-          allowance={allowance}
-          supplyCap={
-            selectedToken === "wxdc" || selectedToken === "xdc"
-              ? wxdcCaps.supplyCap || "0"
-              : selectedToken === "cgo"
-                ? cgoCaps.supplyCap || "0"
-                : usdcCaps.supplyCap || "0"
-          }
-          totalSupplied={
-            selectedToken === "wxdc" || selectedToken === "xdc"
-              ? wxdcSupply.totalSupply || "0"
-              : selectedToken === "cgo"
-                ? cgoSupply.totalSupply || "0"
-                : usdcSupply.totalSupply || "0"
-          }
-          supplyApy={
-            selectedToken === "wxdc" || selectedToken === "xdc"
-              ? wxdcReserveData.supplyApy
-              : selectedToken === "cgo"
-                ? cgoReserveData.supplyApy
-                : usdcReserveData.supplyApy
-          }
-          xdcPrice={xdcPrice}
-          usdcPrice={usdcPrice}
-          cgoPrice={cgoPrice}
           isPending={supplyHook.isPending}
           isConfirming={supplyHook.isConfirming}
         />
@@ -611,23 +586,6 @@ const SupplyContent = () => {
           onClickWithdraw={() => {
             handleWithdraw(unwrapToNative);
           }}
-          suppliedBalance={
-            selectedToken === "xdc" || selectedToken === "wxdc"
-              ? wxdcSupplied
-              : selectedToken === "cgo"
-                ? cgoSupplied
-                : usdcSupplied
-          }
-          availableLiquidity={
-            selectedToken === "xdc" || selectedToken === "wxdc"
-              ? wxdcLiquidity.availableLiquidity
-              : selectedToken === "cgo"
-                ? cgoLiquidity.availableLiquidity
-                : usdcLiquidity.availableLiquidity
-          }
-          xdcPrice={xdcPrice}
-          usdcPrice={usdcPrice}
-          cgoPrice={cgoPrice}
           isPending={withdrawHook.isPending}
           isConfirming={withdrawHook.isConfirming}
           unwrapToNative={unwrapToNative}

@@ -1,7 +1,12 @@
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useChainConfig } from "@/hooks/useChainConfig";
+import { useReserveCaps } from "@/hooks/useReserveCaps";
+import { useReserveData } from "@/hooks/useReserveData";
+import { useReserveSupply } from "@/hooks/useReserveSupply";
+import { useTokenAllowance } from "@/hooks/useTokenAllowance";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
 import {
@@ -34,13 +39,6 @@ interface Props {
   onClickSupply: () => void;
   isApproved: boolean;
   isApprovePending: boolean;
-  allowance?: bigint;
-  supplyCap?: string;
-  totalSupplied?: string;
-  supplyApy?: string;
-  xdcPrice?: number;
-  usdcPrice?: number;
-  cgoPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
 }
@@ -51,23 +49,42 @@ const SupplyModal: React.FC<Props> = ({
   tokenSymbol,
   amount,
   setAmount,
-  allowance,
-  supplyCap = "0",
-  totalSupplied = "0",
   onClickApprove,
   onClickSupply,
   isApproved,
   isApprovePending,
-  supplyApy = "0.00",
-  xdcPrice = 2500,
-  usdcPrice = 1,
-  cgoPrice = 1,
   isPending,
   isConfirming,
 }) => {
-  const { tokens, network } = useChainConfig();
+  const { tokens, network, contracts } = useChainConfig();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { address } = useAccount();
+
+  // Get token configuration
+  const token =
+    tokenSymbol === "xdc" || tokenSymbol === "wxdc"
+      ? tokens.wrappedNative
+      : tokens[tokenSymbol as "usdc" | "cgo"];
+
+  // Fetch all required data
+  const accountData = useUserAccountData();
+  const { price: tokenPrice } = useAssetPrice(token.address);
+  const caps = useReserveCaps(token.address, token.decimals);
+  const reserveData = useReserveData(token.address);
+  const supplyData = useReserveSupply(
+    reserveData.aTokenAddress,
+    token.decimals
+  );
+  const { allowance } = useTokenAllowance(
+    token.address,
+    address,
+    contracts.pool
+  );
+
+  // Get asset prices
+  const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
+  const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
+  const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
 
   // Get native token info
   const nativeTokenSymbol = network.nativeToken.symbol;
@@ -92,8 +109,10 @@ const SupplyModal: React.FC<Props> = ({
     tokens.cgo.decimals
   );
 
-  // Get account data for health factor
-  const accountData = useUserAccountData();
+  // Get supply cap and total supplied
+  const supplyCap = caps.supplyCap || "0";
+  const totalSupplied = supplyData.totalSupply || "0";
+  const supplyApy = reserveData.supplyApy;
 
   // Separate display token from contract token
   // Display: Show what user selected (XDC or WXDC)

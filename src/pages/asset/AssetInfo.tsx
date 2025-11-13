@@ -1,12 +1,15 @@
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useBorrow } from "@/hooks/useBorrow";
+import { useBorrowAllowance } from "@/hooks/useBorrowAllowance";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { useReserveBorrowed } from "@/hooks/useReserveBorrowed";
 import { useReserveCaps } from "@/hooks/useReserveCaps";
 import { useReserveData } from "@/hooks/useReserveData";
 import { useReserveLiquidity } from "@/hooks/useReserveLiquidity";
+import { useReserveSupply } from "@/hooks/useReserveSupply";
 import { useSupply } from "@/hooks/useSupply";
+import { useTokenAllowance } from "@/hooks/useTokenAllowance";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 import { useTransactionFlow } from "@/hooks/useTransactionFlow";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
@@ -27,7 +30,7 @@ interface Props {
 
 const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   const queryClient = useQueryClient();
-  const { tokens } = useChainConfig();
+  const { tokens, contracts } = useChainConfig();
   // Local tab state - sync with token prop
   const [selectedToken, setSelectedToken] = useState<
     "wxdc" | "usdc" | "xdc" | "cgo"
@@ -38,10 +41,28 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   const [isBorrowModal, setIsBorrowModal] = useState<boolean>(false);
   const [isBorrowDoneModal, setIsBorrowDoneModal] = useState<boolean>(false);
   const [isApproved, setIsApproved] = useState<boolean>(false);
+  const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
+  const [isDelegationApproved, setIsDelegationApproved] =
+    useState<boolean>(false);
   const { address } = useAccount();
   const accountData = useUserAccountData();
   const supplyHook = useSupply();
   const borrowHook = useBorrow();
+  const { allowance: borrowAllowance, refetch: refetchBorrowAllowance } =
+    useBorrowAllowance(address);
+
+  // Get current token for allowance check
+  const currentToken =
+    selectedToken === "xdc" || selectedToken === "wxdc"
+      ? tokens.wrappedNative
+      : tokens[selectedToken];
+
+  // Check token allowance for supply
+  const { allowance, refetch: refetchAllowance } = useTokenAllowance(
+    currentToken.address,
+    address,
+    contracts.pool
+  );
 
   // Sync selectedToken with token prop when it changes
   React.useEffect(() => {
@@ -101,13 +122,27 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     cgoReserveData.aTokenAddress
   );
 
-  // Get borrow caps and total borrowed - must be declared before use
+  // Get supply and borrow caps
   const wxdcCaps = useReserveCaps(
     tokens.wrappedNative.address,
     tokens.wrappedNative.decimals
   );
   const usdcCaps = useReserveCaps(tokens.usdc.address, tokens.usdc.decimals);
   const cgoCaps = useReserveCaps(tokens.cgo.address, tokens.cgo.decimals);
+
+  // Get total supplied amounts
+  const wxdcSupply = useReserveSupply(
+    wxdcReserveData.aTokenAddress,
+    tokens.wrappedNative.decimals
+  );
+  const usdcSupply = useReserveSupply(
+    usdcReserveData.aTokenAddress,
+    tokens.usdc.decimals
+  );
+  const cgoSupply = useReserveSupply(
+    cgoReserveData.aTokenAddress,
+    tokens.cgo.decimals
+  );
 
   const wxdcTotalBorrowed = useReserveBorrowed(
     tokens.wrappedNative.variableDebtToken,
@@ -248,14 +283,34 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     },
   });
 
-  const handleBorrow = async () => {
+  const handleDelegationApprove = async () => {
+    if (!address) return;
+
+    try {
+      // Approve unlimited delegation to the gateway for native token borrowing
+      await borrowHook.approveDelegation();
+    } catch (err) {
+      console.error("Delegation approval error:", err);
+    }
+  };
+
+  const handleBorrow = async (unwrapToNative: boolean = false) => {
     if (!address || !amount) return;
     const token =
       selectedToken === "xdc" || selectedToken === "wxdc"
         ? tokens.wrappedNative
         : tokens[selectedToken];
+
     try {
-      await borrowHook.borrow(token.address, amount, token.decimals, address);
+      // If borrowing as native token (XDC) and unwrap is enabled
+      if (
+        (selectedToken === "xdc" || selectedToken === "wxdc") &&
+        unwrapToNative
+      ) {
+        await borrowHook.borrowNative(amount, address);
+      } else {
+        await borrowHook.borrow(token.address, amount, token.decimals, address);
+      }
     } catch (err) {
       console.error("Borrow error:", err);
     }
@@ -398,16 +453,6 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             isApprovePending={
               supplyHook.approveIsPending || supplyHook.approveIsConfirming
             }
-            supplyApy={
-              selectedToken === "wxdc" || selectedToken === "xdc"
-                ? wxdcReserveData.supplyApy
-                : selectedToken === "cgo"
-                  ? cgoReserveData.supplyApy
-                  : usdcReserveData.supplyApy
-            }
-            xdcPrice={xdcPrice}
-            usdcPrice={usdcPrice}
-            cgoPrice={cgoPrice}
             isPending={supplyHook.isPending}
             isConfirming={supplyHook.isConfirming}
           />
@@ -434,25 +479,8 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             tokenSymbol={selectedToken}
             amount={amount}
             setAmount={setAmount}
-            onClickBorrow={() => {
-              handleBorrow();
-            }}
-            availableToBorrow={
-              selectedToken === "xdc" || selectedToken === "wxdc"
-                ? formatValue(
-                    parseFloat(accountData.availableBorrows) / xdcPrice
-                  )
-                : selectedToken === "cgo"
-                  ? formatValue(
-                      parseFloat(accountData.availableBorrows) / cgoPrice
-                    )
-                  : formatValue(
-                      parseFloat(accountData.availableBorrows) / usdcPrice
-                    )
-            }
-            xdcPrice={xdcPrice}
-            usdcPrice={usdcPrice}
-            cgoPrice={cgoPrice}
+            onClickDelegationApprove={handleDelegationApprove}
+            onClickBorrow={handleBorrow}
             isPending={borrowHook.isPending}
             isConfirming={borrowHook.isConfirming}
           />

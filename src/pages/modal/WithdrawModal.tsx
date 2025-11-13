@@ -1,8 +1,12 @@
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import { useAssetPrice } from "@/hooks/useAssetPrice";
 import { useChainConfig } from "@/hooks/useChainConfig";
+import { useReserveData } from "@/hooks/useReserveData";
+import { useReserveLiquidity } from "@/hooks/useReserveLiquidity";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
+import { useUserReserveData } from "@/hooks/useUserReserveData";
 import {
   Box,
   Button,
@@ -21,6 +25,7 @@ import {
 import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
+import { formatUnits } from "viem";
 import usdcIcon from "../../assets/images/usdc.svg";
 
 interface Props {
@@ -30,11 +35,6 @@ interface Props {
   amount: string;
   setAmount: (value: string) => void;
   onClickWithdraw: () => void;
-  suppliedBalance?: string;
-  availableLiquidity?: string;
-  xdcPrice?: number;
-  usdcPrice?: number;
-  cgoPrice?: number;
   isPending?: boolean;
   isConfirming?: boolean;
   unwrapToNative?: boolean;
@@ -48,11 +48,6 @@ const WithdrawModal: React.FC<Props> = ({
   amount,
   setAmount,
   onClickWithdraw,
-  suppliedBalance = "0",
-  availableLiquidity = "0",
-  xdcPrice = 2500,
-  usdcPrice = 1,
-  cgoPrice = 1,
   isPending,
   isConfirming,
   unwrapToNative: externalUnwrapToNative,
@@ -74,6 +69,41 @@ const WithdrawModal: React.FC<Props> = ({
 
   // Get account data for health factor
   const accountData = useUserAccountData();
+
+  // Fetch data internally based on tokenSymbol
+  const currentToken =
+    tokenSymbol === "xdc" || tokenSymbol === "wxdc"
+      ? tokens.wrappedNative
+      : tokens[tokenSymbol];
+
+  // Get reserve data
+  const reserveData = useReserveData(currentToken.address);
+
+  // Get user reserve data
+  const userReserveData = useUserReserveData(
+    currentToken.address,
+    reserveData.aTokenAddress
+  );
+
+  // Get available liquidity
+  const liquidityData = useReserveLiquidity(
+    currentToken.address,
+    currentToken.decimals
+  );
+
+  // Get asset prices
+  const { price: xdcPrice } = useAssetPrice(tokens.wrappedNative.address);
+  const { price: usdcPrice } = useAssetPrice(tokens.usdc.address);
+  const { price: cgoPrice } = useAssetPrice(tokens.cgo.address);
+
+  // Format supplied balance
+  const suppliedBalance = formatUnits(
+    userReserveData.suppliedAmount as bigint,
+    currentToken.decimals
+  );
+
+  // Get available liquidity
+  const availableLiquidity = liquidityData.availableLiquidity;
 
   // Token configuration
   const getTokenConfig = () => {

@@ -1,7 +1,12 @@
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
+import { useAssetPrice } from "@/hooks/useAssetPrice";
+import { useBorrowAllowance } from "@/hooks/useBorrowAllowance";
 import { useChainConfig } from "@/hooks/useChainConfig";
+import { useReserveBorrowed } from "@/hooks/useReserveBorrowed";
+import { useReserveCaps } from "@/hooks/useReserveCaps";
+import { useReserveLiquidity } from "@/hooks/useReserveLiquidity";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
 import {
   Box,
@@ -21,6 +26,7 @@ import {
 import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
+import { useAccount } from "wagmi";
 import usdcIcon from "../../assets/images/usdc.svg";
 
 interface Props {
@@ -30,20 +36,9 @@ interface Props {
   amount: string;
   setAmount: (value: string) => void;
   onClickDelegationApprove?: () => void;
-  onClickBorrow: () => void;
-  isDelegationApproved?: boolean;
-  isDelegationApprovePending?: boolean;
-  delegationAllowance?: bigint;
-  borrowCap?: string;
-  totalBorrowed?: string;
-  availableToBorrow?: string;
-  xdcPrice?: number;
-  usdcPrice?: number;
-  cgoPrice?: number;
+  onClickBorrow: (unwrapToNative: boolean) => void;
   isPending?: boolean;
   isConfirming?: boolean;
-  unwrapToNative?: boolean;
-  setUnwrapToNative?: (value: boolean) => void;
 }
 
 const BorrowModal: React.FC<Props> = ({
@@ -51,39 +46,54 @@ const BorrowModal: React.FC<Props> = ({
   onClose,
   tokenSymbol,
   amount,
-  delegationAllowance,
-  borrowCap = "0",
-  totalBorrowed = "0",
   setAmount,
   onClickDelegationApprove,
   onClickBorrow,
-  isDelegationApproved = false,
-  isDelegationApprovePending = false,
-  availableToBorrow = "0",
-  xdcPrice = 2500,
-  usdcPrice = 1,
-  cgoPrice = 1,
   isPending,
   isConfirming,
-  unwrapToNative: externalUnwrapToNative,
-  setUnwrapToNative: externalSetUnwrapToNative,
 }) => {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [internalUnwrapToNative, setInternalUnwrapToNative] =
-    useState<boolean>(true);
-
-  // Use external state if provided, otherwise use internal state
-  const unwrapToNative = externalUnwrapToNative ?? internalUnwrapToNative;
-  const setUnwrapToNative =
-    externalSetUnwrapToNative ?? setInternalUnwrapToNative;
-
-  // Get chain config for dynamic tokens
+  // Get chain config and user address
   const { tokens, network } = useChainConfig();
+  const { address } = useAccount();
+
+  // Internal state for unwrap toggle
+  const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
+
+  // Get token configuration
+  const token =
+    tokenSymbol === "xdc" || tokenSymbol === "wxdc"
+      ? tokens.wrappedNative
+      : tokens[tokenSymbol as "usdc" | "cgo"];
+
+  // Fetch all required data
+  const accountData = useUserAccountData();
+  const { price: tokenPrice } = useAssetPrice(token.address);
+  const caps = useReserveCaps(token.address, token.decimals);
+  const liquidity = useReserveLiquidity(token.address, token.decimals);
+  const totalBorrowedData = useReserveBorrowed(
+    token.variableDebtToken,
+    token.decimals
+  );
+  const { allowance: delegationAllowance } = useBorrowAllowance(address);
+
+  // Calculate available to borrow
+  const availableToBorrow = formatValue(
+    Math.min(
+      parseFloat(accountData.availableBorrows) / tokenPrice,
+      parseFloat(liquidity.availableLiquidity),
+      parseFloat(caps.borrowCap || "0") > 0
+        ? Math.max(
+            0,
+            parseFloat(caps.borrowCap) -
+              parseFloat(totalBorrowedData.totalBorrowed)
+          )
+        : Infinity
+    )
+  );
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const nativeTokenSymbol = network.nativeToken.symbol;
   const wrappedTokenSymbol = tokens.wrappedNative.symbol;
-
-  // Get account data for health factor
-  const accountData = useUserAccountData();
 
   // Token configuration
   const getTokenConfig = () => {
@@ -94,7 +104,7 @@ const BorrowModal: React.FC<Props> = ({
         symbol: nativeTokenSymbol,
         icon: getTokenLogo(nativeTokenSymbol),
         decimals: 18,
-        price: xdcPrice,
+        price: tokenPrice,
       };
     }
     // If WXDC and unwrap is disabled, show wrapped token
@@ -104,7 +114,7 @@ const BorrowModal: React.FC<Props> = ({
         symbol: wrappedTokenSymbol,
         icon: getTokenLogo(wrappedTokenSymbol),
         decimals: 18,
-        price: xdcPrice,
+        price: tokenPrice,
       };
     }
     // For XDC selection, always show based on toggle
@@ -116,7 +126,7 @@ const BorrowModal: React.FC<Props> = ({
           ? getTokenLogo(nativeTokenSymbol)
           : getTokenLogo(wrappedTokenSymbol),
         decimals: 18,
-        price: xdcPrice,
+        price: tokenPrice,
       };
     }
     // CGO
@@ -126,7 +136,7 @@ const BorrowModal: React.FC<Props> = ({
         symbol: "CGO",
         icon: getTokenLogo("CGO"),
         decimals: tokens.cgo.decimals,
-        price: cgoPrice,
+        price: tokenPrice,
       };
     }
     // USDC
@@ -135,7 +145,7 @@ const BorrowModal: React.FC<Props> = ({
       symbol: "USDC",
       icon: usdcIcon,
       decimals: 6,
-      price: usdcPrice,
+      price: tokenPrice,
     };
   };
 
@@ -387,10 +397,7 @@ const BorrowModal: React.FC<Props> = ({
                     if (needsDelegation) {
                       return (
                         <Button
-                          disabled={
-                            isDelegationApprovePending ||
-                            !onClickDelegationApprove
-                          }
+                          disabled={!onClickDelegationApprove}
                           w="100%"
                           fontSize="18px"
                           onClick={() => {
@@ -399,19 +406,18 @@ const BorrowModal: React.FC<Props> = ({
                             }
                           }}
                           colorPalette="blue"
-                          loading={isDelegationApprovePending}
                         >
-                          {isDelegationApprovePending
-                            ? "Approving delegation..."
-                            : "Approve delegation"}
+                          Approve delegation
                         </Button>
                       );
                     }
                   }
 
                   // Check if borrow would exceed cap
-                  const borrowCapNum = parseFloat(borrowCap || "0");
-                  const totalBorrowedNum = parseFloat(totalBorrowed || "0");
+                  const borrowCapNum = parseFloat(caps.borrowCap || "0");
+                  const totalBorrowedNum = parseFloat(
+                    totalBorrowedData.totalBorrowed || "0"
+                  );
                   const borrowAmount = parseFloat(amount || "0");
                   const exceedsBorrowCap =
                     borrowCapNum > 0 &&
@@ -432,7 +438,7 @@ const BorrowModal: React.FC<Props> = ({
                       }
                       w="100%"
                       fontSize="18px"
-                      onClick={onClickBorrow}
+                      onClick={() => onClickBorrow(unwrapToNative)}
                       colorPalette={isBorrowRisky ? "orange" : "blue"}
                     >
                       {!amount ||
