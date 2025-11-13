@@ -56,28 +56,75 @@ const Dashboard = () => {
     tokens.cgo.decimals
   );
 
+  const wxdcBorrowed = formatUnits(
+    (wxdcUserData.borrowedAmount || 0n) as bigint,
+    tokens.wrappedNative.decimals
+  );
+
+  const usdcBorrowed = formatUnits(
+    (usdcUserData.borrowedAmount || 0n) as bigint,
+    tokens.usdc.decimals
+  );
+
+  const cgoBorrowed = formatUnits(
+    (cgoUserData.borrowedAmount || 0n) as bigint,
+    tokens.cgo.decimals
+  );
+
   const netWorth =
     parseFloat(accountData.totalCollateral) - parseFloat(accountData.totalDebt);
   const healthFactorValue = parseFloat(accountData.healthFactor);
   const healthFactorColor = getHealthFactorColor(healthFactorValue);
 
+  // Calculate total supplied and borrowed in USD
   const totalSuppliedUsd =
     parseFloat(wxdcSupplied) * xdcPrice +
     parseFloat(usdcSupplied) * usdcPrice +
     parseFloat(cgoSupplied) * cgoPrice;
+
+  const totalBorrowedUsd =
+    parseFloat(wxdcBorrowed) * xdcPrice +
+    parseFloat(usdcBorrowed) * usdcPrice +
+    parseFloat(cgoBorrowed) * cgoPrice;
+
+  // Calculate weighted supply APY
   const weightedSupplyApy =
     totalSuppliedUsd > 0
+      ? (parseFloat(wxdcSupplied) *
+          xdcPrice *
+          parseFloat(wxdcReserveData.supplyApy) +
+          parseFloat(usdcSupplied) *
+            usdcPrice *
+            parseFloat(usdcReserveData.supplyApy) +
+          parseFloat(cgoSupplied) *
+            cgoPrice *
+            parseFloat(cgoReserveData.supplyApy)) /
+        totalSuppliedUsd
+      : 0;
+
+  // Calculate weighted borrow APY
+  const weightedBorrowApy =
+    totalBorrowedUsd > 0
+      ? (parseFloat(wxdcBorrowed) *
+          xdcPrice *
+          parseFloat(wxdcReserveData.borrowApy) +
+          parseFloat(usdcBorrowed) *
+            usdcPrice *
+            parseFloat(usdcReserveData.borrowApy) +
+          parseFloat(cgoBorrowed) *
+            cgoPrice *
+            parseFloat(cgoReserveData.borrowApy)) /
+        totalBorrowedUsd
+      : 0;
+
+  // Calculate net APY: (Supply APY × Supply Amount) - (Borrow APY × Borrow Amount) / Total Position
+  const totalPositionUsd = totalSuppliedUsd + totalBorrowedUsd;
+  const netApy =
+    totalPositionUsd > 0
       ? (
-          (parseFloat(wxdcSupplied) *
-            xdcPrice *
-            parseFloat(wxdcReserveData.supplyApy) +
-            parseFloat(usdcSupplied) *
-              usdcPrice *
-              parseFloat(usdcReserveData.supplyApy) +
-            parseFloat(cgoSupplied) *
-              cgoPrice *
-              parseFloat(cgoReserveData.supplyApy)) /
-          totalSuppliedUsd
+          (weightedSupplyApy * totalSuppliedUsd -
+            weightedBorrowApy * totalBorrowedUsd) /
+          totalPositionUsd
         ).toFixed(2)
       : "0.00";
 
@@ -122,7 +169,12 @@ const Dashboard = () => {
             </Flex>
             <Flex direction="column">
               <Box>Net APY</Box>
-              <Heading size="2xl">{weightedSupplyApy}%</Heading>
+              <Heading
+                size="2xl"
+                color={parseFloat(netApy) < 0 ? "red.500" : "inherit"}
+              >
+                {netApy}%
+              </Heading>
             </Flex>
             <Flex direction="column">
               <Box>Health factor</Box>

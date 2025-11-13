@@ -405,6 +405,22 @@ function BorrowContent() {
     });
   }, [yourBorrowsBase, borrowsSortField, borrowsSortDirection]);
 
+  // Calculate available to borrow for each asset (accounting for all constraints)
+  const calculateAvailableToBorrow = (
+    tokenPrice: number,
+    liquidity: string,
+    borrowCap: string,
+    totalBorrowed: string
+  ) => {
+    return Math.min(
+      parseFloat(accountData.availableBorrows) / tokenPrice, // User's borrow capacity
+      parseFloat(liquidity), // Pool liquidity
+      parseFloat(borrowCap || "0") > 0 // Protocol cap
+        ? Math.max(0, parseFloat(borrowCap) - parseFloat(totalBorrowed))
+        : Infinity
+    );
+  };
+
   // Assets to Borrow
   const assetsToBorrowBase = [
     {
@@ -412,45 +428,90 @@ function BorrowContent() {
       name: tokens.wrappedNative.symbol, // WXDC
       symbol: "wxdc",
       available: formatValue(
-        parseFloat(accountData.availableBorrows) / xdcPrice
+        calculateAvailableToBorrow(
+          xdcPrice,
+          wxdcLiquidity.availableLiquidity,
+          wxdcCaps.borrowCap || "0",
+          wxdcTotalBorrowed.totalBorrowed
+        )
       ),
       dollarAvailable: `${formatUsdValue(
-        parseFloat(accountData.availableBorrows)
+        calculateAvailableToBorrow(
+          xdcPrice,
+          wxdcLiquidity.availableLiquidity,
+          wxdcCaps.borrowCap || "0",
+          wxdcTotalBorrowed.totalBorrowed
+        ) * xdcPrice
       )}`,
       apy: `${wxdcReserveData.borrowApy}%`,
       img: wrappedTokenLogo,
       apyValue: parseFloat(wxdcReserveData.borrowApy),
-      availableValue: parseFloat(accountData.availableBorrows) / xdcPrice,
+      availableValue: calculateAvailableToBorrow(
+        xdcPrice,
+        wxdcLiquidity.availableLiquidity,
+        wxdcCaps.borrowCap || "0",
+        wxdcTotalBorrowed.totalBorrowed
+      ),
     },
     {
       id: 2,
       name: "USDC",
       symbol: "usdc",
       available: formatValue(
-        parseFloat(accountData.availableBorrows) / usdcPrice
+        calculateAvailableToBorrow(
+          usdcPrice,
+          usdcLiquidity.availableLiquidity,
+          usdcCaps.borrowCap || "0",
+          usdcTotalBorrowed.totalBorrowed
+        )
       ),
       dollarAvailable: `${formatUsdValue(
-        parseFloat(accountData.availableBorrows)
+        calculateAvailableToBorrow(
+          usdcPrice,
+          usdcLiquidity.availableLiquidity,
+          usdcCaps.borrowCap || "0",
+          usdcTotalBorrowed.totalBorrowed
+        ) * usdcPrice
       )}`,
       apy: `${usdcReserveData.borrowApy}%`,
       img: usdcIcon,
       apyValue: parseFloat(usdcReserveData.borrowApy),
-      availableValue: parseFloat(accountData.availableBorrows) / usdcPrice,
+      availableValue: calculateAvailableToBorrow(
+        usdcPrice,
+        usdcLiquidity.availableLiquidity,
+        usdcCaps.borrowCap || "0",
+        usdcTotalBorrowed.totalBorrowed
+      ),
     },
     {
       id: 3,
       name: "CGO",
       symbol: "cgo",
       available: formatValue(
-        parseFloat(accountData.availableBorrows) / cgoPrice
+        calculateAvailableToBorrow(
+          cgoPrice,
+          cgoLiquidity.availableLiquidity,
+          cgoCaps.borrowCap || "0",
+          cgoTotalBorrowed.totalBorrowed
+        )
       ),
       dollarAvailable: `${formatUsdValue(
-        parseFloat(accountData.availableBorrows)
+        calculateAvailableToBorrow(
+          cgoPrice,
+          cgoLiquidity.availableLiquidity,
+          cgoCaps.borrowCap || "0",
+          cgoTotalBorrowed.totalBorrowed
+        ) * cgoPrice
       )}`,
       apy: `${cgoReserveData.borrowApy}%`,
       img: getTokenLogo("CGO"),
       apyValue: parseFloat(cgoReserveData.borrowApy),
-      availableValue: parseFloat(accountData.availableBorrows) / cgoPrice,
+      availableValue: calculateAvailableToBorrow(
+        cgoPrice,
+        cgoLiquidity.availableLiquidity,
+        cgoCaps.borrowCap || "0",
+        cgoTotalBorrowed.totalBorrowed
+      ),
     },
   ];
 
