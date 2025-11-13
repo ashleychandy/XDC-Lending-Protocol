@@ -131,7 +131,7 @@ const Dashboard = () => {
   return (
     <>
       <Header />
-      <Box p={"48px 0 94px"} bg={"#2b2d3c"}>
+      <Box pt={"0"} pb={"94px"} bg={"#2b2d3c"} mt={"-80px"} paddingTop={"80px"}>
         <Container
           maxW={{
             md: "container.md",
