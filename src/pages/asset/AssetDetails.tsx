@@ -78,6 +78,7 @@ const AssetDetails = () => {
           maxW="container.xl"
           px={{ base: 4, md: 6 }}
           py={4}
+          pt="80px"
           h="100vh"
           display="flex"
           alignItems="center"
@@ -98,6 +99,7 @@ const AssetDetails = () => {
           lg: "container.lg",
           xl: "container.xl",
         }}
+        pt="60px"
         px={{ base: 4, md: 6 }}
         py={4}
         h="100%"
@@ -202,7 +204,7 @@ const AssetDetails = () => {
 
               <Flex direction="column">
                 <Box fontSize="sm">Oracle price</Box>
-                <Heading size="2xl">${oraclePrice.toFixed(2)}</Heading>
+                <Heading size="2xl">${oraclePrice.toFixed(4)}</Heading>
               </Flex>
             </Flex>
           </Flex>

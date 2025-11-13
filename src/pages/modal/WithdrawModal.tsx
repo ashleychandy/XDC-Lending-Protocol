@@ -10,6 +10,7 @@ import { useUserReserveData } from "@/hooks/useUserReserveData";
 import {
   Box,
   Button,
+  Checkbox,
   CloseButton,
   Dialog,
   Flex,
@@ -56,6 +57,8 @@ const WithdrawModal: React.FC<Props> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [internalUnwrapToNative, setInternalUnwrapToNative] =
     useState<boolean>(true);
+  // State for risk acknowledgment
+  const [riskAcknowledged, setRiskAcknowledged] = useState<boolean>(false);
 
   // Use external state if provided, otherwise use internal state
   const unwrapToNative = externalUnwrapToNative ?? internalUnwrapToNative;
@@ -202,29 +205,15 @@ const WithdrawModal: React.FC<Props> = ({
     }
 
     // If withdrawing all collateral but still have debt, HF = 0
-    if (newTotalCollateral === 0) {
+    if (newTotalCollateral === 0 || newTotalCollateral < 0.01) {
       return "0.00";
     }
 
-    // Assume asset has 80% liquidation threshold
-    // In production, this should be fetched from reserve configuration
-    const assetLiquidationThreshold = 80; // 80%
-
-    // Calculate new weighted average liquidation threshold
-    // When withdrawing, we need to recalculate based on remaining collateral
-    const remainingCollateralValue =
-      currentCollateralUsd * avgLiquidationThreshold -
-      withdrawValueUsd * assetLiquidationThreshold;
-
-    const newAvgLiquidationThreshold =
-      newTotalCollateral > 0
-        ? remainingCollateralValue / newTotalCollateral
-        : avgLiquidationThreshold;
-
-    // Calculate new health factor
-    // HF = (collateral * liquidationThreshold%) / debt
+    // Simplified calculation: assume the liquidation threshold stays the same
+    // This is more accurate than trying to recalculate weighted average
+    // HF = (newCollateral × liquidationThreshold%) / debt
     const healthFactor =
-      (newTotalCollateral * newAvgLiquidationThreshold) / 100 / currentDebtUsd;
+      (newTotalCollateral * avgLiquidationThreshold) / 100 / currentDebtUsd;
 
     return healthFactor > 1000 ? "∞" : healthFactor.toFixed(2);
   };
@@ -232,14 +221,14 @@ const WithdrawModal: React.FC<Props> = ({
   const healthFactorValue = parseFloat(accountData.healthFactor);
   const newHealthFactorValue = parseFloat(getNewHealthFactor());
 
-  // Calculate safe max withdraw amount (keeping HF > 1.1)
+  // Calculate safe max withdraw amount (keeping HF > 1.05 for safety)
   const getSafeMaxWithdraw = () => {
     const currentCollateralUsd = parseFloat(accountData.totalCollateral);
     const currentDebtUsd = parseFloat(accountData.totalDebt);
     const avgLiquidationThreshold = parseFloat(
       accountData.currentLiquidationThreshold
     );
-    const minHealthFactor = 1.1; // Keep HF above 1.1 for safety
+    const minHealthFactor = 1.05; // Keep HF above 1.05 for safety
 
     const supplied = parseFloat(suppliedBalance);
     const liquidity = parseFloat(availableLiquidity);
@@ -249,17 +238,29 @@ const WithdrawModal: React.FC<Props> = ({
       return Math.min(supplied, liquidity);
     }
 
-    // Min collateral needed = (debt * minHealthFactor) / liquidationThreshold%
+    // If no liquidation threshold, can't calculate safely
+    if (avgLiquidationThreshold === 0) {
+      return 0;
+    }
+
+    // Calculate minimum collateral needed to maintain HF > 1.05
+    // HF = (collateral × liquidationThreshold%) / debt
+    // Rearranging: minCollateral = (debt × minHF) / (liquidationThreshold% / 100)
     const minCollateralNeeded =
       (currentDebtUsd * minHealthFactor * 100) / avgLiquidationThreshold;
+
+    // Calculate max we can withdraw
     const maxWithdrawUsd = Math.max(
       0,
       currentCollateralUsd - minCollateralNeeded
     );
     const maxWithdrawInToken = maxWithdrawUsd / tokenConfig.price;
 
-    // Return minimum of: health factor limit, supplied balance, and available liquidity
-    return Math.min(maxWithdrawInToken, supplied, liquidity);
+    // Return minimum of all constraints with a small buffer (0.1%) for rounding
+    const safeAmount =
+      Math.min(maxWithdrawInToken, supplied, liquidity) * 0.999;
+
+    return Math.max(0, safeAmount);
   };
 
   const endElement = amount ? (
@@ -393,6 +394,35 @@ const WithdrawModal: React.FC<Props> = ({
                   </Box>
                 )}
 
+                {/* Risk Warning */}
+                {isWithdrawalRisky && !isWithdrawalDangerous && (
+                  <Box
+                    p="12px"
+                    bg="rgba(255, 0, 0, 0.05)"
+                    border="1px solid rgba(255, 0, 0, 0.2)"
+                    borderRadius="6px"
+                    mb="15px"
+                  >
+                    <Box fontSize="sm" color="red.600" mb="8px">
+                      ⚠️ Withdrawing this amount will reduce your health factor
+                      and increase risk of liquidation.
+                    </Box>
+                    <Checkbox.Root
+                      checked={riskAcknowledged}
+                      onCheckedChange={(e) =>
+                        setRiskAcknowledged(e.checked === true)
+                      }
+                      size="sm"
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                      <Checkbox.Label fontSize="sm">
+                        I acknowledge the risks involved
+                      </Checkbox.Label>
+                    </Checkbox.Root>
+                  </Box>
+                )}
+
                 {/* Transaction overview */}
                 <Box>
                   <Box mb="7px" fontSize="sm" fontWeight="medium">
@@ -457,6 +487,7 @@ const WithdrawModal: React.FC<Props> = ({
                     parseFloat(amount) === 0 ||
                     parseFloat(amount) > parseFloat(suppliedBalance) ||
                     isWithdrawalDangerous ||
+                    (isWithdrawalRisky && !riskAcknowledged) ||
                     isPending ||
                     isConfirming
                   }

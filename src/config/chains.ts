@@ -112,22 +112,22 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
         address: "0xC2EABDC14A96A48ee56Dec9917d9057AB93439Ab", // WXDC on testnet
         symbol: "WXDC",
         decimals: 18,
-        aToken: "0x09Fa3c5452Ad7da2B0041B2E92b1caDCA8aA15Fc",
+        aToken: "0x27687a39b3a553e7df3eb88d2f78a541f8ac8ca1",
         variableDebtToken: "0xe82a3BE1d9606ad54cb6c572e4Dc034545D079b0",
       },
       usdc: {
         address: "0xE899E6C96dD269E1ea613F0B95dCB6411A510eca",
         symbol: "USDC",
         decimals: 6,
-        aToken: "0xc87b0EF1327CBae802Eb8a65212B20628Ed84Ffc",
+        aToken: "0xa3bc6e51261e4a8c6addea92a4f28e87dd17c1c7",
         variableDebtToken: "0x095d1870d1ebb9997472C8C188AaAA9Cd0824Bd7",
       },
       cgo: {
         address: "0x394Dbd36Bf533cD4769FDc121EAb73A6f8Ad5040",
         symbol: "CGO",
         decimals: 18,
-        aToken: "0x0000000000000000000000000000000000000000",
-        variableDebtToken: "0x0000000000000000000000000000000000000000",
+        aToken: "0x877910eabe5c0bffc5a9b2ecd90f21f67a8e4ac5",
+        variableDebtToken: "0xa2aa7d8c2c82ca64215f4ef57050b4d956778ad1",
       },
     },
     network: {

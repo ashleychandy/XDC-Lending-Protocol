@@ -4,7 +4,7 @@ import { Box, Flex, IconButton, Switch, Text } from "@chakra-ui/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { LuSettings } from "react-icons/lu";
 import { NavLink } from "react-router";
-import creditify from "src/assets/images/CreditifyBold.svg";
+import creditify from "src/assets/images/creditify.svg";
 import { useAccount, useSwitchChain } from "wagmi";
 import { xdc, xdcTestnet } from "wagmi/chains";
 
@@ -20,21 +20,18 @@ const Header = () => {
   };
 
   return (
-    <Box
-      as="header"
-      p="8px 20px"
-      bg="transparent"
-      position="sticky"
-      top="0"
-      zIndex="1000"
-    >
-      <Flex gap="4" justify="space-between" alignItems="center">
+    <>
+      {/* Logo - Left */}
+      <Box position="fixed" top="8px" left="20px" zIndex="1000">
         <NavLink to={ROUTES.HOME}>
           <Box w="120px" cursor="pointer">
             <img src={creditify} alt="Creditify Logo" />
           </Box>
         </NavLink>
+      </Box>
 
+      {/* Buttons - Right */}
+      <Box position="fixed" top="8px" right="20px" zIndex="1000">
         <Flex alignItems="center" gap="10px">
           <ConnectButton
             label="Connect Wallet"
@@ -54,7 +51,7 @@ const Header = () => {
                 closeOnSelect={false}
                 justifyContent="space-between"
               >
-                <Text>Testnet</Text>
+                <Text>Testnet Mode</Text>
                 <Switch.Root
                   size="sm"
                   checked={isTestnet}
@@ -69,8 +66,8 @@ const Header = () => {
             </Menu.MenuContent>
           </Menu.MenuRoot>
         </Flex>
-      </Flex>
-    </Box>
+      </Box>
+    </>
   );
 };
 

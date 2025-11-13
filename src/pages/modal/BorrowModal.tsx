@@ -11,6 +11,7 @@ import { useUserAccountData } from "@/hooks/useUserAccountData";
 import {
   Box,
   Button,
+  Checkbox,
   CloseButton,
   Dialog,
   Flex,
@@ -58,6 +59,8 @@ const BorrowModal: React.FC<Props> = ({
 
   // Internal state for unwrap toggle
   const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
+  // State for risk acknowledgment
+  const [riskAcknowledged, setRiskAcknowledged] = useState<boolean>(false);
 
   // Get token configuration
   const token =
@@ -191,14 +194,40 @@ const BorrowModal: React.FC<Props> = ({
   const healthFactorValue = parseFloat(accountData.healthFactor);
   const newHealthFactorValue = parseFloat(getNewHealthFactor());
 
-  // Calculate safe max borrow amount
+  // Calculate safe max borrow amount (keeping HF > 1.05 for safety)
   const getSafeMaxBorrow = () => {
-    // The availableToBorrow prop already accounts for ALL constraints:
-    // - User's borrow capacity (based on collateral × LTV)
-    // - Remaining borrow cap (protocol limit)
-    // - Available liquidity in the pool (actual tokens available)
-    // So we can just use it directly
-    return parseFloat(availableToBorrow);
+    const currentCollateralUsd = parseFloat(accountData.totalCollateral);
+    const currentDebtUsd = parseFloat(accountData.totalDebt);
+    const avgLiquidationThreshold = parseFloat(
+      accountData.currentLiquidationThreshold
+    );
+    const minHealthFactor = 1.05; // Keep HF above 1.05 for safety
+
+    // If no collateral, can't borrow
+    if (currentCollateralUsd === 0 || avgLiquidationThreshold === 0) {
+      return 0;
+    }
+
+    // Calculate max debt that maintains HF > 1.05
+    // HF = (collateral × liquidationThreshold%) / debt
+    // Rearranging: maxDebt = (collateral × liquidationThreshold%) / minHF
+    const maxDebtUsd =
+      (currentCollateralUsd * avgLiquidationThreshold) / 100 / minHealthFactor;
+
+    // Subtract current debt to get max new borrow
+    const maxNewBorrowUsd = Math.max(0, maxDebtUsd - currentDebtUsd);
+
+    // Convert to token amount
+    const maxNewBorrowInToken = maxNewBorrowUsd / tokenConfig.price;
+
+    // Also respect the availableToBorrow limit (liquidity, caps, LTV)
+    const availableLimit = parseFloat(availableToBorrow);
+
+    // Return the minimum of both constraints
+    // Add a small buffer (0.1%) to account for rounding errors
+    const safeAmount = Math.min(maxNewBorrowInToken, availableLimit) * 0.999;
+
+    return Math.max(0, safeAmount);
   };
 
   const endElement = amount ? (
@@ -331,6 +360,35 @@ const BorrowModal: React.FC<Props> = ({
                   </Box>
                 )}
 
+                {/* Risk Warning */}
+                {isBorrowRisky && !isBorrowDangerous && (
+                  <Box
+                    p="12px"
+                    bg="rgba(255, 0, 0, 0.05)"
+                    border="1px solid rgba(255, 0, 0, 0.2)"
+                    borderRadius="6px"
+                    mb="15px"
+                  >
+                    <Box fontSize="sm" color="red.600" mb="8px">
+                      ⚠️ Borrowing this amount will reduce your health factor
+                      and increase risk of liquidation.
+                    </Box>
+                    <Checkbox.Root
+                      checked={riskAcknowledged}
+                      onCheckedChange={(e) =>
+                        setRiskAcknowledged(e.checked === true)
+                      }
+                      size="sm"
+                    >
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control />
+                      <Checkbox.Label fontSize="sm">
+                        I acknowledge the risks involved
+                      </Checkbox.Label>
+                    </Checkbox.Root>
+                  </Box>
+                )}
+
                 {/* Transaction overview */}
                 <Box>
                   <Box mb="7px" fontSize="sm" fontWeight="medium">
@@ -433,6 +491,7 @@ const BorrowModal: React.FC<Props> = ({
                         parseFloat(amount) > parseFloat(availableToBorrow) ||
                         exceedsBorrowCap ||
                         isBorrowDangerous ||
+                        (isBorrowRisky && !riskAcknowledged) ||
                         isPending ||
                         isConfirming
                       }
