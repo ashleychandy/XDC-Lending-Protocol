@@ -351,7 +351,8 @@ const RepayModal: React.FC<Props> = ({
                             );
                             const borrowed = parseFloat(borrowedAmount);
                             const maxRepay = Math.min(walletBal, borrowed);
-                            setAmount(formatValue(maxRepay));
+                            // Store raw number as string (no formatting with commas)
+                            setAmount(maxRepay.toString());
                           }}
                         >
                           MAX

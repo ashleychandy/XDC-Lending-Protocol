@@ -79,20 +79,19 @@ const BorrowModal: React.FC<Props> = ({
   );
   const { allowance: delegationAllowance } = useBorrowAllowance(address);
 
-  // Calculate available to borrow
-  const availableToBorrow = formatValue(
-    Math.min(
-      parseFloat(accountData.availableBorrows) / tokenPrice,
-      parseFloat(liquidity.availableLiquidity),
-      parseFloat(caps.borrowCap || "0") > 0
-        ? Math.max(
-            0,
-            parseFloat(caps.borrowCap) -
-              parseFloat(totalBorrowedData.totalBorrowed)
-          )
-        : Infinity
-    )
+  // Calculate available to borrow (keep raw number for comparisons)
+  const availableToBorrowRaw = Math.min(
+    parseFloat(accountData.availableBorrows) / tokenPrice,
+    parseFloat(liquidity.availableLiquidity),
+    parseFloat(caps.borrowCap || "0") > 0
+      ? Math.max(
+          0,
+          parseFloat(caps.borrowCap) -
+            parseFloat(totalBorrowedData.totalBorrowed)
+        )
+      : Infinity
   );
+  const availableToBorrow = formatValue(availableToBorrowRaw);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const nativeTokenSymbol = network.nativeToken.symbol;
@@ -221,7 +220,7 @@ const BorrowModal: React.FC<Props> = ({
     const maxNewBorrowInToken = maxNewBorrowUsd / tokenConfig.price;
 
     // Also respect the availableToBorrow limit (liquidity, caps, LTV)
-    const availableLimit = parseFloat(availableToBorrow);
+    const availableLimit = availableToBorrowRaw;
 
     // Return the minimum of both constraints
     // Add a small buffer (0.1%) to account for rounding errors
@@ -330,7 +329,7 @@ const BorrowModal: React.FC<Props> = ({
                       </Box>
                       <Flex alignItems="center" gap="5px">
                         <Box fontSize="13px" className="light-text-2">
-                          Available {formatValue(parseFloat(availableToBorrow))}
+                          Available {availableToBorrow}
                         </Box>
                         <Button
                           variant="plain"
@@ -341,7 +340,8 @@ const BorrowModal: React.FC<Props> = ({
                           className="title-text-1"
                           onClick={() => {
                             const safeMax = getSafeMaxBorrow();
-                            setAmount(formatValue(safeMax));
+                            // Store raw number as string (no formatting with commas)
+                            setAmount(safeMax.toString());
                           }}
                         >
                           MAX
@@ -509,7 +509,7 @@ const BorrowModal: React.FC<Props> = ({
                         !amount ||
                         amount.trim() === "" ||
                         parseFloat(amount) === 0 ||
-                        parseFloat(amount) > parseFloat(availableToBorrow) ||
+                        parseFloat(amount) > availableToBorrowRaw ||
                         exceedsBorrowCap ||
                         isBorrowDangerous ||
                         (isBorrowRisky && !riskAcknowledged) ||
@@ -529,7 +529,7 @@ const BorrowModal: React.FC<Props> = ({
                         ? "Enter an amount"
                         : exceedsBorrowCap
                           ? "Exceeds borrow cap"
-                          : parseFloat(amount) > parseFloat(availableToBorrow)
+                          : parseFloat(amount) > availableToBorrowRaw
                             ? "Insufficient borrow capacity"
                             : isBorrowDangerous
                               ? "Health factor too low"

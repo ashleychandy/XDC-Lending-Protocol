@@ -182,29 +182,24 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
     return Math.min(userAvailableInToken, remainingCap, availableLiquidity);
   };
 
-  const borrowedXdc = formatValue(
-    getAvailableToBorrow(
-      wxdcCaps.borrowCap,
-      wxdcTotalBorrowed.totalBorrowed,
-      wxdcLiquidity.availableLiquidity,
-      xdcPrice
-    )
+  // Store raw values (not formatted) for proper display
+  const borrowedXdc = getAvailableToBorrow(
+    wxdcCaps.borrowCap,
+    wxdcTotalBorrowed.totalBorrowed,
+    wxdcLiquidity.availableLiquidity,
+    xdcPrice
   );
-  const borrowedUsdc = formatValue(
-    getAvailableToBorrow(
-      usdcCaps.borrowCap,
-      usdcTotalBorrowed.totalBorrowed,
-      usdcLiquidity.availableLiquidity,
-      usdcPrice
-    )
+  const borrowedUsdc = getAvailableToBorrow(
+    usdcCaps.borrowCap,
+    usdcTotalBorrowed.totalBorrowed,
+    usdcLiquidity.availableLiquidity,
+    usdcPrice
   );
-  const borrowedCgo = formatValue(
-    getAvailableToBorrow(
-      cgoCaps.borrowCap,
-      cgoTotalBorrowed.totalBorrowed,
-      cgoLiquidity.availableLiquidity,
-      cgoPrice
-    )
+  const borrowedCgo = getAvailableToBorrow(
+    cgoCaps.borrowCap,
+    cgoTotalBorrowed.totalBorrowed,
+    cgoLiquidity.availableLiquidity,
+    cgoPrice
   );
 
   // Token config — depends on selected tab, not prop
@@ -531,10 +526,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
                 formatValue(parseFloat(wxdcBalance)),
                 formatUsdValue(Number(wxdcBalance) * xdcPrice)
               )}
-              {renderSupplyBorrow(
-                parseFloat(wxdcBalance),
-                parseFloat(borrowedXdc)
-              )}
+              {renderSupplyBorrow(parseFloat(wxdcBalance), borrowedXdc)}
             </Tabs.Content>
 
             <Tabs.Content value="xdc">
@@ -543,10 +535,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
                 formatValue(parseFloat(xdcBalance)),
                 formatUsdValue(Number(xdcBalance) * xdcPrice)
               )}
-              {renderSupplyBorrow(
-                parseFloat(xdcBalance),
-                parseFloat(borrowedXdc)
-              )}
+              {renderSupplyBorrow(parseFloat(xdcBalance), borrowedXdc)}
             </Tabs.Content>
           </Tabs.Root>
         ) : token === "cgo" ? (
@@ -556,10 +545,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
               formatValue(parseFloat(cgoBalance)),
               formatUsdValue(Number(cgoBalance) * cgoPrice)
             )}
-            {renderSupplyBorrow(
-              parseFloat(cgoBalance),
-              parseFloat(borrowedCgo)
-            )}
+            {renderSupplyBorrow(parseFloat(cgoBalance), borrowedCgo)}
           </>
         ) : (
           <>
@@ -568,10 +554,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
               formatValue(parseFloat(usdcBalance)),
               formatUsdValue(Number(usdcBalance) * usdcPrice)
             )}
-            {renderSupplyBorrow(
-              parseFloat(usdcBalance),
-              parseFloat(borrowedUsdc)
-            )}
+            {renderSupplyBorrow(parseFloat(usdcBalance), borrowedUsdc)}
           </>
         )}
       </Box>

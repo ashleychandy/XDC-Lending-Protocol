@@ -375,7 +375,8 @@ const WithdrawModal: React.FC<Props> = ({
                           className="title-text-1"
                           onClick={() => {
                             const safeMax = getSafeMaxWithdraw();
-                            setAmount(formatValue(safeMax));
+                            // Store raw number as string (no formatting with commas)
+                            setAmount(safeMax.toString());
                           }}
                         >
                           MAX
