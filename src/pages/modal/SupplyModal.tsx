@@ -250,7 +250,7 @@ const SupplyModal: React.FC<Props> = ({
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header justifyContent="space-between">
-                <Dialog.Title fontSize="22px">
+                <Dialog.Title fontSize="22px" className="title-text-1">
                   Supply {tokenConfig.symbol}
                 </Dialog.Title>
                 <Dialog.CloseTrigger asChild pos="static">
@@ -261,7 +261,9 @@ const SupplyModal: React.FC<Props> = ({
               </Dialog.Header>
               <Dialog.Body>
                 <Box mb="15px">
-                  <Box mb="7px">Amount</Box>
+                  <Box mb="7px" className="light-text-2">
+                    Amount
+                  </Box>
                   <Box
                     p="6px 12px"
                     border="1px solid #eaebef"
@@ -295,13 +297,17 @@ const SupplyModal: React.FC<Props> = ({
                           width="24px"
                           height="24px"
                         />
-                        <Heading size="md">{tokenConfig.symbol}</Heading>
+                        <Heading size="md" className="title-text-1">
+                          {tokenConfig.symbol}
+                        </Heading>
                       </Flex>
                     </Flex>
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Box fontSize="sm">{getDollarValue()}</Box>
+                      <Box fontSize="sm" className="light-text-2">
+                        {getDollarValue()}
+                      </Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px">
+                        <Box fontSize="13px" className="light-text-2">
                           Wallet balance{" "}
                           {formatValue(parseFloat(tokenConfig.balance))}
                         </Box>
@@ -312,7 +318,7 @@ const SupplyModal: React.FC<Props> = ({
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          colorPalette="blue"
+                          className="title-text-1"
                           onClick={() => {
                             const walletBalance = parseFloat(
                               tokenConfig.balance
@@ -352,15 +358,23 @@ const SupplyModal: React.FC<Props> = ({
                   </Box>
                 </Box>
                 <Box>
-                  <Box mb="7px">Transaction overview</Box>
+                  <Box mb="7px" className="light-text-2">
+                    Transaction overview
+                  </Box>
                   <Box p="12px" border="1px solid #eaebef" borderRadius="6px">
                     <Flex
                       justifyContent="space-between"
                       alignItems="center"
                       mb="15px"
                     >
-                      <Box fontSize="sm">Supply APY</Box>
-                      <Box fontSize="sm" fontWeight="semibold">
+                      <Box fontSize="sm" className="title-text-1">
+                        Supply APY
+                      </Box>
+                      <Box
+                        fontSize="sm"
+                        fontWeight="semibold"
+                        className="title-text-1"
+                      >
                         {supplyApy}%
                       </Box>
                     </Flex>
@@ -369,7 +383,9 @@ const SupplyModal: React.FC<Props> = ({
                       alignItems="center"
                       mb="15px"
                     >
-                      <Box fontSize="sm">Collateralization</Box>
+                      <Box fontSize="sm" className="title-text-1">
+                        Collateralization
+                      </Box>
                       <Box
                         color="green.600"
                         fontSize="sm"
@@ -379,31 +395,40 @@ const SupplyModal: React.FC<Props> = ({
                       </Box>
                     </Flex>
                     <Flex justifyContent="space-between" gap="7px">
-                      <Box fontSize="sm">Health factor</Box>
+                      <Box fontSize="sm" className="title-text-1">
+                        Health factor
+                      </Box>
                       <Box textAlign="right">
                         <Flex
                           gap="5px"
                           alignItems="center"
                           justifyContent="end"
                         >
-                          <Box fontSize="sm">
+                          <Box fontSize="sm" className="title-text-1">
                             {healthFactorValue > 1000
                               ? "∞"
                               : healthFactorValue.toFixed(2)}
                           </Box>
-                          <Box fontSize="sm">→</Box>
+                          <Box fontSize="sm" className="light-text-2">
+                            →
+                          </Box>
                           <Box color={healthFactorColor} fontWeight="semibold">
                             {getNewHealthFactor()}
                           </Box>
                         </Flex>
-                        <Box fontSize="12px">{`Liquidation at < 1.0`}</Box>
+                        <Box
+                          fontSize="12px"
+                          className="light-text-2"
+                        >{`Liquidation at < 1.0`}</Box>
                       </Box>
                     </Flex>
                   </Box>
                 </Box>
                 <Flex mt="20px" alignItems="center" gap="5px">
-                  <MdLocalGasStation size="16px" />
-                  <Box fontSize="sm">~$0.0001 (12.5 Gwei)</Box>
+                  <MdLocalGasStation size="16px" className="light-text-2" />
+                  <Box fontSize="sm" className="title-text-1">
+                    ~$0.0001 (12.5 Gwei)
+                  </Box>
                 </Flex>
               </Dialog.Body>
               <Dialog.Footer>
@@ -435,7 +460,8 @@ const SupplyModal: React.FC<Props> = ({
                         w="100%"
                         fontSize="18px"
                         onClick={onClickSupply}
-                        colorPalette="blue"
+                        variant={"plain"}
+                        className="btn-color-dark-1"
                         loading={isPending || isConfirming}
                       >
                         {!amount ||
@@ -471,9 +497,10 @@ const SupplyModal: React.FC<Props> = ({
                         isApprovePending
                       }
                       w="100%"
+                      variant={"plain"}
+                      className="btn-color-dark-1"
                       fontSize="18px"
                       onClick={needsApproval ? onClickApprove : onClickSupply}
-                      colorPalette="blue"
                       loading={isApprovePending || isPending || isConfirming}
                     >
                       {!amount ||

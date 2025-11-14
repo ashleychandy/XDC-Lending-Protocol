@@ -73,17 +73,23 @@ const RepayDoneModal: React.FC<Props> = ({
                       <FaCheck />
                     </Icon>
                   </Flex>
-                  <Heading size="xl" mb="7px">
+                  <Heading size="xl" mb="7px" className="title-text-1">
                     All done
                   </Heading>
                   <Box>
-                    You repaid {amount || "0.00"} {tokenSymbol?.toUpperCase()}
+                    You repaid{" "}
+                    <Box as={"span"} fontWeight={"700"}>
+                      {amount || "0.00"}
+                    </Box>{" "}
+                    {tokenSymbol?.toUpperCase()}
                   </Box>
                 </Box>
               </Dialog.Body>
               <Dialog.Footer flexDirection="column" gap="8px">
                 <Button
-                  variant="subtle"
+                  size={"xl"}
+                  variant="plain"
+                  className="btn-color-light-1"
                   w="100%"
                   fontSize="16px"
                   onClick={handleOpenExplorer}
@@ -95,7 +101,14 @@ const RepayDoneModal: React.FC<Props> = ({
                   </Icon>
                 </Button>
                 <Dialog.ActionTrigger asChild>
-                  <Button w="100%" fontSize="16px" mb="30px">
+                  <Button
+                    size={"xl"}
+                    variant="plain"
+                    className="btn-color-dark-1"
+                    w="100%"
+                    fontSize="16px"
+                    mb="30px"
+                  >
                     Ok, Close
                   </Button>
                 </Dialog.ActionTrigger>

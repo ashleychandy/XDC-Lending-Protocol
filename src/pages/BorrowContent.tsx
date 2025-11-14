@@ -803,6 +803,8 @@ function BorrowContent() {
                       <Flex justify="flex-end" gap="5px">
                         <Button
                           size="sm"
+                          variant={"plain"}
+                          className="btn-color-dark-1"
                           onClick={() =>
                             openBorrowModal(
                               item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
@@ -813,7 +815,8 @@ function BorrowContent() {
                         </Button>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant={"plain"}
+                          className="btn-color-light-1"
                           onClick={() =>
                             openRepayModal(
                               item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
@@ -951,6 +954,8 @@ function BorrowContent() {
                     <Flex justify="flex-end" gap="5px">
                       <Button
                         size="sm"
+                        variant={"plain"}
+                        className="btn-color-dark-1"
                         onClick={() =>
                           openBorrowModal(
                             item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
@@ -964,7 +969,8 @@ function BorrowContent() {
                       </Button>
                       <Button
                         size="sm"
-                        variant="outline"
+                        variant={"plain"}
+                        className="btn-color-light-1"
                         onClick={() =>
                           navigate(buildAssetDetailsRoute(item.symbol))
                         }

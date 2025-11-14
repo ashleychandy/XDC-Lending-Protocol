@@ -265,7 +265,7 @@ const RepayModal: React.FC<Props> = ({
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header justifyContent="space-between">
-                <Dialog.Title fontSize="22px">
+                <Dialog.Title fontSize="22px" className="title-text-1">
                   Repay {tokenConfig.symbol}
                 </Dialog.Title>
                 <Dialog.CloseTrigger asChild pos="static">
@@ -278,7 +278,12 @@ const RepayModal: React.FC<Props> = ({
               <Dialog.Body>
                 {/* Amount input */}
                 <Box mb="15px">
-                  <Box mb="7px" fontSize="sm" fontWeight="medium">
+                  <Box
+                    mb="7px"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    className="light-text-2"
+                  >
                     Amount
                   </Box>
                   <Box
@@ -317,14 +322,18 @@ const RepayModal: React.FC<Props> = ({
                           height="24px"
                           alt={tokenConfig.symbol}
                         />
-                        <Heading size="md">{tokenConfig.symbol}</Heading>
+                        <Heading size="md" className="title-text-1">
+                          {tokenConfig.symbol}
+                        </Heading>
                       </Flex>
                     </Flex>
 
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Box fontSize="sm">{getDollarValue()}</Box>
+                      <Box fontSize="sm" className="light-text-2">
+                        {getDollarValue()}
+                      </Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px">
+                        <Box fontSize="13px" className="light-text-2">
                           Wallet balance{" "}
                           {formatValue(parseFloat(tokenConfig.walletBalance))}
                         </Box>
@@ -334,7 +343,7 @@ const RepayModal: React.FC<Props> = ({
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          colorPalette="blue"
+                          className="title-text-1"
                           onClick={() => {
                             // Set to minimum of wallet balance or borrowed amount
                             const walletBal = parseFloat(
@@ -363,7 +372,11 @@ const RepayModal: React.FC<Props> = ({
                     >
                       <Switch.HiddenInput />
                       <Switch.Control />
-                      <Switch.Label fontSize="sm">
+                      <Switch.Label
+                        fontSize="sm"
+                        className="title-text-1"
+                        cursor={"pointer"}
+                      >
                         Repay with native {network.nativeToken.symbol}
                       </Switch.Label>
                     </Switch.Root>
@@ -372,7 +385,12 @@ const RepayModal: React.FC<Props> = ({
 
                 {/* Transaction overview */}
                 <Box>
-                  <Box mb="7px" fontSize="sm" fontWeight="medium">
+                  <Box
+                    mb="7px"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    className="light-text-2"
+                  >
                     Transaction overview
                   </Box>
                   <Box p="12px" border="1px solid #eaebef" borderRadius="6px">
@@ -381,7 +399,7 @@ const RepayModal: React.FC<Props> = ({
                       alignItems="flex-start"
                       mb="15px"
                     >
-                      <Box w="22%" fontSize="sm">
+                      <Box w="22%" fontSize="sm" className="title-text-1">
                         Remaining debt
                       </Box>
                       <Box textAlign="right">
@@ -391,14 +409,24 @@ const RepayModal: React.FC<Props> = ({
                           justifyContent="flex-end"
                         >
                           <Flex alignItems="flex-end">
-                            <Box fontSize="sm" fontWeight="semibold">
+                            <Box
+                              fontSize="sm"
+                              fontWeight="semibold"
+                              className="title-text-1"
+                            >
                               {formatValue(parseFloat(borrowedAmount))}{" "}
                               {tokenConfig.symbol}
                             </Box>
                           </Flex>
-                          <Box fontSize="sm">→</Box>
+                          <Box fontSize="sm" className="light-text-2">
+                            →
+                          </Box>
                           <Flex alignItems="flex-end">
-                            <Box fontSize="sm" fontWeight="semibold">
+                            <Box
+                              fontSize="sm"
+                              fontWeight="semibold"
+                              className="title-text-1"
+                            >
                               {getRemainingDebt()} {tokenConfig.symbol}
                             </Box>
                           </Flex>
@@ -409,17 +437,25 @@ const RepayModal: React.FC<Props> = ({
                           justifyContent="flex-end"
                         >
                           <Flex alignItems="flex-end">
-                            <Box fontSize="xs">{getBorrowedAmountUsd()}</Box>
+                            <Box fontSize="xs" className="light-text-2">
+                              {getBorrowedAmountUsd()}
+                            </Box>
                           </Flex>
-                          <Box fontSize="sm">→</Box>
+                          <Box fontSize="sm" className="light-text-2">
+                            →
+                          </Box>
                           <Flex alignItems="flex-end">
-                            <Box fontSize="xs">{getRemainingDebtUsd()}</Box>
+                            <Box fontSize="xs" className="light-text-2">
+                              {getRemainingDebtUsd()}
+                            </Box>
                           </Flex>
                         </Flex>
                       </Box>
                     </Flex>
                     <Flex justifyContent="space-between" gap="7px">
-                      <Box fontSize="sm">Health factor</Box>
+                      <Box fontSize="sm" className="title-text-1">
+                        Health factor
+                      </Box>
                       <Box textAlign="right">
                         <Flex
                           gap="5px"
@@ -435,7 +471,9 @@ const RepayModal: React.FC<Props> = ({
                               ? "∞"
                               : healthFactorValue.toFixed(2)}
                           </Box>
-                          <Box fontSize="sm">→</Box>
+                          <Box fontSize="sm" className="light-text-2">
+                            →
+                          </Box>
                           <Box
                             color={getHealthFactorColor(newHealthFactorValue)}
                             fontWeight="semibold"
@@ -443,7 +481,7 @@ const RepayModal: React.FC<Props> = ({
                             {getNewHealthFactor()}
                           </Box>
                         </Flex>
-                        <Box fontSize="12px" mt="2px">
+                        <Box fontSize="12px" mt="2px" className="light-text-2">
                           {`Liquidation at < 1.0`}
                         </Box>
                       </Box>
@@ -453,8 +491,10 @@ const RepayModal: React.FC<Props> = ({
 
                 {/* Gas cost */}
                 <Flex mt="20px" alignItems="center" gap="5px">
-                  <MdLocalGasStation size="16px" />
-                  <Box fontSize="sm">~$0.0001 (12.5 Gwei)</Box>
+                  <MdLocalGasStation size="16px" className="light-text-2" />
+                  <Box fontSize="sm" className="title-text-1">
+                    ~$0.0001 (12.5 Gwei)
+                  </Box>
                 </Flex>
               </Dialog.Body>
 
@@ -475,7 +515,8 @@ const RepayModal: React.FC<Props> = ({
                         w="100%"
                         fontSize="18px"
                         onClick={onClickRepay}
-                        colorPalette="blue"
+                        variant={"plain"}
+                        className="btn-color-dark-1"
                         loading={isPending || isConfirming}
                       >
                         {!amount ||
@@ -513,7 +554,8 @@ const RepayModal: React.FC<Props> = ({
                       w="100%"
                       fontSize="18px"
                       onClick={needsApproval ? onClickApprove : onClickRepay}
-                      colorPalette="blue"
+                      variant={"plain"}
+                      className="btn-color-dark-1"
                       loading={isApprovePending || isPending || isConfirming}
                     >
                       {!amount ||

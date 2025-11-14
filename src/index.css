@@ -255,11 +255,23 @@ tr:last-child > td {
 .title-text-1 {
   color: #303549;
 }
-.btn-color-dark-1 {
+.btn-color-dark-1,
+.btn-color-dark-1-hover {
   background-color: #383d51;
   color: #fff;
+}
+.btn-color-dark-1-hover:hover {
+  background-color: #2b2d3c;
+  border-color: #ebebed1f;
+}
+.btn-color-dark-1:hover {
+  background-color: #292e41;
 }
 .btn-color-light-1 {
   background-color: #f7f7f9;
   color: #383d51;
+  border-color: #eaebef;
+}
+.btn-color-light-1:hover {
+  border-color: #383d51;
 }

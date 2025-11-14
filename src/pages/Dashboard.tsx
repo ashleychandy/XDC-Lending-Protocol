@@ -6,18 +6,19 @@ import { useChainConfig } from "@/hooks/useChainConfig";
 import { useProtocolReserveData } from "@/hooks/useProtocolReserveData";
 import { useProtocolUserReserveData } from "@/hooks/useProtocolUserReserveData";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { Box, Container, Flex, Heading, Image } from "@chakra-ui/react";
+import { Box, Button, Container, Flex, Heading, Image } from "@chakra-ui/react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import BorrowContent from "./BorrowContent";
 import ConnectYourWalletContent from "./ConnectYourWalletContent";
 import Header from "./Header";
 import SupplyContent from "./SupplyContent";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { isConnected } = useAccount();
   const { tokens, network } = useChainConfig();
-
+  const navigate = useNavigate();
   // Fetch all reserves and aTokens for mapping token addresses
   const { reserves, aTokens } = useAllReserves();
 
@@ -151,39 +152,54 @@ const Dashboard = () => {
               {network.name.replace(/^XDC\s+/i, "")} Market
             </Heading>
           </Flex>
-
-          <Flex gap="6" alignItems="center" flexWrap="wrap">
-            <Flex direction="column">
-              <Box className="light-text-1">Net worth</Box>
-              <Heading size="2xl" className="text-white-2">
-                <Box as={"span"} className="light-text-1" mr={"2px"}>
-                  $
-                </Box>
-                {netWorth.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </Heading>
+          <Flex justifyContent={"space-between"} alignItems={"center"}>
+            <Flex gap="6" alignItems="center" flexWrap="wrap">
+              <Flex direction="column">
+                <Box className="light-text-1">Net worth</Box>
+                <Heading size="2xl" className="text-white-2">
+                  <Box as={"span"} className="light-text-1" mr={"2px"}>
+                    $
+                  </Box>
+                  {netWorth.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </Heading>
+              </Flex>
+              <Flex direction="column">
+                <Box className="light-text-1">Net APY</Box>
+                <Heading
+                  size="2xl"
+                  className="text-white-2"
+                  color={parseFloat(netApy) < 0 ? "red.500" : "text-white-2"}
+                >
+                  {netApy}
+                  <Box as={"span"} className="light-text-1" ml={"2px"}>
+                    %
+                  </Box>
+                </Heading>
+              </Flex>
+              <Flex direction="column">
+                <Box className="light-text-1">Health factor</Box>
+                <Heading size="2xl" color={healthFactorColor}>
+                  {healthFactorValue > 1000
+                    ? "∞"
+                    : healthFactorValue.toFixed(2)}
+                </Heading>
+              </Flex>
             </Flex>
-            <Flex direction="column">
-              <Box className="light-text-1">Net APY</Box>
-              <Heading
-                size="2xl"
-                className="text-white-2"
-                color={parseFloat(netApy) < 0 ? "red.500" : "text-white-2"}
-              >
-                {netApy}
-                <Box as={"span"} className="light-text-1" ml={"2px"}>
-                  %
-                </Box>
-              </Heading>
-            </Flex>
-            <Flex direction="column">
-              <Box className="light-text-1">Health factor</Box>
-              <Heading size="2xl" color={healthFactorColor}>
-                {healthFactorValue > 1000 ? "∞" : healthFactorValue.toFixed(2)}
-              </Heading>
-            </Flex>
+            <Button
+              size={"xs"}
+              variant={"plain"}
+              p={"3px 5px"}
+              minH={"auto"}
+              fontSize={"11px"}
+              h={"auto"}
+              className="btn-color-dark-1-hover"
+              onClick={() => navigate("/history")}
+            >
+              VIEW TRANSACTIONS
+            </Button>
           </Flex>
         </Container>
       </Box>

@@ -9,11 +9,12 @@ import {
   Portal,
   Text,
 } from "@chakra-ui/react";
-import { FaCheck, FaWallet } from "react-icons/fa6";
+import { FaCheck } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
 import { useAccount } from "wagmi";
 import { useChainConfig } from "../../hooks/useChainConfig";
+import { IoWalletOutline } from "react-icons/io5";
 
 interface Props {
   isOpen: boolean;
@@ -145,31 +146,37 @@ const BorrowDoneModal: React.FC<Props> = ({
                       <FaCheck />
                     </Icon>
                   </Flex>
-                  <Heading size="xl" mb="7px">
+                  <Heading size="xl" mb="7px" className="title-text-1">
                     All done
                   </Heading>
-                  <Box mb="10px">
-                    You Borrowed {amount || "0.00"} {tokenSymbol?.toUpperCase()}
+                  <Box mb="20px" className="title-text-1">
+                    You Borrowed{" "}
+                    <Box as={"span"} fontWeight={"700"}>
+                      {amount || "0.00"}
+                    </Box>{" "}
+                    {tokenSymbol?.toUpperCase()}
                   </Box>
-                  <Text fontSize="sm" color="gray.500">
+                  <Text fontSize="sm" className="title-text-1" mb={"7px"}>
                     Add debt token to wallet to track your balance.
                   </Text>
+                  <Button
+                    size={"sm"}
+                    variant="plain"
+                    className="btn-color-dark-1"
+                    onClick={handleAddToWallet}
+                  >
+                    <Icon size="md" className="light-text-1">
+                      <IoWalletOutline />
+                    </Icon>
+                    Add to wallet
+                  </Button>
                 </Box>
               </Dialog.Body>
               <Dialog.Footer flexDirection="column" gap="8px">
                 <Button
-                  variant="outline"
-                  w="100%"
-                  fontSize="16px"
-                  onClick={handleAddToWallet}
-                >
-                  <Icon size="md" mr="2">
-                    <FaWallet />
-                  </Icon>
-                  Add to wallet
-                </Button>
-                <Button
-                  variant="subtle"
+                  size={"xl"}
+                  variant="plain"
+                  className="btn-color-light-1"
                   w="100%"
                   fontSize="16px"
                   onClick={handleOpenExplorer}
@@ -181,7 +188,14 @@ const BorrowDoneModal: React.FC<Props> = ({
                   </Icon>
                 </Button>
                 <Dialog.ActionTrigger asChild>
-                  <Button w="100%" fontSize="16px" mb="30px">
+                  <Button
+                    size={"xl"}
+                    variant="plain"
+                    className="btn-color-dark-1"
+                    w="100%"
+                    fontSize="16px"
+                    mb="30px"
+                  >
                     Ok, Close
                   </Button>
                 </Dialog.ActionTrigger>
