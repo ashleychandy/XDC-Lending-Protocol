@@ -32,10 +32,12 @@ export const useUserReserveData = (
   // Use Protocol Data Provider to get all user reserve data in a single call
   const protocolData = useProtocolUserReserveData(assetAddress);
 
-  // Return the same interface as before for backward compatibility
+  // Return the same interface as before for backward compatibility, plus loading state
   return {
     suppliedAmount: protocolData.suppliedAmount,
     borrowedAmount: protocolData.borrowedAmount,
     isUsingAsCollateral: protocolData.isUsingAsCollateral,
+    isLoading: protocolData.isLoading,
+    error: protocolData.error,
   };
 };

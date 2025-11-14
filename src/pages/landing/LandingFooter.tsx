@@ -65,9 +65,7 @@ const LandingFooter = () => {
             <Link fontSize={"13px"} className="footer-link" href="#">
               Privacy
             </Link>
-            <Link fontSize={"13px"} className="footer-link" href="#">
-              Careers
-            </Link>
+            
           </Flex>
         </Flex>
       </Box>

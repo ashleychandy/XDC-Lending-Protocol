@@ -6,14 +6,22 @@ import { useChainConfig } from "@/hooks/useChainConfig";
 import { useProtocolReserveData } from "@/hooks/useProtocolReserveData";
 import { useProtocolUserReserveData } from "@/hooks/useProtocolUserReserveData";
 import { useUserAccountData } from "@/hooks/useUserAccountData";
-import { Box, Button, Container, Flex, Heading, Image } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Heading,
+  Image,
+  Skeleton,
+} from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 import BorrowContent from "./BorrowContent";
 import ConnectYourWalletContent from "./ConnectYourWalletContent";
 import Header from "./Header";
 import SupplyContent from "./SupplyContent";
-import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { isConnected } = useAccount();
@@ -156,36 +164,51 @@ const Dashboard = () => {
             <Flex gap="6" alignItems="center" flexWrap="wrap">
               <Flex direction="column">
                 <Box className="light-text-1">Net worth</Box>
-                <Heading size="2xl" className="text-white-2">
-                  <Box as={"span"} className="light-text-1" mr={"2px"}>
-                    $
-                  </Box>
-                  {netWorth.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </Heading>
+                {accountData.isLoading ? (
+                  <Skeleton height="40px" width="150px" />
+                ) : (
+                  <Heading size="2xl" className="text-white-2">
+                    <Box as={"span"} className="light-text-1" mr={"2px"}>
+                      $
+                    </Box>
+                    {netWorth.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </Heading>
+                )}
               </Flex>
               <Flex direction="column">
                 <Box className="light-text-1">Net APY</Box>
-                <Heading
-                  size="2xl"
-                  className="text-white-2"
-                  color={parseFloat(netApy) < 0 ? "red.500" : "text-white-2"}
-                >
-                  {netApy}
-                  <Box as={"span"} className="light-text-1" ml={"2px"}>
-                    %
-                  </Box>
-                </Heading>
+                {accountData.isLoading ||
+                wxdcReserveData.isLoading ||
+                usdcReserveData.isLoading ||
+                cgoReserveData.isLoading ? (
+                  <Skeleton height="40px" width="100px" />
+                ) : (
+                  <Heading
+                    size="2xl"
+                    className="text-white-2"
+                    color={parseFloat(netApy) < 0 ? "red.500" : "text-white-2"}
+                  >
+                    {netApy}
+                    <Box as={"span"} className="light-text-1" ml={"2px"}>
+                      %
+                    </Box>
+                  </Heading>
+                )}
               </Flex>
               <Flex direction="column">
                 <Box className="light-text-1">Health factor</Box>
-                <Heading size="2xl" color={healthFactorColor}>
-                  {healthFactorValue > 1000
-                    ? "∞"
-                    : healthFactorValue.toFixed(2)}
-                </Heading>
+                {accountData.isLoading ? (
+                  <Skeleton height="40px" width="80px" />
+                ) : (
+                  <Heading size="2xl" color={healthFactorColor}>
+                    {healthFactorValue > 1000
+                      ? "∞"
+                      : healthFactorValue.toFixed(2)}
+                  </Heading>
+                )}
               </Flex>
             </Flex>
             <Button

@@ -8,6 +8,7 @@ export const ROUTES = {
   DASHBOARD: "/dashboard",
   ASSET_DETAILS: "/asset-details",
   MARKET: "/dashboard",
+  HISTORY: "/history",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

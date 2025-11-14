@@ -22,6 +22,7 @@ import {
   Heading,
   Icon,
   Image,
+  Skeleton,
   Switch,
   Table,
 } from "@chakra-ui/react";
@@ -673,7 +674,72 @@ const SupplyContent = () => {
             </Box>
           </Flex>
         )}
-        {yourSupplies.length !== 0 ? (
+        {wxdcUserData.isLoading ||
+        usdcUserData.isLoading ||
+        cgoUserData.isLoading ? (
+          <Box p="15px" overflowX="auto">
+            <Table.Root size="sm">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader
+                    w="25%"
+                    minW="100px"
+                    className="light-text-2"
+                  >
+                    Asset
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader
+                    w="20%"
+                    minW="100px"
+                    className="light-text-2"
+                  >
+                    Balance
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader
+                    w="13%"
+                    minW="60px"
+                    className="light-text-2"
+                  >
+                    APY
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader
+                    w="17%"
+                    minW="100px"
+                    className="light-text-2"
+                  >
+                    Collateral
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader
+                    w="25%"
+                    minW="150px"
+                    className="light-text-2"
+                  ></Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {[1, 2, 3].map((i) => (
+                  <Table.Row key={i}>
+                    <Table.Cell>
+                      <Skeleton height="20px" width="80px" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Skeleton height="20px" width="100px" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Skeleton height="20px" width="60px" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Skeleton height="20px" width="40px" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Skeleton height="32px" width="120px" />
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+          </Box>
+        ) : yourSupplies.length !== 0 ? (
           <Box p="15px" overflowX="auto">
             <Table.Root size="sm">
               <Table.Header>

@@ -21,6 +21,7 @@ import {
   Heading,
   Icon,
   Image,
+  Skeleton,
   Table,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -708,7 +709,58 @@ function BorrowContent() {
             </Box>
           </Flex>
         )}
-        {yourBorrows.length !== 0 ? (
+        {wxdcUserData.isLoading ||
+        usdcUserData.isLoading ||
+        cgoUserData.isLoading ? (
+          <Box p="15px" overflowX="auto">
+            <Table.Root size="sm">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader
+                    w="30%"
+                    minW="100px"
+                    className="light-text-2"
+                  >
+                    Asset
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader
+                    w="25%"
+                    minW="100px"
+                    className="light-text-2"
+                  >
+                    Debt
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader
+                    w="15%"
+                    minW="60px"
+                    className="light-text-2"
+                  >
+                    APY
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader w="30%" minW="150px"></Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {[1, 2, 3].map((i) => (
+                  <Table.Row key={i}>
+                    <Table.Cell>
+                      <Skeleton height="20px" width="80px" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Skeleton height="20px" width="100px" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Skeleton height="20px" width="60px" />
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Skeleton height="32px" width="120px" />
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+          </Box>
+        ) : yourBorrows.length !== 0 ? (
           <Box p="15px" overflowX="auto">
             <Table.Root size="sm">
               <Table.Header>
