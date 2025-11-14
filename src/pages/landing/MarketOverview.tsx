@@ -100,8 +100,8 @@ const MarketOverview: React.FC<Props> = ({ tokenDetails }) => {
           justifyContent={"flex-end"}
           alignItems={"center"}
         >
-          <Box fontSize={"24px"} fontStyle={"italic"} maxW={"68%"} pr={"140px"}>
-            Supply, Borrow, Earn on Lightning-Fast
+          <Box fontSize={"24px"} fontStyle={"italic"} maxW={"80%"} pr={"140px"}>
+            Supply, Borrow, Earn on Lightning-Fast XDC Network
           </Box>
           <Image
             src={xdcBigIcon}

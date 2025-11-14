@@ -1,5 +1,4 @@
-import { SimpleGrid, Flex, Heading, Box } from "@chakra-ui/react";
-import React from "react";
+import { Box, Flex, Heading, SimpleGrid } from "@chakra-ui/react";
 
 const MeetCreditify = () => {
   return (
@@ -50,7 +49,7 @@ const MeetCreditify = () => {
               Borrow
             </Heading>
             <Box as={"p"} fontSize={"12px"}>
-              Borrow securely using your multi-chain collateral.
+              Borrow securely using your collateral.
             </Box>
           </Flex>
         </Box>

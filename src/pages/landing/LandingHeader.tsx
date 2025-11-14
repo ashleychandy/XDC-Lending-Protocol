@@ -23,8 +23,19 @@ const LandingHeader = () => {
         <Link to={ROUTES.MARKET} className="nav-link">
           Markets
         </Link>
+        <Button
+          className="primary-btn"
+          onClick={() => navigate(ROUTES.DASHBOARD)}
+        >
+          Open App
+        </Button>
         <Box className="landing-btn">
-          <ConnectButton label="Open App" />
+          <ConnectButton
+            label="Connect Wallet"
+            chainStatus="none"
+            showBalance={false}
+            accountStatus="address"
+          />
         </Box>
       </Flex>
     </Box>

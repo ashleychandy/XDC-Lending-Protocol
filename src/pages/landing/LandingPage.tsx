@@ -1,4 +1,3 @@
-import { getTokenLogo } from "@/config/tokenLogos";
 import {
   formatCurrency,
   formatPercentage,
@@ -14,23 +13,21 @@ import {
   Flex,
   Heading,
   Image,
-  SimpleGrid,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import usdcIcon from "../../assets/images/usdc.svg";
-import xdcIcon from "../../assets/images/xdc-icon.webp";
 import xdcMiniIcon from "../../assets/images/landing/xdc-mini-icon.png";
+import usdcIcon from "../../assets/images/usdc.svg";
 import Faq from "./Faq";
 import GovernanceSecurity from "./GovernanceSecurity";
 import HowCreditifyWorks from "./HowCreditifyWorks";
+import InstantCapital from "./InstantCapital";
 import LandingFooter from "./LandingFooter";
 import LandingHeader from "./LandingHeader";
 import MarketOverview from "./MarketOverview";
+import MeetCreditify from "./MeetCreditify";
 import OwnMoney from "./OwnMoney";
 import type { TokenDetailsDTO } from "./types/type";
-import MeetCreditify from "./MeetCreditify";
 import WhyBuildOnXDC from "./WhyBuildOnXDC";
-import InstantCapital from "./InstantCapital";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -87,7 +84,7 @@ const LandingPage = () => {
     },
     {
       symbol: "XDC",
-      shortName: "WXDC",
+      shortName: "XDC",
       fullName: "XDC Network Reserve",
       icon: xdcMiniIcon,
       tvl: wxdcTvl,
@@ -178,7 +175,7 @@ const LandingPage = () => {
                 lineHeight={{ base: "40px", md: "48px", lg: "64px" }}
                 mb={{ base: "15px", md: "20px" }}
               >
-                Supply. Earn. Borrow.Securely.
+                Decentralized Lending, Redefined on XDC.
               </Heading>
               <Box
                 as={"p"}
@@ -187,10 +184,8 @@ const LandingPage = () => {
                 maxW={"50%"}
                 mx={"auto"}
               >
-                Creditify enables users to supply assets like USDC and WETH to
-                earn yield, and borrow instantly against collateral with
-                automated risk management. Non-custodial, audited, and governed
-                by the community.
+                Supply, borrow, and earn across USDC, CGO, and XDC — with
+                near-zero gas fees, instant finality, and real yield.
               </Box>
               <Flex
                 alignItems={"center"}

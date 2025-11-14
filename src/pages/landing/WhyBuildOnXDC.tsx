@@ -4,23 +4,23 @@ import xdcIcon from "../../assets/images/landing/xdc-big-icon.png";
 
 const items = [
   {
-    bold: "2-Second Finality",
+    bold: "2-second finality",
     rest: "ensures instant and reliable execution.",
     ml: { base: 0, md: 0, lg: 0 },
   },
   {
-    bold: "Gas Fees < $0.0001",
+    bold: "Gas fees < $0.0001",
     rest: "make user transactions nearly free.",
     ml: { base: 0, md: "80px", xl: "180px" },
   },
   {
-    bold: "Hybrid & Compliance-Ready",
+    bold: "Hybrid and Compliance-Ready.",
     rest: "Architecture",
     ml: { base: 0, md: "200px", xl: "340px" },
   },
   {
-    bold: "Scaleable & Energy Effieient",
-    rest: "Layer-1 network with global reach",
+    bold: "Scalable and energy-efficient",
+    rest: "Layer-1 network with global reach.",
     ml: { base: 0, md: "300px", xl: "500px" },
   },
 ];
