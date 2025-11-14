@@ -27,18 +27,24 @@ const items = [
 
 const WhyBuildOnXDC = () => {
   return (
-    <Box as={"section"}>
-      <Heading fontSize={"32px"} mb={"40px"}>
+    <Box as={"section"} mb={{ base: "60px", md: "80px", lg: "100px" }}>
+      <Heading
+        as="h2"
+        fontSize={"32px"}
+        mb={"40px"}
+        fontWeight={700}
+        letterSpacing={"0.5px"}
+        lineHeight={1.2}
+      >
         Why build on XDC Network?
       </Heading>
       <Box w="full" bgGradient="linear(to-br, #ffffff, #f1f1f1)">
-        <VStack align="stretch" gap={"30px"}>
+        <VStack align="stretch" gap={"30px"} py={{ base: "20px", md: "30px" }}>
           {items.map((item, i) => (
             <Box
               key={item.bold}
               position="relative"
-              pl="35px"
-              // stagger horizontally on desktop
+              pl={{ base: "35px", md: "35px" }}
               ml={item.ml}
             >
               {/* X icon */}
@@ -60,8 +66,8 @@ const WhyBuildOnXDC = () => {
                 as="div"
                 align="center"
                 justifyContent={"center"}
-                px={{ base: 5, md: "10px" }}
-                py={{ base: 3, md: "21px" }}
+                px={{ base: "15px", md: "20px" }}
+                py={{ base: "15px", md: "21px" }}
                 borderRadius="250px"
                 maxW={"626px"}
                 w={"100%"}
@@ -71,13 +77,15 @@ const WhyBuildOnXDC = () => {
               >
                 <Text
                   as={"div"}
-                  fontSize={{ base: "sm", md: "md" }}
+                  fontSize={{ base: "14px", md: "18px", lg: "20px" }}
                   color={"#000"}
+                  lineHeight={1.5}
+                  textAlign={"center"}
                 >
-                  <Text as="span" fontWeight="700" fontSize={"20px"}>
+                  <Text as="span" fontWeight={700} letterSpacing={"0.3px"}>
                     {item.bold}{" "}
                   </Text>
-                  <Text as="span" fontWeight="400" fontSize={"20px"}>
+                  <Text as="span" fontWeight={400} letterSpacing={"0.2px"}>
                     {item.rest}
                   </Text>
                 </Text>

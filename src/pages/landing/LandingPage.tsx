@@ -165,24 +165,34 @@ const LandingPage = () => {
             <Box w={"100%"} textAlign={"center"}>
               <Box
                 as={"p"}
+                className="section-label"
                 fontSize={{ base: "12px", md: "13px" }}
                 mb={{ base: "15px", md: "20px" }}
+                fontWeight={500}
+                letterSpacing={"1px"}
               >
                 Decentralized Liquidity Protocol
               </Box>
               <Heading
+                as="h1"
                 fontSize={{ base: "32px", md: "40px", lg: "64px" }}
-                lineHeight={{ base: "40px", md: "48px", lg: "64px" }}
+                lineHeight={{ base: "1.2", md: "1.15", lg: "1.1" }}
                 mb={{ base: "15px", md: "20px" }}
+                fontWeight={700}
+                letterSpacing={{ base: "-0.5px", lg: "-1px" }}
               >
                 Decentralized Lending, Redefined on XDC.
               </Heading>
               <Box
                 as={"p"}
+                className="section-subtitle"
                 mb={{ base: "15px", md: "40px" }}
                 fontSize={{ base: "14px", md: "16px" }}
-                maxW={"50%"}
+                maxW={{ base: "90%", md: "70%", lg: "50%" }}
                 mx={"auto"}
+                fontWeight={400}
+                lineHeight={1.6}
+                letterSpacing={"0.2px"}
               >
                 Supply, borrow, and earn across USDC, CGO, and XDC — with
                 near-zero gas fees, instant finality, and real yield.
@@ -192,6 +202,7 @@ const LandingPage = () => {
                 gap={"15px"}
                 justifyContent={"center"}
                 mb={{ base: "30px", md: "30px" }}
+                flexWrap={"wrap"}
               >
                 <Button
                   className="primary-btn"
@@ -218,6 +229,7 @@ const LandingPage = () => {
                 alignItems={"center"}
                 gap={"15px"}
                 justifyContent={"center"}
+                flexWrap={"wrap"}
               >
                 <Button
                   className="secondary-btn-sm"

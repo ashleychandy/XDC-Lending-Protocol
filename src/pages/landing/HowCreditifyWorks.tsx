@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, Image, SimpleGrid } from "@chakra-ui/react";
+import { Box, Flex, Heading, SimpleGrid } from "@chakra-ui/react";
 
 const HowCreditifyWorks = () => {
   const items = [
@@ -25,16 +25,34 @@ const HowCreditifyWorks = () => {
   ];
 
   return (
-    <Box as={"section"} gap={"20px"}>
-      <Heading fontSize={"32px"} mb={"20px"}>
+    <Box
+      as={"section"}
+      gap={"20px"}
+      mb={{ base: "60px", md: "80px", lg: "100px" }}
+    >
+      <Heading
+        as="h2"
+        fontSize={"32px"}
+        mb={"20px"}
+        fontWeight={700}
+        letterSpacing={"0.5px"}
+        lineHeight={1.2}
+      >
         How Creditify works
       </Heading>
-      <Box as={"p"} mb={"20px"} maxW={"68%"}>
+      <Box
+        as={"p"}
+        mb={"20px"}
+        maxW={{ base: "100%", md: "80%", lg: "68%" }}
+        fontWeight={400}
+        lineHeight={1.6}
+        letterSpacing={"0.2px"}
+      >
         A decentralized finance protocol where you can supply assets to earn,
         use your collateral to borrow, and grow your portfolio — all powered by
         the XDC Network
       </Box>
-      <SimpleGrid columns={{ base: 2, sm: 4 }} gap="15px">
+      <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap="15px">
         {items.map((x, i) => {
           return (
             <Box
@@ -53,18 +71,33 @@ const HowCreditifyWorks = () => {
                 justifyContent="center"
                 alignItems="center"
                 color={"#fff"}
-                // fontWeight={x.icon ? undefined : "700"}
+                fontWeight={600}
                 fontSize={"14px"}
                 mb={"5px"}
               >
                 {x.rank}
               </Flex>
-              <Heading mb={"10px"} fontSize={"14px"}>
+              <Heading
+                as="h4"
+                mb={"10px"}
+                fontSize={"14px"}
+                fontWeight={600}
+                letterSpacing={"0.3px"}
+                lineHeight={1.4}
+              >
                 {x.title}
               </Heading>
               {x.descItems.map((a, ind) => {
                 return (
-                  <Box as={"p"} key={ind} className="p" fontSize={"14px"}>
+                  <Box
+                    as={"p"}
+                    key={ind}
+                    className="p"
+                    fontSize={"14px"}
+                    fontWeight={400}
+                    lineHeight={1.6}
+                    letterSpacing={"0.2px"}
+                  >
                     {a}
                   </Box>
                 );

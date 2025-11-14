@@ -11,17 +11,17 @@ const Faq = () => {
     {
       value: "b",
       title: "Where are supplied tokens stored?",
-      text: "Supplied tokens are stored in publicly accessible smart contracts that enable overcollateralised borrowing according to governance-approved parameters. The Creditify Protocol smart contracts have been audited and formally verified by third parties.",
+      text: "Supplied tokens are stored in publicly accessible smart contracts that enable overcollateralised borrowing according variable parameters. The Creditify Protocol smart contracts have been audited and formally verified by third parties.",
     },
     {
       value: "c",
-      title: "What is Creditify token?",
-      text: "Creditify is used as the centre of gravity of Creditify Protocol governance. Creditify is used to vote and decide on the outcome of Creditify Improvement Proposals (AIPs). Apart from this, Creditify can be staked within the protocol Safety Module to provide a backstop in the case of a shortfall event, and earn incentives for doing so.",
+      title: "What is Creditify?",
+      text: "NA",
     },
     {
       value: "d",
       title: "Does Creditify has risk?",
-      text: "No protocol can be considered entirely risk free, but extensive steps have been taken to minimize these risks as much as possible – the Creditify Protocol code is publicly available and auditable by anyone, and has been audited by multiple smart contract auditors. Any code changes must be executed through the onchain governance processes. Additionally, there is an ongoing bug bounty campaign and service providers specializing in technical reviews and risk mitigation.",
+      text: "No protocol can be considered entirely risk free, but extensive steps have been taken to minimize these risks as much as possible – the Creditify Protocol code is publicly available and auditable by anyone, and has been audited by multiple smart contract auditors.",
     },
   ];
 

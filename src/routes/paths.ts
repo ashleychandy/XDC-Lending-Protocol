@@ -6,11 +6,8 @@
 export const ROUTES = {
   HOME: "/",
   DASHBOARD: "/dashboard",
-  HISTORY: "/history",
   ASSET_DETAILS: "/asset-details",
-  MARKET: "/market",
-  GOVERNANCE: "/governance",
-  SAVINGS: "/savings",
+  MARKET: "/dashboard",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;
