@@ -796,6 +796,8 @@ const SupplyContent = () => {
                       <Flex gap="5px" justify="flex-end">
                         <Button
                           size="sm"
+                          variant={"plain"}
+                          className="btn-color-dark-1"
                           onClick={() =>
                             openSupplyModal(
                               item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
@@ -806,7 +808,8 @@ const SupplyContent = () => {
                         </Button>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="plain"
+                          className="btn-color-light-1"
                           onClick={() => {
                             openWithdrawModal(
                               item.name,
@@ -936,6 +939,8 @@ const SupplyContent = () => {
                     <Flex justify="flex-end" gap="5px">
                       <Button
                         size="sm"
+                        variant={"plain"}
+                        className="btn-color-dark-1"
                         onClick={() =>
                           openSupplyModal(
                             item.symbol as "wxdc" | "usdc" | "xdc" | "cgo"
@@ -947,7 +952,8 @@ const SupplyContent = () => {
                       </Button>
                       <Button
                         size="sm"
-                        variant="outline"
+                        variant={"plain"}
+                        className="btn-color-light-1"
                         onClick={() =>
                           navigate(buildAssetDetailsRoute(item.symbol))
                         }

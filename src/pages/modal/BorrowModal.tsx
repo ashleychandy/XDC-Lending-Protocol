@@ -261,7 +261,7 @@ const BorrowModal: React.FC<Props> = ({
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header justifyContent="space-between">
-                <Dialog.Title fontSize="22px">
+                <Dialog.Title fontSize="22px" className="title-text-1">
                   Borrow {tokenConfig.symbol}
                 </Dialog.Title>
                 <Dialog.CloseTrigger asChild pos="static">
@@ -274,7 +274,12 @@ const BorrowModal: React.FC<Props> = ({
               <Dialog.Body>
                 {/* Amount input */}
                 <Box mb="15px">
-                  <Box mb="7px" fontSize="sm" fontWeight="medium">
+                  <Box
+                    mb="7px"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    className="light-text-2"
+                  >
                     Amount
                   </Box>
                   <Box
@@ -313,14 +318,18 @@ const BorrowModal: React.FC<Props> = ({
                           height="24px"
                           alt={tokenConfig.symbol}
                         />
-                        <Heading size="md">{tokenConfig.symbol}</Heading>
+                        <Heading size="md" className="title-text-1">
+                          {tokenConfig.symbol}
+                        </Heading>
                       </Flex>
                     </Flex>
 
                     <Flex justifyContent="space-between" alignItems="center">
-                      <Box fontSize="sm">{getDollarValue()}</Box>
+                      <Box fontSize="sm" className="light-text-2">
+                        {getDollarValue()}
+                      </Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px">
+                        <Box fontSize="13px" className="light-text-2">
                           Available {formatValue(parseFloat(availableToBorrow))}
                         </Box>
                         <Button
@@ -329,7 +338,7 @@ const BorrowModal: React.FC<Props> = ({
                           fontSize="10px"
                           minWidth="auto"
                           h="auto"
-                          colorPalette="blue"
+                          className="title-text-1"
                           onClick={() => {
                             const safeMax = getSafeMaxBorrow();
                             setAmount(formatValue(safeMax));
@@ -391,12 +400,19 @@ const BorrowModal: React.FC<Props> = ({
 
                 {/* Transaction overview */}
                 <Box>
-                  <Box mb="7px" fontSize="sm" fontWeight="medium">
+                  <Box
+                    mb="7px"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    className="light-text-2"
+                  >
                     Transaction overview
                   </Box>
                   <Box p="12px" border="1px solid #eaebef" borderRadius="6px">
                     <Flex justifyContent="space-between" gap="7px">
-                      <Box fontSize="sm">Health factor</Box>
+                      <Box fontSize="sm" className="title-text-1">
+                        Health factor
+                      </Box>
                       <Box textAlign="right">
                         <Flex
                           gap="5px"
@@ -412,7 +428,9 @@ const BorrowModal: React.FC<Props> = ({
                               ? "∞"
                               : healthFactorValue.toFixed(2)}
                           </Box>
-                          <Box fontSize="sm">→</Box>
+                          <Box fontSize="sm" className="light-text-2">
+                            →
+                          </Box>
                           <Box
                             color={getHealthFactorColor(newHealthFactorValue)}
                             fontWeight="semibold"
@@ -420,7 +438,7 @@ const BorrowModal: React.FC<Props> = ({
                             {getNewHealthFactor()}
                           </Box>
                         </Flex>
-                        <Box fontSize="12px" mt="2px">
+                        <Box fontSize="12px" mt="2px" className="light-text-2">
                           {`Liquidation at < 1.0`}
                         </Box>
                       </Box>
@@ -430,8 +448,10 @@ const BorrowModal: React.FC<Props> = ({
 
                 {/* Gas cost */}
                 <Flex mt="20px" alignItems="center" gap="5px">
-                  <MdLocalGasStation size="16px" />
-                  <Box fontSize="sm">~$0.0001 (12.5 Gwei)</Box>
+                  <MdLocalGasStation size="16px" className="light-text-2" />
+                  <Box fontSize="sm" className="title-text-1">
+                    ~$0.0001 (12.5 Gwei)
+                  </Box>
                 </Flex>
               </Dialog.Body>
 
@@ -463,7 +483,8 @@ const BorrowModal: React.FC<Props> = ({
                               onClickDelegationApprove();
                             }
                           }}
-                          colorPalette="blue"
+                          variant={"plain"}
+                          className="btn-color-dark-1"
                         >
                           Approve delegation
                         </Button>
@@ -498,7 +519,9 @@ const BorrowModal: React.FC<Props> = ({
                       w="100%"
                       fontSize="18px"
                       onClick={() => onClickBorrow(unwrapToNative)}
-                      colorPalette={isBorrowRisky ? "orange" : "blue"}
+                      // colorPalette={isBorrowRisky ? "orange" : "blue"}
+                      variant={"plain"}
+                      className="btn-color-dark-1"
                     >
                       {!amount ||
                       amount.trim() === "" ||
