@@ -348,7 +348,8 @@ const SupplyModal: React.FC<Props> = ({
                                 ? Math.max(0, maxAmount - 0.01)
                                 : maxAmount;
 
-                            setAmount(formatValue(finalAmount));
+                            // Don't use formatValue here - it adds commas which break decimal parsing
+                            setAmount(finalAmount.toString());
                           }}
                         >
                           MAX
