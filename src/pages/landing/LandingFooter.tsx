@@ -2,7 +2,7 @@ import { Box, Button, Flex, Heading, Input, Link } from "@chakra-ui/react";
 
 const LandingFooter = () => {
   return (
-    <Box as={"section"} py={{ base: "40px", md: "60px", lg: "90px" }}>
+    <Box as={"section"}>
       <Box maxW={"1140px"} mx={"auto"}>
         <Flex
           className="footer-newsletter"
@@ -13,7 +13,7 @@ const LandingFooter = () => {
           <Flex
             direction={"column"}
             justifyContent={"center"}
-            p={{ base: "15px", sm: "20px", md: "50px 20px", lg: "100px 50px" }}
+            p={{ base: "15px", sm: "20px", md: "50px 20px", lg: "80px 50px" }}
             w={{ base: "100%", md: "40%" }}
           >
             <Heading
@@ -31,7 +31,7 @@ const LandingFooter = () => {
             className="footer-email-box"
             direction={"column"}
             justifyContent={"center"}
-            p={{ base: "15px", sm: "20px", md: "50px 20px", lg: "100px 50px" }}
+            p={{ base: "15px", sm: "20px", md: "50px 20px", lg: "80px 50px" }}
             w={{ base: "100%", md: "60%" }}
             borderRadius={"15px"}
           >

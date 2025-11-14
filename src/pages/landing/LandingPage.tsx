@@ -17,9 +17,9 @@ import {
   SimpleGrid,
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import section1Img from "../../assets/images/landing/section1Img.png";
 import usdcIcon from "../../assets/images/usdc.svg";
 import xdcIcon from "../../assets/images/xdc-icon.webp";
+import xdcMiniIcon from "../../assets/images/landing/xdc-mini-icon.png";
 import Faq from "./Faq";
 import GovernanceSecurity from "./GovernanceSecurity";
 import HowCreditifyWorks from "./HowCreditifyWorks";
@@ -28,7 +28,9 @@ import LandingHeader from "./LandingHeader";
 import MarketOverview from "./MarketOverview";
 import OwnMoney from "./OwnMoney";
 import type { TokenDetailsDTO } from "./types/type";
-import YourAssets from "./YourAssets";
+import MeetCreditify from "./MeetCreditify";
+import WhyBuildOnXDC from "./WhyBuildOnXDC";
+import InstantCapital from "./InstantCapital";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -74,7 +76,7 @@ const LandingPage = () => {
           value: formatPercentage(parseFloat(usdcBorrowApy)),
         },
         {
-          label: "Available Liquidity",
+          label: "Liquidity",
           value: formatCurrency(usdcLiquidity),
         },
         {
@@ -87,7 +89,7 @@ const LandingPage = () => {
       symbol: "XDC",
       shortName: "WXDC",
       fullName: "XDC Network Reserve",
-      icon: xdcIcon,
+      icon: xdcMiniIcon,
       tvl: wxdcTvl,
       tokenInfo: [
         {
@@ -99,7 +101,7 @@ const LandingPage = () => {
           value: formatPercentage(parseFloat(wxdcBorrowApy)),
         },
         {
-          label: "Available Liquidity",
+          label: "Liquidity",
           value: formatCurrency(wxdcLiquidity),
         },
         {
@@ -108,7 +110,7 @@ const LandingPage = () => {
         },
       ],
     },
-    {
+    /* {
       symbol: "CG",
       shortName: "CGO",
       fullName: "CGO Reserve",
@@ -132,7 +134,7 @@ const LandingPage = () => {
           value: formatPercentage(cgoUtilizationRate),
         },
       ],
-    },
+    }, */
   ];
 
   return (
@@ -161,9 +163,9 @@ const LandingPage = () => {
             gap={{ lg: "20px" }}
             alignItems={"center"}
             direction={{ base: "column", lg: "row" }}
-            py={{ base: "40px", md: "60px", lg: "100px" }}
+            py={{ base: "40px", md: "60px", lg: "120px" }}
           >
-            <Box w={{ base: "100%", lg: "55%" }}>
+            <Box w={"100%"} textAlign={"center"}>
               <Box
                 as={"p"}
                 fontSize={{ base: "12px", md: "13px" }}
@@ -172,47 +174,72 @@ const LandingPage = () => {
                 Decentralized Liquidity Protocol
               </Box>
               <Heading
-                fontSize={{ base: "32px", md: "40px", lg: "48px" }}
-                lineHeight={{ base: "40px", md: "48px", lg: "56px" }}
+                fontSize={{ base: "32px", md: "40px", lg: "64px" }}
+                lineHeight={{ base: "40px", md: "48px", lg: "64px" }}
                 mb={{ base: "15px", md: "20px" }}
               >
-                Supply. Earn. Borrow. — Securely.
+                Supply. Earn. Borrow.Securely.
               </Heading>
               <Box
                 as={"p"}
-                mb={{ base: "15px", md: "20px" }}
+                mb={{ base: "15px", md: "40px" }}
                 fontSize={{ base: "14px", md: "16px" }}
+                maxW={"50%"}
+                mx={"auto"}
               >
-                Creditify enables users to supply assets like USDC and XDC to
+                Creditify enables users to supply assets like USDC and WETH to
                 earn yield, and borrow instantly against collateral with
                 automated risk management. Non-custodial, audited, and governed
                 by the community.
               </Box>
               <Flex
                 alignItems={"center"}
-                gap={{ base: "10px", md: "20px" }}
-                mb={{ base: "30px", md: "40px" }}
-                direction={{ base: "column", sm: "row" }}
-                w={{ base: "100%", sm: "auto" }}
+                gap={"15px"}
+                justifyContent={"center"}
+                mb={{ base: "30px", md: "30px" }}
               >
                 <Button
                   className="primary-btn"
                   onClick={() => navigate(ROUTES.DASHBOARD)}
-                  w={{ base: "100%", sm: "auto" }}
                 >
                   Launch Creditify
+                </Button>
+                <Button
+                  className="secondary-btn"
+                  onClick={() => navigate(ROUTES.DASHBOARD)}
+                >
+                  View Markets
                 </Button>
                 <Button
                   className="secondary-btn"
                   onClick={() =>
                     window.open("https://docs.xdc.network/", "_blank")
                   }
-                  w={{ base: "100%", sm: "auto" }}
                 >
-                  How it works
+                  Read Documentation
                 </Button>
               </Flex>
               <Flex
+                alignItems={"center"}
+                gap={"15px"}
+                justifyContent={"center"}
+              >
+                <Button
+                  className="secondary-btn-sm"
+                  onClick={() => navigate(ROUTES.DASHBOARD)}
+                >
+                  <Image src={usdcIcon} w={"13px"} h={"13px"} />
+                  Supply APY ${tokenDetails[0].tokenInfo[0].value}
+                </Button>
+                <Button
+                  className="secondary-btn-sm"
+                  onClick={() => navigate(ROUTES.DASHBOARD)}
+                >
+                  <Image src={usdcIcon} w={"13px"} h={"13px"} />
+                  Borrow APY ${tokenDetails[0].tokenInfo[1].value}
+                </Button>
+              </Flex>
+              {/* <Flex
                 alignItems={"stretch"}
                 gap={{ base: "10px", md: "15px" }}
                 direction={{ base: "column", sm: "row" }}
@@ -288,37 +315,46 @@ const LandingPage = () => {
                     </Box>
                   );
                 })}
-              </Flex>
-            </Box>
-            <Box w={{ base: "100%", lg: "45%" }}>
-              <Image
-                src={section1Img}
-                alt="section1Img"
-                maxW={"100%"}
-                width={{ base: "500px", lg: "100%" }}
-                height={{ base: "400px", lg: "auto" }}
-                mx={"auto"}
-              ></Image>
+              </Flex> */}
             </Box>
           </Flex>
+          <Box
+            maxW={"1000px"}
+            w={"100%"}
+            mx={"auto"}
+            mb={{ base: "60px", md: "60px", lg: "60px" }}
+            borderBottom={"2px solid #00000024"}
+          ></Box>
           {/* How Creditify works */}
           <HowCreditifyWorks />
           {/* Market Overview section */}
           <MarketOverview tokenDetails={tokenDetails} />
-          <Box
-            pt={{ base: "60px", md: "80px", lg: "120px" }}
-            maxW={"1054px"}
-            w={"100%"}
-            mx={"auto"}
-            mb={{ base: "60px", md: "80px", lg: "150px" }}
-            borderBottom={"1px solid #e2e8f0"}
-          ></Box>
-          {/* Your assets, your control */}
-          <YourAssets />
+          {/* MeetCreditify */}
+          <MeetCreditify />
           {/* Own your money */}
           <OwnMoney />
+          {/* WhyBuildOnXDC */}
+          <WhyBuildOnXDC />
+          <Box
+            pt={{ base: "60px", md: "60px", lg: "100px" }}
+            maxW={"1000px"}
+            w={"100%"}
+            mx={"auto"}
+            mb={{ base: "60px", md: "80px", lg: "120px" }}
+            borderBottom={"2px solid #00000024"}
+          ></Box>
           {/* Security & Audits */}
           <GovernanceSecurity />
+          <Box
+            pt={{ base: "60px", md: "60px", lg: "140px" }}
+            maxW={"1000px"}
+            w={"100%"}
+            mx={"auto"}
+            mb={{ base: "60px", md: "80px", lg: "120px" }}
+            borderBottom={"2px solid #00000024"}
+          ></Box>
+          {/* InstantCapital */}
+          <InstantCapital />
           {/* Faq */}
           <Faq />
           {/* Footer */}

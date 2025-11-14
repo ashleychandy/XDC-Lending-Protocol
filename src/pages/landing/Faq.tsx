@@ -26,7 +26,11 @@ const Faq = () => {
   ];
 
   return (
-    <Box as={"section"} py={{ base: "60px", md: "80px", lg: "150px" }}>
+    <Box
+      as={"section"}
+      pt={{ base: "60px", md: "80px", lg: "200px" }}
+      pb={{ base: "60px", md: "80px", lg: "150px" }}
+    >
       <Box maxW={"1140px"} mx={"auto"}>
         <Flex
           alignItems={{ lg: "flex-start" }}
@@ -34,8 +38,8 @@ const Faq = () => {
           gap={{ base: "20px", lg: "0" }}
         >
           <Heading
-            fontSize={{ base: "30px", sm: "40px", md: "48px", lg: "64px" }}
-            lineHeight={{ base: "30px", sm: "40px", md: "48px", lg: "64px" }}
+            fontSize={{ base: "30px", sm: "40px", md: "48px", lg: "70px" }}
+            lineHeight={{ base: "30px", sm: "40px", md: "48px", lg: "70px" }}
             w={{ base: "100%", lg: "30%" }}
             textAlign={{ base: "center", lg: "left" }}
           >
@@ -75,7 +79,7 @@ const Faq = () => {
               <Link
                 href="#"
                 fontSize={"24px"}
-                color="#06B6D4"
+                color="#000"
                 textDecoration={"underline"}
               >
                 See more <BiRightArrowAlt size={"28px"} />

@@ -21,27 +21,33 @@ tr:last-child > td {
 }
 .landing-page .secondary-btn,
 .landing-page .secondary-btn-lg {
-  box-shadow: 0px 6px 18px 0px #06b6d41f;
-  border: 1px solid #ffffff0f;
-  background: #ffffff01;
-  border-radius: 10px;
-  color: #ffffffa6;
-  font-size: 16px;
+  border: 1px solid #2c3e5040;
+  background: transparent;
+  border-radius: 12px;
+  color: #000000;
+  font-size: 14px;
+  /* font-weight: 700; */
+  /* font-family: "Inter", sans-serif; */
+}
+
+.landing-page .nav-link {
   font-weight: 700;
-  font-family: "Inter", sans-serif;
+  color: #6c7a89;
+  border-bottom: 1px solid #6c7a89;
 }
 
 .landing-page .primary-btn,
 .landing-btn button,
 .landing-page .primary-btn-lg {
-  background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%) !important;
-  border: 2px solid #000000 !important;
+  background-color: #000000 !important;
+  box-shadow: 0px 6px 20px 0px #4a90e22e;
   box-shadow: 0px 6px 24px 0px #06b6d41f !important;
-  border-radius: 14px !important;
-  color: #051225 !important;
-  font-size: 16px !important;
-  font-weight: 700 !important;
-  font-family: "Inter", sans-serif !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  min-height: auto !important;
+  /* font-weight: 700 !important; */
+  /* font-family: "Inter", sans-serif !important; */
 }
 
 .landing-page .secondary-btn-lg {
@@ -95,7 +101,7 @@ tr:last-child > td {
 
 .landing-page-light p,
 .landing-page-light .p {
-  color: #4a5568 !important;
+  color: #6c7a89 !important;
 }
 
 .landing-page-light h1,
@@ -108,17 +114,21 @@ tr:last-child > td {
 }
 
 .landing-page-light .secondary-btn,
-.landing-page-light .secondary-btn-lg {
-  box-shadow: 0px 6px 18px 0px rgba(99, 102, 241, 0.12);
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  border-radius: 10px;
-  color: #4a5568;
-  font-size: 16px;
-  font-weight: 700;
-  font-family: "Inter", sans-serif;
+.landing-page-light .secondary-btn-lg,
+.landing-page-light .secondary-btn-sm {
+  border: 1px solid #2c3e5040;
+  background: transparent;
+  border-radius: 12px;
+  color: #000000;
+  font-size: 14px;
+  /* font-weight: 700;
+  font-family: "Inter", sans-serif; */
 }
 
+.landing-page-light .secondary-btn-sm {
+  font-size: 9px;
+  max-height: 32px;
+}
 .landing-page-light .secondary-btn:hover,
 .landing-page-light .secondary-btn-lg:hover {
   background: #f7fafc;
@@ -126,20 +136,15 @@ tr:last-child > td {
 }
 
 .landing-page-light .box2 {
-  color: #2d3748 !important;
-  background: #f7fafc !important;
-  border: 1px solid #e2e8f0 !important;
+  color: #000 !important;
+  background: #e6e6e6 !important;
+  border: 1px solid #e6e6e6 !important;
 }
 
 .landing-page-light .box {
-  background: linear-gradient(
-    180deg,
-    rgba(99, 102, 241, 0.03) 0%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  border: 1px solid #e2e8f0;
-  backdrop-filter: blur(8px);
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  border: 0.97px solid #ffffff0f;
+  box-shadow: 0px 4px 4px 0px #00000040;
 }
 
 .landing-page-light .box .chakra-flex {
@@ -157,11 +162,11 @@ tr:last-child > td {
 
 /* Footer Light Theme */
 .landing-page-light a {
-  color: #4a5568 !important;
+  color: #000 !important;
 }
 
 .landing-page-light a:hover {
-  color: #2d3748 !important;
+  color: #000 !important;
 }
 
 /* Input Light Theme */
@@ -182,7 +187,6 @@ tr:last-child > td {
 
 /* FAQ Light Theme */
 .landing-page-light .faq-item {
-  border: 1px solid #e2e8f0 !important;
 }
 
 .landing-page-light .faq-title {
@@ -195,33 +199,28 @@ tr:last-child > td {
 
 /* Token Icon Background Light Theme */
 .landing-page-light .token-icon-bg {
-  background: rgba(99, 102, 241, 0.08) !important;
+  background: #000 !important;
 }
 
 /* CTA Box Light Theme */
 .landing-page-light .cta-box {
-  border: 1px solid #e2e8f0 !important;
-  background: linear-gradient(
-    90deg,
-    rgba(99, 102, 241, 0.06) 0%,
-    rgba(6, 182, 212, 0.03) 100%
-  ) !important;
+  border: 1px solid #ffffff08 !important;
+  box-shadow: 0px 4px 4px 0px #00000040 !important;
 }
 
 /* Link Colors Light Theme */
 .landing-page-light a[href="#"] {
-  color: #06b6d4 !important;
+  color: #000 !important;
 }
 
 /* Footer Newsletter Light Theme */
 .landing-page-light .footer-newsletter {
-  background: #f7fafc !important;
-  border: 1px solid #e2e8f0 !important;
+  background: #ffffff05;
+  border: 1.76px solid #ffffff05;
+  box-shadow: 0px 4px 4px 0px #00000040;
 }
 
 .landing-page-light .footer-email-box {
-  background: #ffffff !important;
-  border: 2px solid #e2e8f0 !important;
 }
 
 .landing-page-light .footer-link {
@@ -238,7 +237,7 @@ tr:last-child > td {
 }
 
 .landing-page-light .governance-list li {
-  color: #4a5568 !important;
+  color: #000 !important;
 }
 
 .light-text-1 {

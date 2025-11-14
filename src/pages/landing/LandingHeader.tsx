@@ -1,7 +1,7 @@
 import { ROUTES } from "@/routes/paths";
 import { Box, Button, Flex } from "@chakra-ui/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const LandingHeader = () => {
   const navigate = useNavigate();
@@ -11,22 +11,20 @@ const LandingHeader = () => {
       <Flex
         justifyContent={{ base: "center", lg: "flex-end" }}
         alignItems={"center"}
-        gap={"15px"}
+        gap={"25px"}
       >
-        <Button
-          className="secondary-btn"
-          onClick={() => navigate(ROUTES.MARKET)}
+        <Link
+          target="_blank"
+          to={"https://docs.xdc.network/"}
+          className="nav-link"
         >
-          View Markets
-        </Button>
-        <Button
-          className="secondary-btn"
-          onClick={() => window.open("https://docs.xdc.network/", "_blank")}
-        >
-          Read Docs
-        </Button>
+          How it Works
+        </Link>
+        <Link to={ROUTES.MARKET} className="nav-link">
+          Markets
+        </Link>
         <Box className="landing-btn">
-          <ConnectButton />
+          <ConnectButton label="Open App" />
         </Box>
       </Flex>
     </Box>
