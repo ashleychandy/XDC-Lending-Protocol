@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { useAssetDetails } from "@/hooks/useAssetDetails";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import Header from "@/pages/Header";

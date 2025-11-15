@@ -64,6 +64,15 @@ export default function FormattedCounter({
     decimalPlacesArray.push(Math.pow(10, i));
   }
 
+  // Group integer places by thousands for comma formatting
+  const groupedIntegerPlaces = [];
+  for (let i = 0; i < integerPlaces.length; i++) {
+    groupedIntegerPlaces.push({
+      place: integerPlaces[i],
+      showComma: i > 0 && (integerPlaces.length - i) % 3 === 0,
+    });
+  }
+
   return (
     <Flex
       alignItems="center"
@@ -81,17 +90,28 @@ export default function FormattedCounter({
           -
         </Box>
       )}
-      <Counter
-        value={integerPart}
-        fontSize={fontSize}
-        places={integerPlaces}
-        gap={1}
-        textColor={textColor}
-        gradientFrom="transparent"
-        gradientTo="transparent"
-        containerStyle={{ display: "inline-flex" }}
-        horizontalPadding={0}
-      />
+      <Flex alignItems="center" display="inline-flex" gap="0.5">
+        {groupedIntegerPlaces.map((group, index) => (
+          <Flex key={group.place} alignItems="center" display="inline-flex">
+            <Counter
+              value={integerPart}
+              fontSize={fontSize}
+              places={[group.place]}
+              gap={1}
+              textColor={textColor}
+              gradientFrom="transparent"
+              gradientTo="transparent"
+              containerStyle={{ display: "inline-flex" }}
+              horizontalPadding={0}
+            />
+            {group.showComma && (
+              <Box fontSize={`${fontSize}px`} color={textColor} mx="0.25">
+                ,
+              </Box>
+            )}
+          </Flex>
+        ))}
+      </Flex>
       {decimalPlaces > 0 && (
         <>
           <Box fontSize={`${fontSize}px`} color={textColor}>

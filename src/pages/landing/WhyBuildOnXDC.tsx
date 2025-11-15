@@ -1,5 +1,6 @@
 // FeatureStrips.tsx
-import { Box, Flex, Heading, Image, Text, VStack } from "@chakra-ui/react";
+import TextType from "@/components/ui/TextType/TextType";
+import { Box, Flex, Heading, Image, VStack } from "@chakra-ui/react";
 import xdcIcon from "../../assets/images/landing/xdc-big-icon.png";
 
 const items = [
@@ -75,20 +76,20 @@ const WhyBuildOnXDC = () => {
                 border="1px solid #000000"
                 boxShadow="0px 3.3px 3.3px 0px #00000040"
               >
-                <Text
-                  as={"div"}
-                  fontSize={{ base: "14px", md: "18px", lg: "20px" }}
-                  color={"#000"}
-                  lineHeight={1.5}
-                  textAlign={"center"}
-                >
-                  <Text as="span" fontWeight={700} letterSpacing={"0.3px"}>
-                    {item.bold}{" "}
-                  </Text>
-                  <Text as="span" fontWeight={400} letterSpacing={"0.2px"}>
-                    {item.rest}
-                  </Text>
-                </Text>
+                <TextType
+                  text={`${item.bold} ${item.rest}`}
+                  typingSpeed={50}
+                  showCursor={false}
+                  startOnVisible={true}
+                  loop={false}
+                  className="text-type-xdc"
+                  style={{
+                    fontSize: "clamp(14px, 4vw, 20px)",
+                    color: "#000",
+                    lineHeight: 1.5,
+                    textAlign: "center",
+                  }}
+                />
               </Flex>
             </Box>
           ))}
