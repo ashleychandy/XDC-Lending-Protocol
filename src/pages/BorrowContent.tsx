@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
@@ -668,12 +669,12 @@ function BorrowContent() {
               <Box as={"span"} className="light-text-2">
                 Balance $
               </Box>
-              <Box as={"span"} className="title-text-1">
-                {parseFloat(accountData.totalDebt).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </Box>
+              <FormattedCounter
+                value={parseFloat(accountData.totalDebt)}
+                fontSize={14}
+                textColor="#000"
+                decimalPlaces={2}
+              />
             </Box>
             <Box
               p="4px 8px"
@@ -684,12 +685,14 @@ function BorrowContent() {
               <Box as={"span"} className="light-text-2" mr={"2px"}>
                 APY
               </Box>
-              <Box as={"span"} className="title-text-1">
-                {weightedBorrowApy}
-              </Box>
-              <Box as={"span"} className="light-text-2" ml={"2px"}>
-                %
-              </Box>
+              <FormattedCounter
+                value={weightedBorrowApy}
+                fontSize={14}
+                textColor="#000"
+                suffix="%"
+                decimalPlaces={2}
+                className="title-text-1"
+              />
             </Box>
             <Box
               p="4px 8px"
@@ -840,16 +843,27 @@ function BorrowContent() {
                     </Table.Cell>
                     <Table.Cell w="25%">
                       <Flex direction="column">
-                        <Box fontSize="sm" className="title-text-1">
-                          {item.debt}
-                        </Box>
-                        <Box fontSize="xs" className="light-text-2">
-                          {item.dollarDebt}
-                        </Box>
+                        <FormattedCounter
+                          value={item.debt}
+                          fontSize={14}
+                          textColor="#000"
+                          className="title-text-1"
+                        />
+                        <FormattedCounter
+                          value={item.dollarDebt}
+                          fontSize={12}
+                          textColor="#6b7280"
+                          className="light-text-2"
+                        />
                       </Flex>
                     </Table.Cell>
                     <Table.Cell w="15%" fontSize="sm" className="title-text-1">
-                      {item.apy}
+                      <FormattedCounter
+                        value={item.apy}
+                        fontSize={14}
+                        textColor="#000"
+                        suffix="%"
+                      />
                     </Table.Cell>
                     <Table.Cell w="30%">
                       <Flex justify="flex-end" gap="5px">
@@ -991,16 +1005,27 @@ function BorrowContent() {
                   </Table.Cell>
                   <Table.Cell w="25%">
                     <Flex direction="column">
-                      <Box fontSize="sm" className="title-text-1">
-                        {item.available}
-                      </Box>
-                      <Box fontSize="xs" className="light-text-2">
-                        {item.dollarAvailable}
-                      </Box>
+                      <FormattedCounter
+                        value={item.available}
+                        fontSize={14}
+                        textColor="#000"
+                        className="title-text-1"
+                      />
+                      <FormattedCounter
+                        value={item.dollarAvailable}
+                        fontSize={12}
+                        textColor="#6b7280"
+                        className="light-text-2"
+                      />
                     </Flex>
                   </Table.Cell>
                   <Table.Cell w="18%" fontSize="sm" className="title-text-1">
-                    {item.apy}
+                    <FormattedCounter
+                      value={item.apy}
+                      fontSize={14}
+                      textColor="#000"
+                      suffix="%"
+                    />
                   </Table.Cell>
                   <Table.Cell w="27%">
                     <Flex justify="flex-end" gap="5px">

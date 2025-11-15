@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
@@ -362,10 +363,19 @@ const WithdrawModal: React.FC<Props> = ({
                         {getDollarValue()}
                       </Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px" className="light-text-2">
-                          Supply balance{" "}
-                          {formatValue(parseFloat(suppliedBalance))}
-                        </Box>
+                        <Flex
+                          fontSize="13px"
+                          className="light-text-2"
+                          alignItems="center"
+                          gap="1"
+                        >
+                          <Box>Supply balance</Box>
+                          <FormattedCounter
+                            value={formatValue(parseFloat(suppliedBalance))}
+                            fontSize={13}
+                            textColor="#6b7280"
+                          />
+                        </Flex>
                         <Button
                           variant="plain"
                           p="0"

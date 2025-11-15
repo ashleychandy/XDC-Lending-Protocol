@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
@@ -424,9 +425,17 @@ const BorrowModal: React.FC<Props> = ({
                             fontSize="sm"
                             fontWeight="semibold"
                           >
-                            {healthFactorValue > 1000
-                              ? "∞"
-                              : healthFactorValue.toFixed(2)}
+                            {healthFactorValue > 1000 ? (
+                              "∞"
+                            ) : (
+                              <FormattedCounter
+                                value={healthFactorValue.toFixed(2)}
+                                fontSize={14}
+                                textColor={getHealthFactorColor(
+                                  healthFactorValue
+                                )}
+                              />
+                            )}
                           </Box>
                           <Box fontSize="sm" className="light-text-2">
                             →
@@ -435,7 +444,17 @@ const BorrowModal: React.FC<Props> = ({
                             color={getHealthFactorColor(newHealthFactorValue)}
                             fontWeight="semibold"
                           >
-                            {getNewHealthFactor()}
+                            {getNewHealthFactor() === "∞" ? (
+                              "∞"
+                            ) : (
+                              <FormattedCounter
+                                value={getNewHealthFactor()}
+                                fontSize={14}
+                                textColor={getHealthFactorColor(
+                                  newHealthFactorValue
+                                )}
+                              />
+                            )}
                           </Box>
                         </Flex>
                         <Box fontSize="12px" mt="2px" className="light-text-2">

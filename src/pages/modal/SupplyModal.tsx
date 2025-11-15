@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
@@ -307,10 +308,19 @@ const SupplyModal: React.FC<Props> = ({
                         {getDollarValue()}
                       </Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px" className="light-text-2">
-                          Wallet balance{" "}
-                          {formatValue(parseFloat(tokenConfig.balance))}
-                        </Box>
+                        <Flex
+                          fontSize="13px"
+                          className="light-text-2"
+                          alignItems="center"
+                          gap="1"
+                        >
+                          <Box>Wallet balance</Box>
+                          <FormattedCounter
+                            value={formatValue(parseFloat(tokenConfig.balance))}
+                            fontSize={13}
+                            textColor="#6b7280"
+                          />
+                        </Flex>
 
                         <Button
                           variant="plain"
@@ -406,15 +416,29 @@ const SupplyModal: React.FC<Props> = ({
                           justifyContent="end"
                         >
                           <Box fontSize="sm" className="title-text-1">
-                            {healthFactorValue > 1000
-                              ? "∞"
-                              : healthFactorValue.toFixed(2)}
+                            {healthFactorValue > 1000 ? (
+                              "∞"
+                            ) : (
+                              <FormattedCounter
+                                value={healthFactorValue.toFixed(2)}
+                                fontSize={14}
+                                textColor="#000"
+                              />
+                            )}
                           </Box>
                           <Box fontSize="sm" className="light-text-2">
                             →
                           </Box>
                           <Box color={healthFactorColor} fontWeight="semibold">
-                            {getNewHealthFactor()}
+                            {getNewHealthFactor() === "∞" ? (
+                              "∞"
+                            ) : (
+                              <FormattedCounter
+                                value={getNewHealthFactor()}
+                                fontSize={14}
+                                textColor={healthFactorColor}
+                              />
+                            )}
                           </Box>
                         </Flex>
                         <Box

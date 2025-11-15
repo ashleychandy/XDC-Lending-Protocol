@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
@@ -627,15 +628,12 @@ const SupplyContent = () => {
               <Box as={"span"} className="light-text-2">
                 Balance $
               </Box>
-              <Box as={"span"} className="title-text-1">
-                {parseFloat(accountData.totalCollateral).toLocaleString(
-                  "en-US",
-                  {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }
-                )}
-              </Box>
+              <FormattedCounter
+                value={parseFloat(accountData.totalCollateral)}
+                fontSize={14}
+                textColor="#000"
+                decimalPlaces={2}
+              />
             </Box>
             <Box
               p="4px 8px"
@@ -646,12 +644,14 @@ const SupplyContent = () => {
               <Box as={"span"} className="light-text-2" mr={"2px"}>
                 APY
               </Box>
-              <Box as={"span"} className="title-text-1">
-                {weightedSupplyApy}
-              </Box>
-              <Box as={"span"} className="light-text-2" ml={"2px"}>
-                %
-              </Box>
+              <FormattedCounter
+                value={weightedSupplyApy}
+                fontSize={14}
+                textColor="#000"
+                suffix="%"
+                decimalPlaces={2}
+                className="title-text-1"
+              />
             </Box>
             <Box
               p="4px 8px"
@@ -662,15 +662,12 @@ const SupplyContent = () => {
               <Box as={"span"} className="light-text-2">
                 Collateral $
               </Box>
-              <Box as={"span"} className="title-text-1">
-                {parseFloat(accountData.totalCollateral).toLocaleString(
-                  "en-US",
-                  {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }
-                )}
-              </Box>
+              <FormattedCounter
+                value={parseFloat(accountData.totalCollateral)}
+                fontSize={14}
+                textColor="#000"
+                decimalPlaces={2}
+              />
             </Box>
           </Flex>
         )}
@@ -826,16 +823,27 @@ const SupplyContent = () => {
                     </Table.Cell>
                     <Table.Cell w="20%">
                       <Flex direction="column">
-                        <Box fontSize="sm" className="title-text-1">
-                          {item.balance}
-                        </Box>
-                        <Box fontSize="xs" className="light-text-2">
-                          {item.dollarBalance}
-                        </Box>
+                        <FormattedCounter
+                          value={item.balance}
+                          fontSize={14}
+                          textColor="#000"
+                          className="title-text-1"
+                        />
+                        <FormattedCounter
+                          value={item.dollarBalance}
+                          fontSize={12}
+                          textColor="#6b7280"
+                          className="light-text-2"
+                        />
                       </Flex>
                     </Table.Cell>
                     <Table.Cell w="13%" fontSize="sm" className="title-text-1">
-                      {item.apy}
+                      <FormattedCounter
+                        value={item.apy}
+                        fontSize={14}
+                        textColor="#000"
+                        suffix="%"
+                      />
                     </Table.Cell>
                     <Table.Cell w="12%">
                       <Switch.Root
@@ -987,12 +995,20 @@ const SupplyContent = () => {
                     </Flex>
                   </Table.Cell>
                   <Table.Cell w="23%">
-                    <Box fontSize="sm" className="title-text-1">
-                      {item.balance}
-                    </Box>
+                    <FormattedCounter
+                      value={item.balance}
+                      fontSize={14}
+                      textColor="#000"
+                      className="title-text-1"
+                    />
                   </Table.Cell>
                   <Table.Cell w="15%" fontSize="sm" className="title-text-1">
-                    {item.apy}
+                    <FormattedCounter
+                      value={item.apy}
+                      fontSize={14}
+                      textColor="#000"
+                      suffix="%"
+                    />
                   </Table.Cell>
                   <Table.Cell w="12%">
                     {item.canBeCollateral && (

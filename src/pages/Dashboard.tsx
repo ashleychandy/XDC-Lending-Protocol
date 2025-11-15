@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
 import { useAllReserves } from "@/hooks/useAllReserves";
 import { useAllWalletBalances } from "@/hooks/useAllWalletBalances";
@@ -167,15 +168,13 @@ const Dashboard = () => {
                 {accountData.isLoading ? (
                   <Skeleton height="40px" width="150px" />
                 ) : (
-                  <Heading size="2xl" className="text-white-2">
-                    <Box as={"span"} className="light-text-1" mr={"2px"}>
-                      $
-                    </Box>
-                    {netWorth.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </Heading>
+                  <FormattedCounter
+                    value={netWorth}
+                    fontSize={32}
+                    textColor="#fff"
+                    prefix="$"
+                    decimalPlaces={2}
+                  />
                 )}
               </Flex>
               <Flex direction="column">
@@ -186,28 +185,30 @@ const Dashboard = () => {
                 cgoReserveData.isLoading ? (
                   <Skeleton height="40px" width="100px" />
                 ) : (
-                  <Heading
-                    size="2xl"
-                    className="text-white-2"
-                    color={parseFloat(netApy) < 0 ? "red.500" : "text-white-2"}
-                  >
-                    {netApy}
-                    <Box as={"span"} className="light-text-1" ml={"2px"}>
-                      %
-                    </Box>
-                  </Heading>
+                  <FormattedCounter
+                    value={parseFloat(netApy)}
+                    fontSize={32}
+                    textColor={parseFloat(netApy) < 0 ? "#ef4444" : "#fff"}
+                    suffix="%"
+                    decimalPlaces={2}
+                  />
                 )}
               </Flex>
               <Flex direction="column">
                 <Box className="light-text-1">Health factor</Box>
                 {accountData.isLoading ? (
                   <Skeleton height="40px" width="80px" />
-                ) : (
+                ) : healthFactorValue > 1000 ? (
                   <Heading size="2xl" color={healthFactorColor}>
-                    {healthFactorValue > 1000
-                      ? "∞"
-                      : healthFactorValue.toFixed(2)}
+                    ∞
                   </Heading>
+                ) : (
+                  <FormattedCounter
+                    value={healthFactorValue}
+                    fontSize={32}
+                    textColor={healthFactorColor}
+                    decimalPlaces={2}
+                  />
                 )}
               </Flex>
             </Flex>

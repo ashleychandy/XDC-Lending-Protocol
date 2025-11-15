@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { useAssetDetails } from "@/hooks/useAssetDetails";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import Header from "@/pages/Header";
@@ -651,7 +652,14 @@ const TransactionHistory = () => {
                               {assetInfo.symbol}
                             </Table.Cell>
                             <Table.Cell>
-                              {formatAmount(tx.amount, assetInfo.decimals)}
+                              <FormattedCounter
+                                value={formatAmount(
+                                  tx.amount,
+                                  assetInfo.decimals
+                                )}
+                                fontSize={14}
+                                textColor="#000"
+                              />
                             </Table.Cell>
                             <Table.Cell color="#62677b" fontSize="sm">
                               {formatTimestamp(tx.timestamp)}

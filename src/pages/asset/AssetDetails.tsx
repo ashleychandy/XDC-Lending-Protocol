@@ -1,8 +1,4 @@
-import {
-  formatCurrency,
-  formatPercentage,
-  useAssetDetails,
-} from "@/hooks/useAssetDetails";
+import { useAssetDetails } from "@/hooks/useAssetDetails";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import Header from "@/pages/Header";
 import {
@@ -188,36 +184,52 @@ const AssetDetails = () => {
                 <Box fontSize="sm" className="light-text-1">
                   Reserve Size
                 </Box>
-                <Heading size="2xl" className="text-white-2">
-                  {formatCurrency(reserveSize)}
-                </Heading>
+                <FormattedCounter
+                  value={reserveSize}
+                  fontSize={24}
+                  textColor="#fff"
+                  prefix="$"
+                  decimalPlaces={2}
+                />
               </Flex>
 
               <Flex direction="column">
                 <Box fontSize="sm" className="light-text-1">
                   Available liquidity
                 </Box>
-                <Heading size="2xl" className="text-white-2">
-                  {formatCurrency(availableLiquidity)}
-                </Heading>
+                <FormattedCounter
+                  value={availableLiquidity}
+                  fontSize={24}
+                  textColor="#fff"
+                  prefix="$"
+                  decimalPlaces={2}
+                />
               </Flex>
 
               <Flex direction="column">
                 <Box fontSize="sm" className="light-text-1">
                   Utilization Rate
                 </Box>
-                <Heading size="2xl" className="text-white-2">
-                  {formatPercentage(utilizationRate)}
-                </Heading>
+                <FormattedCounter
+                  value={utilizationRate}
+                  fontSize={24}
+                  textColor="#fff"
+                  suffix="%"
+                  decimalPlaces={2}
+                />
               </Flex>
 
               <Flex direction="column">
                 <Box fontSize="sm" className="light-text-1">
                   Oracle price
                 </Box>
-                <Heading size="2xl" className="text-white-2">
-                  ${oraclePrice.toFixed(4)}
-                </Heading>
+                <FormattedCounter
+                  value={oraclePrice}
+                  fontSize={24}
+                  textColor="#fff"
+                  prefix="$"
+                  decimalPlaces={4}
+                />
               </Flex>
             </Flex>
           </Flex>

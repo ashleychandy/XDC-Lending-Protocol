@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
@@ -333,10 +334,21 @@ const RepayModal: React.FC<Props> = ({
                         {getDollarValue()}
                       </Box>
                       <Flex alignItems="center" gap="5px">
-                        <Box fontSize="13px" className="light-text-2">
-                          Wallet balance{" "}
-                          {formatValue(parseFloat(tokenConfig.walletBalance))}
-                        </Box>
+                        <Flex
+                          fontSize="13px"
+                          className="light-text-2"
+                          alignItems="center"
+                          gap="1"
+                        >
+                          <Box>Wallet balance</Box>
+                          <FormattedCounter
+                            value={formatValue(
+                              parseFloat(tokenConfig.walletBalance)
+                            )}
+                            fontSize={13}
+                            textColor="#6b7280"
+                          />
+                        </Flex>
                         <Button
                           variant="plain"
                           p="0"

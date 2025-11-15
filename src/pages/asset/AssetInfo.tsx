@@ -1,3 +1,4 @@
+import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import {
   NATIVE_TOKEN_ADDRESS,
@@ -363,10 +364,12 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
       <Flex direction="column">
         <Box>{label}</Box>
         <Flex gap="2" alignItems="center">
-          <Heading size="md">
-            {value}{" "}
-            <span style={{ fontSize: "14px" }}>{tokenConfig?.symbol}</span>
-          </Heading>
+          <Flex alignItems="center" gap="1">
+            <FormattedCounter value={value} fontSize={18} textColor="#000" />
+            <Box fontSize="14px" ml="1">
+              {tokenConfig?.symbol}
+            </Box>
+          </Flex>
         </Flex>
       </Flex>
     </Flex>
@@ -380,12 +383,19 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             <Box>Available to supply</Box>
             <Flex justifyContent="space-between" alignItems="center">
               <Flex direction="column">
-                <Box>
-                  {formatValue(availableNum)} {tokenConfig.symbol}
-                </Box>
-                <Box fontSize="13px">
-                  {formatUsdValue(availableNum * tokenConfig.price)}
-                </Box>
+                <Flex alignItems="center" gap="1">
+                  <FormattedCounter
+                    value={formatValue(availableNum)}
+                    fontSize={14}
+                    textColor="#000"
+                  />
+                  <Box ml="1">{tokenConfig.symbol}</Box>
+                </Flex>
+                <FormattedCounter
+                  value={formatUsdValue(availableNum * tokenConfig.price)}
+                  fontSize={13}
+                  textColor="#6b7280"
+                />
               </Flex>
               <Button
                 size="sm"
@@ -404,12 +414,19 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
             <Box>Available to borrow</Box>
             <Flex justifyContent="space-between" alignItems="center">
               <Flex direction="column">
-                <Box>
-                  {formatValue(borrowedNum)} {tokenConfig.symbol}
-                </Box>
-                <Box fontSize="13px">
-                  {formatUsdValue(borrowedNum * tokenConfig.price)}
-                </Box>
+                <Flex alignItems="center" gap="1">
+                  <FormattedCounter
+                    value={formatValue(borrowedNum)}
+                    fontSize={14}
+                    textColor="#000"
+                  />
+                  <Box ml="1">{tokenConfig.symbol}</Box>
+                </Flex>
+                <FormattedCounter
+                  value={formatUsdValue(borrowedNum * tokenConfig.price)}
+                  fontSize={13}
+                  textColor="#6b7280"
+                />
               </Flex>
               <Button
                 size="sm"
