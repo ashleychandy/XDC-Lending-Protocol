@@ -1,29 +1,65 @@
-import { Accordion, Box, Flex, Heading, Link, Span } from "@chakra-ui/react";
-import { BiRightArrowAlt } from "react-icons/bi";
+import { Accordion, Box, Button, Flex, Heading, Span } from "@chakra-ui/react";
+import { useState } from "react";
 
 const Faq = () => {
-  const accordionItems = [
+  const [showMore, setShowMore] = useState(false);
+
+  const allAccordionItems = [
     {
       value: "a",
       title: "What is Creditify?",
-      text: "Creditify is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market while earning interest, and borrowers can access liquidity by providing collateral that exceeds the borrowed amount.",
+      text: "A decentralized, non-custodial lending protocol on the XDC Network where users can supply assets to earn yield and borrow against their collateral.",
     },
     {
       value: "b",
-      title: "Where are supplied tokens stored?",
-      text: "Supplied tokens are stored in publicly accessible smart contracts that enable overcollateralised borrowing according variable parameters. The Creditify Protocol smart contracts have been audited and formally verified by third parties.",
+      title: "How does Creditify work?",
+      text: "Users deposit assets into liquidity pools, earn yield, and can borrow other assets using their deposits as collateral. Interest rates adjust algorithmically based on supply and demand.",
     },
     {
       value: "c",
-      title: "What is Creditify?",
-      text: "NA",
+      title: "Which assets are supported?",
+      text: "Currently USDC, XDC, CGO (gold-backed token). More assets may be added based on demand, liquidity, and risk assessments.",
     },
     {
       value: "d",
-      title: "Does Creditify has risk?",
-      text: "No protocol can be considered entirely risk free, but extensive steps have been taken to minimize these risks as much as possible – the Creditify Protocol code is publicly available and auditable by anyone, and has been audited by multiple smart contract auditors.",
+      title: "Where are my supplied tokens stored?",
+      text: "All assets are stored in smart contracts on the XDC blockchain, not with Creditify. You retain full ownership and control at all times.",
+    },
+    {
+      value: "e",
+      title: "What wallets can I use with Creditify?",
+      text: "Creditify supports: XDC Pay, MetaMask (with XDC network added), Any Web3 wallet compatible with EVM chains",
+    },
+    {
+      value: "f",
+      title: "Is Creditify audited?",
+      text: "Yes. Smart contracts undergo third-party audits, formal verification, and continuous security monitoring. Audit reports and proofs are publicly available.",
+    },
+    {
+      value: "g",
+      title: "What are the risks?",
+      text: "Using Creditify involves: Liquidation risk, Token volatility",
+    },
+    {
+      value: "h",
+      title: "How do interest rates work?",
+      text: "APYs are algorithmically determined by the lending market. When demand to borrow increases, APYs rise; when demand drops, APYs fall.",
+    },
+    {
+      value: "i",
+      title: "What is liquidation?",
+      text: "If your collateral value drops below the required threshold, your position may be partially liquidated to maintain solvency. Liquidation protects the protocol and lenders.",
+    },
+    {
+      value: "j",
+      title: "How do I borrow?",
+      text: "Supply assets → enable them as collateral → choose a borrow asset → confirm transaction. Borrowing is instant.",
     },
   ];
+
+  const displayedItems = showMore
+    ? allAccordionItems
+    : allAccordionItems.slice(0, 4);
 
   return (
     <Box
@@ -47,7 +83,7 @@ const Faq = () => {
           </Heading>
           <Box w={{ base: "100%", lg: "70%" }}>
             <Accordion.Root collapsible>
-              {accordionItems.map((item, index) => (
+              {displayedItems.map((item, index) => (
                 <Accordion.Item
                   key={index}
                   className="box faq-item"
@@ -60,7 +96,7 @@ const Faq = () => {
                     <Span
                       fontWeight={"400"}
                       flex="1"
-                      fontSize={{ base: "16px", md: "20px", lg: "24px" }}
+                      fontSize={{ base: "14px", md: "16px", lg: "18px" }}
                       className="faq-title"
                     >
                       {item.title}
@@ -68,7 +104,10 @@ const Faq = () => {
                     <Accordion.ItemIndicator />
                   </Accordion.ItemTrigger>
                   <Accordion.ItemContent>
-                    <Accordion.ItemBody className="faq-body">
+                    <Accordion.ItemBody
+                      className="faq-body"
+                      fontSize={{ base: "12px", md: "14px", lg: "16px" }}
+                    >
                       {item.text}
                     </Accordion.ItemBody>
                   </Accordion.ItemContent>
@@ -76,14 +115,17 @@ const Faq = () => {
               ))}
             </Accordion.Root>
             <Box textAlign={{ base: "center", lg: "left" }}>
-              <Link
-                href="#"
-                fontSize={"24px"}
+              <Button
+                onClick={() => setShowMore(!showMore)}
+                variant="plain"
+                fontSize={{ base: "14px", md: "16px", lg: "18px" }}
                 color="#000"
                 textDecoration={"underline"}
+                cursor="pointer"
+                _hover={{ opacity: 0.7 }}
               >
-                See more <BiRightArrowAlt size={"28px"} />
-              </Link>
+                {showMore ? "See less" : "See more"}
+              </Button>
             </Box>
           </Box>
         </Flex>

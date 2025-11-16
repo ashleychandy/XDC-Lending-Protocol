@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { getHealthFactorColor } from "@/helpers/getHealthFactorColor";
 import { useAllReserves } from "@/hooks/useAllReserves";
@@ -248,6 +249,7 @@ const Dashboard = () => {
           )}
         </Box>
       </Container>
+      <Footer />
     </>
   );
 };

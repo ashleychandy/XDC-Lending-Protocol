@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { useAssetDetails } from "@/hooks/useAssetDetails";
 import { useChainConfig } from "@/hooks/useChainConfig";
@@ -109,13 +110,13 @@ const AssetDetails = () => {
             <Flex gap="2" alignItems="center">
               <Image
                 src={network.icon}
-                width="32px"
-                height="32px"
+                width="100px"
+                height="50px"
                 objectFit="contain"
                 flexShrink={0}
               />
               <Heading size="lg" className="text-white-1">
-                {network.name} Market
+                {network.name.replace(/^XDC\s+/i, "")} Market
               </Heading>
             </Flex>
           </Flex>
@@ -229,7 +230,7 @@ const AssetDetails = () => {
                   fontSize={24}
                   textColor="#fff"
                   prefix="$"
-                  decimalPlaces={4}
+                  decimalPlaces={oraclePrice < 10 ? 4 : 2}
                 />
               </Flex>
             </Flex>
@@ -273,6 +274,7 @@ const AssetDetails = () => {
           )}
         </Box>
       </Container>
+      <Footer />
     </>
   );
 };

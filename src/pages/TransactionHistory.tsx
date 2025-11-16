@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { useAssetDetails } from "@/hooks/useAssetDetails";
 import { useChainConfig } from "@/hooks/useChainConfig";
@@ -437,8 +438,8 @@ const TransactionHistory = () => {
             <Flex gap="2" alignItems="center">
               <Image
                 src={network.icon}
-                width="32px"
-                height="32px"
+                width="100px"
+                height="50px"
                 objectFit="contain"
                 flexShrink={0}
               />
@@ -449,7 +450,7 @@ const TransactionHistory = () => {
                 fontSize={"32px"}
                 lineHeight={"32px"}
               >
-                {network.name} Market
+                {network.name.replace(/^XDC\s+/i, "")} Market
               </Heading>
             </Flex>
           </Flex>
@@ -742,6 +743,7 @@ const TransactionHistory = () => {
           </Box>
         </Container>
       </Box>
+      <Footer />
     </>
   );
 };

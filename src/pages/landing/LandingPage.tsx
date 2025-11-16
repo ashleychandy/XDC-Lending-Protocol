@@ -181,7 +181,7 @@ const LandingPage = () => {
                 fontWeight={700}
                 letterSpacing={{ base: "-0.5px", lg: "-1px" }}
               >
-                Decentralized Lending, Redefined on XDC.
+                Lend, Borrow & Earn with Near-Zero Fees.
               </Heading>
               <Box
                 as={"p"}
@@ -194,8 +194,9 @@ const LandingPage = () => {
                 lineHeight={1.6}
                 letterSpacing={"0.2px"}
               >
-                Supply, borrow, and earn across USDC, CGO, and XDC — with
-                near-zero gas fees, instant finality, and real yield.
+                The fastest, lowest-cost DeFi experience on XDC, earn real yield
+                and unlock instant liquidity using USDC, XDC, or gold-backed
+                CGO.
               </Box>
               <Flex
                 alignItems={"center"}
@@ -218,9 +219,7 @@ const LandingPage = () => {
                 </Button>
                 <Button
                   className="secondary-btn"
-                  onClick={() =>
-                    window.open("https://docs.xdc.network/", "_blank")
-                  }
+                  onClick={() => navigate(ROUTES.DOCUMENTATION)}
                 >
                   Read Documentation
                 </Button>
@@ -231,20 +230,64 @@ const LandingPage = () => {
                 justifyContent={"center"}
                 flexWrap={"wrap"}
               >
-                <Button
-                  className="secondary-btn-sm"
-                  onClick={() => navigate(ROUTES.DASHBOARD)}
+                <Box
+                  className="box"
+                  p={{ base: "12px 18px", md: "14px 22px" }}
+                  borderRadius={"12px"}
                 >
-                  <Image src={usdcIcon} w={"13px"} h={"13px"} />
-                  Supply APY ${tokenDetails[0].tokenInfo[0].value}
-                </Button>
-                <Button
-                  className="secondary-btn-sm"
-                  onClick={() => navigate(ROUTES.DASHBOARD)}
+                  <Flex alignItems={"center"} gap={"10px"}>
+                    <Image
+                      src={usdcIcon}
+                      w={{ base: "18px", md: "20px" }}
+                      h={{ base: "18px", md: "20px" }}
+                    />
+                    <Box textAlign={"left"}>
+                      <Box
+                        fontSize={{ base: "11px", md: "12px" }}
+                        opacity={0.7}
+                        mb={"2px"}
+                      >
+                        Supply APY
+                      </Box>
+                      <Box
+                        fontSize={{ base: "16px", md: "18px" }}
+                        fontWeight={700}
+                        lineHeight={1}
+                      >
+                        {tokenDetails[0].tokenInfo[0].value}
+                      </Box>
+                    </Box>
+                  </Flex>
+                </Box>
+                <Box
+                  className="box"
+                  p={{ base: "12px 18px", md: "14px 22px" }}
+                  borderRadius={"12px"}
                 >
-                  <Image src={usdcIcon} w={"13px"} h={"13px"} />
-                  Borrow APY ${tokenDetails[0].tokenInfo[1].value}
-                </Button>
+                  <Flex alignItems={"center"} gap={"10px"}>
+                    <Image
+                      src={usdcIcon}
+                      w={{ base: "18px", md: "20px" }}
+                      h={{ base: "18px", md: "20px" }}
+                    />
+                    <Box textAlign={"left"}>
+                      <Box
+                        fontSize={{ base: "11px", md: "12px" }}
+                        opacity={0.7}
+                        mb={"2px"}
+                      >
+                        Borrow APY
+                      </Box>
+                      <Box
+                        fontSize={{ base: "16px", md: "18px" }}
+                        fontWeight={700}
+                        lineHeight={1}
+                      >
+                        {tokenDetails[0].tokenInfo[1].value}
+                      </Box>
+                    </Box>
+                  </Flex>
+                </Box>
               </Flex>
               {/* <Flex
                 alignItems={"stretch"}
@@ -333,9 +376,13 @@ const LandingPage = () => {
             borderBottom={"2px solid #00000024"}
           ></Box>
           {/* How Creditify works */}
-          <HowCreditifyWorks />
+          <Box id="how-creditify-works">
+            <HowCreditifyWorks />
+          </Box>
           {/* Market Overview section */}
-          <MarketOverview tokenDetails={tokenDetails} />
+          <Box id="market-overview">
+            <MarketOverview tokenDetails={tokenDetails} />
+          </Box>
           {/* MeetCreditify */}
           <MeetCreditify />
           {/* Own your money */}

@@ -56,8 +56,7 @@ const GovernanceSecurity = () => {
               mb={"15px"}
               fontSize={{ base: "14px", sm: "18px", lg: "16px" }}
             >
-              Third-party security audits and bug bounty program. Proofs and
-              reports are available in the documentation.
+              Creditify is fully non-custodial and rigorously audited.
             </Box>
             <Box
               as="ul"
@@ -84,11 +83,11 @@ const GovernanceSecurity = () => {
                 mb={"10px"}
                 fontSize={{ base: "14px", sm: "16px", lg: "16px" }}
               >
-                Bug bounty program
+                Third-party security partners
               </Box>
             </Box>
             <Link to={""} color="#000" style={{ textDecoration: "underline" }}>
-              Learn more
+              [View Security Reports]
             </Link>
           </Box>
         </Flex>

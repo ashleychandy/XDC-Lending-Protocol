@@ -14,8 +14,13 @@ const InstantCapital = () => {
             Turn Gold Into Instant Capital{" "}
           </Heading>
           <Box fontSize={"24px"} fontStyle={"italic"}>
-            Supply CGO tokens backed by real physical gold, earn yield, and
-            borrow stablecoins instantly. No selling. No waiting. No middlemen
+            <Box>Supply CGO tokens (backed 1:1 by physical gold)</Box>
+            <Box> → Earn yield on your gold holdings </Box>→ Borrow stablecoins
+            without selling
+          </Box>
+          <Box>
+            The first DeFi protocol to unlock liquidity from tokenized precious
+            metals.
           </Box>
         </Box>
         <Flex w={"50%"} justifyContent={"flex-end"}>

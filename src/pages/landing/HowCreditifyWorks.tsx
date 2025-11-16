@@ -5,22 +5,22 @@ const HowCreditifyWorks = () => {
     {
       rank: "1",
       title: "Supply assets",
-      descItems: ["Deposit USDC, XDC, or CGO to the Creditify liquidity pool."],
+      descItems: ["Deposit USDC, XDC, or CGO and start earning instantly."],
     },
     {
       rank: "2",
-      title: "Earn Yield",
-      descItems: ["Automatically earn variable APY based on market demand."],
+      title: "Earn Real Yield",
+      descItems: ["Variable APY powered by decentralized market demand."],
     },
     {
       rank: "3",
       title: "Borrow Against Collateral",
-      descItems: ["Use your supplied assets as collateral to borrow instantly"],
+      descItems: ["Get instant liquidity without selling your assets."],
     },
     {
       rank: "4",
-      title: "Repay & Withdraw",
-      descItems: ["Repay loans anytime and unlock your collateral."],
+      title: "Repay Anytime",
+      descItems: ["Close your loan and withdraw your assets with no lock-ups."],
     },
   ];
 

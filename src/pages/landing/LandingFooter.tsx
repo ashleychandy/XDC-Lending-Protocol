@@ -59,10 +59,10 @@ const LandingFooter = () => {
             © Creditify • Built for DeFi • Non-custodial
           </Box>
           <Flex alignItems={"center"} gap={"8px"}>
-            <Link fontSize={"13px"} className="footer-link" href="#">
+            <Link fontSize={"13px"} className="footer-link" href="/terms">
               Terms
             </Link>
-            <Link fontSize={"13px"} className="footer-link" href="#">
+            <Link fontSize={"13px"} className="footer-link" href="/privacy">
               Privacy
             </Link>
           </Flex>

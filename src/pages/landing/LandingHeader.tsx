@@ -1,10 +1,17 @@
 import { ROUTES } from "@/routes/paths";
 import { Box, Button, Flex } from "@chakra-ui/react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const LandingHeader = () => {
   const navigate = useNavigate();
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
     <Box as={"header"} p={{ base: "20px 0", lg: "40px 20px" }}>
@@ -13,16 +20,22 @@ const LandingHeader = () => {
         alignItems={"center"}
         gap={"25px"}
       >
-        <Link
-          target="_blank"
-          to={"https://docs.xdc.network/"}
+        <Box
+          as="button"
+          onClick={() => scrollToSection("how-creditify-works")}
           className="nav-link"
+          cursor="pointer"
         >
           How it Works
-        </Link>
-        <Link to={ROUTES.MARKET} className="nav-link">
+        </Box>
+        <Box
+          as="button"
+          onClick={() => scrollToSection("market-overview")}
+          className="nav-link"
+          cursor="pointer"
+        >
           Markets
-        </Link>
+        </Box>
         <Button
           className="primary-btn"
           onClick={() => navigate(ROUTES.DASHBOARD)}
