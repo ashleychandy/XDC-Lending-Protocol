@@ -89,7 +89,7 @@ const AssetDetails = () => {
   }
 
   return (
-    <>
+    <Box display="flex" flexDirection="column" minH="100vh">
       <Header />
       <Box pt={"60px"} pb={"94px"} bg={"#2b2d3c"}>
         <Container
@@ -274,8 +274,10 @@ const AssetDetails = () => {
           )}
         </Box>
       </Container>
-      <Footer />
-    </>
+      <Box mt="auto">
+        <Footer />
+      </Box>
+    </Box>
   );
 };
 

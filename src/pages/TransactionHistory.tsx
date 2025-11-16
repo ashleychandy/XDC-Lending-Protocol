@@ -63,7 +63,7 @@ const TransactionHistory = () => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>(["all"]);
   const itemsPerPage = 10;
 
-  const { isLoading } = useAssetDetails(token);
+  useAssetDetails(token);
 
   // Load cached data on mount
   useEffect(() => {
@@ -74,9 +74,9 @@ const TransactionHistory = () => {
 
     if (cached) {
       try {
-        const parsedCache: CachedData = JSON.parse(cached, (key, value) => {
+        const parsedCache: CachedData = JSON.parse(cached, (_key, value) => {
           // Convert bigint strings back to bigint
-          if (key === "blockNumber" || key === "lastFetchBlock") {
+          if (_key === "blockNumber" || _key === "lastFetchBlock") {
             return BigInt(value);
           }
           return value;
@@ -347,7 +347,7 @@ const TransactionHistory = () => {
 
           try {
             // Convert bigint to string for JSON serialization
-            const serialized = JSON.stringify(cacheData, (key, value) =>
+            const serialized = JSON.stringify(cacheData, (_key, value) =>
               typeof value === "bigint" ? value.toString() : value
             );
             localStorage.setItem(cacheKey, serialized);
@@ -407,10 +407,8 @@ const TransactionHistory = () => {
     try {
       const formatted = formatUnits(BigInt(amount), decimals);
       const num = parseFloat(formatted);
-      return num.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
+      // Return raw number for FormattedCounter to handle formatting
+      return num.toFixed(2);
     } catch {
       return "0.00";
     }
@@ -420,7 +418,7 @@ const TransactionHistory = () => {
   const skeletonRows = Array.from({ length: 5 }, (_, i) => i);
 
   return (
-    <>
+    <Box display="flex" flexDirection="column" minH="100vh">
       <Header />
       <Box pt={"60px"} pb={"94px"} bg={"#2b2d3c"}>
         <Container
@@ -743,8 +741,10 @@ const TransactionHistory = () => {
           </Box>
         </Container>
       </Box>
-      <Footer />
-    </>
+      <Box mt="auto">
+        <Footer />
+      </Box>
+    </Box>
   );
 };
 

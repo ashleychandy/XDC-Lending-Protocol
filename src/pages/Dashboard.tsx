@@ -139,7 +139,7 @@ const Dashboard = () => {
       : "0.00";
 
   return (
-    <>
+    <Box display="flex" flexDirection="column" minH="100vh">
       <Header />
       <Box pt={"60px"} pb={"94px"} bg={"#2b2d3c"}>
         <Container
@@ -249,8 +249,10 @@ const Dashboard = () => {
           )}
         </Box>
       </Container>
-      <Footer />
-    </>
+      <Box mt="auto">
+        <Footer />
+      </Box>
+    </Box>
   );
 };
 

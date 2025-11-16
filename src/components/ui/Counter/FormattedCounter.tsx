@@ -66,10 +66,16 @@ export default function FormattedCounter({
 
   // Group integer places by thousands for comma formatting
   const groupedIntegerPlaces = [];
+  const totalDigits = integerPlaces.length;
   for (let i = 0; i < integerPlaces.length; i++) {
+    // Calculate position from the right (0 = ones place, 1 = tens, 2 = hundreds, etc.)
+    const positionFromRight = totalDigits - 1 - i;
     groupedIntegerPlaces.push({
       place: integerPlaces[i],
-      showComma: i > 0 && (integerPlaces.length - i) % 3 === 0,
+      // Show comma before this digit if the previous position was at a thousands boundary
+      // We want commas after positions 3, 6, 9... which means before positions 2, 5, 8...
+      showCommaBefore:
+        positionFromRight % 3 === 2 && positionFromRight < totalDigits - 1,
     });
   }
 
@@ -90,9 +96,14 @@ export default function FormattedCounter({
           -
         </Box>
       )}
-      <Flex alignItems="center" display="inline-flex" gap="0.5">
-        {groupedIntegerPlaces.map((group, index) => (
+      <Flex alignItems="center" display="inline-flex" gap="0">
+        {groupedIntegerPlaces.map((group) => (
           <Flex key={group.place} alignItems="center" display="inline-flex">
+            {group.showCommaBefore && (
+              <Box fontSize={`${fontSize}px`} color={textColor} mx="0.5">
+                ,
+              </Box>
+            )}
             <Counter
               value={integerPart}
               fontSize={fontSize}
@@ -104,11 +115,6 @@ export default function FormattedCounter({
               containerStyle={{ display: "inline-flex" }}
               horizontalPadding={0}
             />
-            {group.showComma && (
-              <Box fontSize={`${fontSize}px`} color={textColor} mx="0.25">
-                ,
-              </Box>
-            )}
           </Flex>
         ))}
       </Flex>
