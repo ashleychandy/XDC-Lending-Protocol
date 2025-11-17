@@ -5,14 +5,20 @@ import { http } from "viem";
 import { WagmiProvider } from "wagmi";
 import { xdc, xdcTestnet } from "wagmi/chains";
 
+// Get RPC URLs from environment variables
+const RPC_XDC_MAINNET =
+  import.meta.env.VITE_RPC_XDC_MAINNET || "https://rpc.xinfin.network";
+const RPC_XDC_APOTHEM =
+  import.meta.env.VITE_RPC_XDC_APOTHEM || "https://rpc.apothem.network";
+
 export const config = getDefaultConfig({
   appName: "Creditify",
   projectId: "YOUR_PROJECT_ID",
   chains: [xdc, xdcTestnet],
 
   transports: {
-    [xdc.id]: http("https://erpc.xinfin.network"),
-    [xdcTestnet.id]: http("https://erpc.apothem.network"),
+    [xdc.id]: http(RPC_XDC_MAINNET),
+    [xdcTestnet.id]: http(RPC_XDC_APOTHEM),
   },
   batch: {
     multicall: false,
