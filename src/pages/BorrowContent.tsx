@@ -660,23 +660,29 @@ function BorrowContent() {
         </Heading>
         {yourBorrows.length !== 0 && (
           <Flex gap="2" alignItems="center" px="24px" mb="10px" flexWrap="wrap">
-            <Box
+            <Flex
+              alignItems={"center"}
+              gap={"2px"}
               p="4px 8px"
               borderRadius="4px"
               border="1px solid #eaebef"
               fontSize="sm"
             >
               <Box as={"span"} className="light-text-2">
-                Balance $
+                Balance
               </Box>
               <FormattedCounter
+                prefixColor="#62677b"
+                prefix="$"
                 value={parseFloat(accountData.totalDebt)}
                 fontSize={14}
                 textColor="#000"
                 decimalPlaces={2}
               />
-            </Box>
-            <Box
+            </Flex>
+            <Flex
+              alignItems={"center"}
+              gap={"2px"}
               p="4px 8px"
               borderRadius="4px"
               border="1px solid #eaebef"
@@ -686,6 +692,7 @@ function BorrowContent() {
                 APY
               </Box>
               <FormattedCounter
+                suffixColor="#62677b"
                 value={weightedBorrowApy}
                 fontSize={14}
                 textColor="#000"
@@ -693,7 +700,7 @@ function BorrowContent() {
                 decimalPlaces={2}
                 className="title-text-1"
               />
-            </Box>
+            </Flex>
             <Box
               p="4px 8px"
               borderRadius="4px"
@@ -859,6 +866,7 @@ function BorrowContent() {
                     </Table.Cell>
                     <Table.Cell w="15%" fontSize="sm" className="title-text-1">
                       <FormattedCounter
+                        suffixColor="#62677b"
                         value={item.apy}
                         fontSize={14}
                         textColor="#000"
@@ -1021,6 +1029,7 @@ function BorrowContent() {
                   </Table.Cell>
                   <Table.Cell w="18%" fontSize="sm" className="title-text-1">
                     <FormattedCounter
+                      suffixColor="#62677b"
                       value={item.apy}
                       fontSize={14}
                       textColor="#000"

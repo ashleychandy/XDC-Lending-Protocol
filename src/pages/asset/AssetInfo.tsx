@@ -346,14 +346,14 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
       alignItems="center"
       borderBottom="1px solid"
       borderColor="bg.emphasized"
-      pb="25px"
-      mb="15px"
+      pb="20px"
+      mb="20px"
     >
       <Flex
         w="42px"
         h="42px"
         borderRadius="12px"
-        bg="bg.muted"
+        className="btn-color-light-1"
         justifyContent="center"
         alignItems="center"
       >
@@ -362,11 +362,11 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
         </Icon>
       </Flex>
       <Flex direction="column">
-        <Box>{label}</Box>
+        <Box className="light-text-2">{label}</Box>
         <Flex gap="2" alignItems="center">
           <Flex alignItems="center" gap="1">
-            <FormattedCounter value={value} fontSize={18} textColor="#000" />
-            <Box fontSize="14px" ml="1">
+            <FormattedCounter value={value} fontSize={16} textColor="#303549" />
+            <Box fontSize="16px" ml="1" className="light-text-2">
               {tokenConfig?.symbol}
             </Box>
           </Flex>
@@ -380,25 +380,31 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
       {tokenConfig && (
         <>
           <Box mb="15px">
-            <Box>Available to supply</Box>
+            <Box className="title-text-1">Available to supply</Box>
             <Flex justifyContent="space-between" alignItems="center">
               <Flex direction="column">
                 <Flex alignItems="center" gap="1">
                   <FormattedCounter
                     value={formatValue(availableNum)}
-                    fontSize={14}
-                    textColor="#000"
+                    fontSize={16}
+                    textColor="#303549"
                   />
-                  <Box ml="1">{tokenConfig.symbol}</Box>
+                  <Box ml="1" className="light-text-2">
+                    {tokenConfig.symbol}
+                  </Box>
                 </Flex>
                 <FormattedCounter
                   value={formatUsdValue(availableNum * tokenConfig.price)}
                   fontSize={13}
                   textColor="#6b7280"
+                  prefix="$"
+                  prefixColor="#6b7280"
                 />
               </Flex>
               <Button
                 size="sm"
+                variant={"plain"}
+                className="btn-color-dark-1"
                 onClick={() =>
                   openSupplyModal(
                     selectedToken as "wxdc" | "usdc" | "xdc" | "cgo"
@@ -411,25 +417,31 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
           </Box>
 
           <Box mb="15px">
-            <Box>Available to borrow</Box>
+            <Box className="title-text-1">Available to borrow</Box>
             <Flex justifyContent="space-between" alignItems="center">
               <Flex direction="column">
                 <Flex alignItems="center" gap="1">
                   <FormattedCounter
                     value={formatValue(borrowedNum)}
-                    fontSize={14}
-                    textColor="#000"
+                    fontSize={16}
+                    textColor="#303549"
                   />
-                  <Box ml="1">{tokenConfig.symbol}</Box>
+                  <Box ml="1" className="light-text-2">
+                    {tokenConfig.symbol}
+                  </Box>
                 </Flex>
                 <FormattedCounter
                   value={formatUsdValue(borrowedNum * tokenConfig.price)}
                   fontSize={13}
                   textColor="#6b7280"
+                  prefix="$"
+                  prefixColor="#6b7280"
                 />
               </Flex>
               <Button
                 size="sm"
+                variant={"plain"}
+                className="btn-color-dark-1"
                 onClick={() =>
                   openBorrowModal(
                     selectedToken as "wxdc" | "usdc" | "xdc" | "cgo"
@@ -446,7 +458,7 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
   );
 
   return (
-    <Box width={{ base: "100%", xl: "35%" }}>
+    <Box width={{ base: "100%", xl: "30%" }}>
       <Box
         shadow="rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
         bg={"#fff"}
@@ -527,11 +539,30 @@ const AssetInfo: React.FC<Props> = ({ token = "xdc" }) => {
               setSelectedToken(val.value as "wxdc" | "usdc" | "xdc" | "cgo")
             }
           >
-            <Tabs.List bg="bg.inverted" rounded="l3" p="1" w="100%" mb="15px">
-              <Tabs.Trigger value="wxdc" w="50%" justifyContent="center">
+            <Tabs.List
+              rounded="l2"
+              p="2px"
+              w="100%"
+              className={`btn-color-dark-1-hover no-hover`}
+            >
+              <Tabs.Trigger
+                className={`info-tab ${selectedToken === "wxdc" ? "active" : ""}`}
+                value="wxdc"
+                w="50%"
+                justifyContent="center"
+                height={"auto"}
+                p={"5px"}
+              >
                 {tokens.wrappedNative.symbol}
               </Tabs.Trigger>
-              <Tabs.Trigger value="xdc" w="50%" justifyContent="center">
+              <Tabs.Trigger
+                className={`info-tab ${selectedToken === "xdc" ? "active" : ""}`}
+                value="xdc"
+                w="50%"
+                justifyContent="center"
+                height={"auto"}
+                p={"5px"}
+              >
                 XDC
               </Tabs.Trigger>
               <Tabs.Indicator rounded="l2" />

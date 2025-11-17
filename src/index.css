@@ -318,9 +318,20 @@ tr:last-child > td {
   color: #303549;
 }
 .btn-color-dark-1,
-.btn-color-dark-1-hover {
+.btn-color-dark-1-hover,
+.btn-color-dark-1-hover.no-hover {
   background-color: #383d51;
   color: #fff;
+}
+.btn-color-dark-1-hover.no-hover:hover {
+  background-color: #383d51;
+  color: #fff;
+}
+.info-tab {
+  color: #a5a8b6;
+}
+.info-tab.active {
+  color: #2b2d3c;
 }
 .btn-color-dark-1-hover:hover {
   background-color: #2b2d3c;
@@ -336,4 +347,10 @@ tr:last-child > td {
 }
 .btn-color-light-1:hover {
   border-color: #383d51;
+}
+.icon-dark {
+  color: #a5a8b6;
+}
+.icon-dark:hover {
+  color: #fff;
 }

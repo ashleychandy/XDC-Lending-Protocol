@@ -91,17 +91,24 @@ const AssetDetails = () => {
   return (
     <Box display="flex" flexDirection="column" minH="100vh">
       <Header />
-      <Box pt={"60px"} pb={"94px"} bg={"#2b2d3c"}>
+      <Box pt={"91px"} pb={"94px"} maxH={"290px"} bg={"#2b2d3c"}>
         <Container
           maxW={{
             base: "100%",
             lg: "container.lg",
             xl: "container.xl",
+            "2xl": "container.2xl",
           }}
+          px={{ base: "auto", "2xl": "0" }}
           h="100%"
         >
           <Flex alignItems="center" gap="10px" mb="15px">
-            <Button size="sm" onClick={() => navigate(-1)}>
+            <Button
+              variant={"plain"}
+              className="btn-color-dark-1-hover"
+              size="sm"
+              onClick={() => navigate(-1)}
+            >
               <Icon size="md">
                 <IoMdArrowBack />
               </Icon>
@@ -110,8 +117,8 @@ const AssetDetails = () => {
             <Flex gap="2" alignItems="center">
               <Image
                 src={network.icon}
-                width="100px"
-                height="50px"
+                width="50px"
+                height="20px"
                 objectFit="contain"
                 flexShrink={0}
               />
@@ -124,7 +131,6 @@ const AssetDetails = () => {
           <Flex
             alignItems="center"
             gap={{ base: "15px", md: "32px" }}
-            mb="40px"
             flexWrap="wrap"
           >
             <Flex gap="3" alignItems="center">
@@ -135,7 +141,7 @@ const AssetDetails = () => {
                 alt={tokenInfo.symbol}
               />
               <Flex direction="column">
-                <Heading size="md" className="text-white-2">
+                <Heading size="md" className="light-text-2">
                   {tokenInfo.symbol}
                 </Heading>
                 <Flex gap="2" alignItems="center">
@@ -147,12 +153,13 @@ const AssetDetails = () => {
                     height="24px"
                     minWidth="auto"
                     p="5px"
-                    variant="surface"
+                    variant="plain"
+                    className="btn-color-dark-1-hover"
                     borderRadius="50%"
                     onClick={handleOpenExplorer}
                     title="View on Explorer"
                   >
-                    <Icon size="sm">
+                    <Icon size="sm" className="icon-dark">
                       <FiExternalLink />
                     </Icon>
                   </Button>
@@ -161,12 +168,13 @@ const AssetDetails = () => {
                     height="24px"
                     minWidth="auto"
                     p="5px"
-                    variant="surface"
+                    variant="plain"
+                    className="btn-color-dark-1-hover"
                     borderRadius="50%"
                     onClick={addToWallet}
                     title="Add to Wallet"
                   >
-                    <Icon size="sm">
+                    <Icon size="sm" className="icon-dark">
                       <IoWalletOutline />
                     </Icon>
                   </Button>
@@ -178,6 +186,7 @@ const AssetDetails = () => {
               as="hr"
               borderWidth="1px"
               height="42px"
+              borderColor={"#62677b"}
               display={{ base: "none", md: "block" }}
             />
 
@@ -188,7 +197,7 @@ const AssetDetails = () => {
                 </Box>
                 <FormattedCounter
                   value={reserveSize}
-                  fontSize={24}
+                  fontSize={21}
                   textColor="#fff"
                   prefix="$"
                   decimalPlaces={2}
@@ -201,7 +210,7 @@ const AssetDetails = () => {
                 </Box>
                 <FormattedCounter
                   value={availableLiquidity}
-                  fontSize={24}
+                  fontSize={21}
                   textColor="#fff"
                   prefix="$"
                   decimalPlaces={2}
@@ -214,7 +223,7 @@ const AssetDetails = () => {
                 </Box>
                 <FormattedCounter
                   value={utilizationRate}
-                  fontSize={24}
+                  fontSize={21}
                   textColor="#fff"
                   suffix="%"
                   decimalPlaces={2}
@@ -227,7 +236,7 @@ const AssetDetails = () => {
                 </Box>
                 <FormattedCounter
                   value={oraclePrice}
-                  fontSize={24}
+                  fontSize={21}
                   textColor="#fff"
                   prefix="$"
                   decimalPlaces={oraclePrice < 10 ? 4 : 2}
@@ -242,7 +251,9 @@ const AssetDetails = () => {
           base: "100%",
           lg: "container.lg",
           xl: "container.xl",
+          "2xl": "container.2xl",
         }}
+        px={{ base: "auto", "2xl": "0" }}
         h="100%"
       >
         <Box mt={"-50px"}>

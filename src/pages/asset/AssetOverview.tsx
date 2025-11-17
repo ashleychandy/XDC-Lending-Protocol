@@ -116,7 +116,7 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
   }
 
   return (
-    <Box width={{ base: "100%", xl: "65%" }}>
+    <Box width={{ base: "100%", xl: "70%" }}>
       <Box
         shadow="rgba(0, 0, 0, 0.05) 0px 2px 1px, rgba(0, 0, 0, 0.25) 0px 0px 1px"
         bg={"#fff"}
@@ -129,7 +129,7 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
         </Heading>
         <Flex direction="column" gap="35px">
           <Flex gap="10px">
-            <Heading size="md" minW="170px">
+            <Heading size="md" minW="170px" className="title-text-1">
               Supply Info
             </Heading>
             <Flex direction="column" gap="30px" w="100%">
@@ -165,21 +165,21 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
                     bg="white"
                     boxShadow="sm"
                   >
-                    <Icon fontSize="30px" color="gray.400">
+                    <Icon fontSize="30px" className="light-text-2">
                       <BiInfinite />
                     </Icon>
                   </Box>
                 )}
                 <Flex direction="column">
-                  <Box>Total supplied</Box>
-                  <Heading size="lg">
+                  <Box className="light-text-2">Total supplied</Box>
+                  <Heading size="lg" className="title-text-1">
                     {hasSupplyCap
                       ? `${formatTokenAmount(
                           totalSupplied
                         )} of ${formatTokenAmount(supplyCap)}`
                       : formatTokenAmount(totalSupplied)}
                   </Heading>
-                  <Box fontSize="13px">
+                  <Box fontSize="13px" className="light-text-2">
                     {hasSupplyCap
                       ? `${formatCurrency(
                           totalSuppliedUsd
@@ -187,22 +187,24 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
                       : formatCurrency(totalSuppliedUsd)}
                   </Box>
                   {!hasSupplyCap && (
-                    <Box fontSize="12px" color="gray.500" mt={1}>
+                    <Box fontSize="12px" className="light-text-2" mt={1}>
                       No supply cap
                     </Box>
                   )}
                 </Flex>
                 <Box as="hr" borderWidth="1px" height="32px" />
                 <Flex direction="column">
-                  <Box>APY</Box>
-                  <Heading size="lg">
+                  <Box className="light-text-2">APY</Box>
+                  <Heading size="lg" className="title-text-1">
                     {formatPercentage(parseFloat(supplyApy))}
                   </Heading>
                 </Flex>
               </Flex>
               <Box mb="10px">
                 <Flex alignItems="center" gap="10px" mb="10px" flexWrap="wrap">
-                  <Box fontSize="14px">Collateral usage</Box>
+                  <Box fontSize="14px" className="title-text-1">
+                    Collateral usage
+                  </Box>
                   <Flex alignItems="center" gap="5px" color="green.600">
                     <FaCheck />
                     <Box fontSize="14px" fontWeight="600">
@@ -226,10 +228,16 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
                         w={{ base: "100%", sm: "48%", md: "33.33%" }}
                         borderRadius="8px"
                       >
-                        <Box fontSize={{ base: "xs", md: "sm" }}>{x.title}</Box>
+                        <Box
+                          fontSize={{ base: "xs", md: "sm" }}
+                          className="light-text-2"
+                        >
+                          {x.title}
+                        </Box>
                         <Box
                           fontSize={{ base: "sm", md: "md" }}
                           fontWeight="600"
+                          className="title-text-1"
                         >
                           {x.value}
                         </Box>
@@ -242,7 +250,7 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
           </Flex>
           <Box as="hr" borderWidth="100%"></Box>
           <Flex gap="10px">
-            <Heading size="md" minW="170px">
+            <Heading size="md" minW="170px" className="title-text-1">
               Borrow Info
             </Heading>
             <Flex direction="column" gap="30px" w="100%">
@@ -278,21 +286,21 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
                     bg="white"
                     boxShadow="sm"
                   >
-                    <Icon fontSize="30px" color="gray.400">
+                    <Icon fontSize="30px" className="light-text-2">
                       <BiInfinite />
                     </Icon>
                   </Box>
                 )}
                 <Flex direction="column">
-                  <Box>Total borrowed</Box>
-                  <Heading size="lg">
+                  <Box className="light-text-2">Total borrowed</Box>
+                  <Heading size="lg" className="title-text-1">
                     {hasBorrowCap
                       ? `${formatTokenAmount(
                           totalBorrowed
                         )} of ${formatTokenAmount(borrowCap)}`
                       : formatTokenAmount(totalBorrowed)}
                   </Heading>
-                  <Box fontSize="13px">
+                  <Box fontSize="13px" className="light-text-2">
                     {hasBorrowCap
                       ? `${formatCurrency(
                           totalBorrowedUsd
@@ -300,27 +308,31 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
                       : formatCurrency(totalBorrowedUsd)}
                   </Box>
                   {!hasBorrowCap && (
-                    <Box fontSize="12px" color="gray.500" mt={1}>
+                    <Box fontSize="12px" className="light-text-2" mt={1}>
                       No borrow cap
                     </Box>
                   )}
                 </Flex>
                 <Box as="hr" borderWidth="1px" height="32px" />
                 <Flex direction="column">
-                  <Box>APY, variable</Box>
-                  <Heading size="lg">
+                  <Box className="light-text-2">APY, variable</Box>
+                  <Heading size="lg" className="title-text-1">
                     {formatPercentage(parseFloat(borrowApy))}
                   </Heading>
                 </Flex>
                 <Box as="hr" borderWidth="1px" height="32px" />
                 <Flex direction="column">
-                  <Box>Borrow cap</Box>
-                  <Heading size="lg">{formatTokenAmount(borrowCap)}</Heading>
-                  <Box fontSize="13px">{formatCurrency(borrowCapUsd)}</Box>
+                  <Box className="light-text-2">Borrow cap</Box>
+                  <Heading size="lg" className="title-text-1">
+                    {formatTokenAmount(borrowCap)}
+                  </Heading>
+                  <Box fontSize="13px" className="light-text-2">
+                    {formatCurrency(borrowCapUsd)}
+                  </Box>
                 </Flex>
               </Flex>
               <Box mb="10px">
-                <Box fontSize="14px" mb="10px">
+                <Box fontSize="14px" mb="10px" className="title-text-1">
                   Collector Info
                 </Box>
                 <Flex
@@ -339,10 +351,16 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
                         w={{ base: "100%", sm: "48%", md: "33.33%" }}
                         borderRadius="8px"
                       >
-                        <Box fontSize={{ base: "xs", md: "sm" }}>{x.title}</Box>
+                        <Box
+                          fontSize={{ base: "xs", md: "sm" }}
+                          className="light-text-2"
+                        >
+                          {x.title}
+                        </Box>
                         <Box
                           fontSize={{ base: "sm", md: "md" }}
                           fontWeight="600"
+                          className="title-text-1"
                         >
                           {x.value}
                         </Box>
@@ -353,16 +371,16 @@ const AssetOverview: React.FC<Props> = ({ token = "wxdc" }) => {
               </Box>
             </Flex>
           </Flex>
-
+          <Box as="hr" borderWidth="100%"></Box>
           <Flex gap="10px">
-            <Heading size="md" minW="170px">
+            <Heading size="md" minW="170px" className="title-text-1">
               Interest rate model
             </Heading>
             <Flex direction="column" gap="20px" w="100%">
               <Box mb="10px">
                 <Flex direction="column">
-                  <Box>Utilization Rate</Box>
-                  <Heading size="lg">
+                  <Box className="light-text-2">Utilization Rate</Box>
+                  <Heading size="lg" className="title-text-1">
                     {formatPercentage(utilizationRate)}
                   </Heading>
                 </Flex>

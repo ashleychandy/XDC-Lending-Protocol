@@ -426,7 +426,9 @@ const TransactionHistory = () => {
             base: "100%",
             lg: "container.lg",
             xl: "container.xl",
+            "2xl": "container.2xl",
           }}
+          px={{ base: "auto", "2xl": "0" }}
           h="100%"
         >
           <Box className="light-text-1" fontSize={"18px"}>
@@ -454,11 +456,9 @@ const TransactionHistory = () => {
           </Flex>
           <Button
             size="sm"
-            variant="solid"
+            variant="plain"
+            className="btn-color-dark-1-hover"
             onClick={() => navigate(-1)}
-            bg="white"
-            color="#2b2d3c"
-            _hover={{ bg: "rgba(255, 255, 255, 0.9)" }}
           >
             <Icon>
               <IoMdArrowBack />
@@ -473,7 +473,9 @@ const TransactionHistory = () => {
             base: "100%",
             lg: "container.lg",
             xl: "container.xl",
+            "2xl": "container.2xl",
           }}
+          px={{ base: "auto", "2xl": "0" }}
           h="100%"
         >
           <Box
