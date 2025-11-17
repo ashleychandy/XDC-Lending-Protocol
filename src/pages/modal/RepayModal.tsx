@@ -28,7 +28,7 @@ import { useRef, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { MdLocalGasStation } from "react-icons/md";
 import { formatUnits } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 import usdcIcon from "../../assets/images/usdc.svg";
 
 interface Props {
@@ -102,6 +102,11 @@ const RepayModal: React.FC<Props> = ({
     currentToken.decimals
   );
 
+  // Get native XDC balance
+  const { data: xdcBalance } = useBalance({
+    address,
+  });
+
   // Get wallet balances for validation
   const { balance: wxdcBalance } = useTokenBalance(
     tokens.wrappedNative.address,
@@ -134,7 +139,8 @@ const RepayModal: React.FC<Props> = ({
           icon: getTokenLogo(wrappedTokenSymbol),
           decimals: 18,
           price: xdcPrice,
-          walletBalance: wxdcBalance,
+          // Use native XDC balance when useNative is true, otherwise use WXDC balance
+          walletBalance: useNative ? xdcBalance?.formatted || "0" : wxdcBalance,
         };
       case "usdc":
         return {
