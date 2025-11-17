@@ -619,23 +619,29 @@ const SupplyContent = () => {
         </Heading>
         {yourSupplies.length !== 0 && (
           <Flex gap="2" alignItems="center" px="24px" mb="10px" flexWrap="wrap">
-            <Box
+            <Flex
+              alignItems={"center"}
+              gap={"2px"}
               p="4px 8px"
               borderRadius="4px"
               border="1px solid #eaebef"
               fontSize="sm"
             >
               <Box as={"span"} className="light-text-2">
-                Balance $
+                Balance
               </Box>
               <FormattedCounter
+                prefixColor="#62677b"
+                prefix="$"
                 value={parseFloat(accountData.totalCollateral)}
                 fontSize={14}
                 textColor="#000"
                 decimalPlaces={2}
               />
-            </Box>
-            <Box
+            </Flex>
+            <Flex
+              alignItems={"center"}
+              gap={"2px"}
               p="4px 8px"
               borderRadius="4px"
               border="1px solid #eaebef"
@@ -645,6 +651,7 @@ const SupplyContent = () => {
                 APY
               </Box>
               <FormattedCounter
+                suffixColor="#62677b"
                 value={weightedSupplyApy}
                 fontSize={14}
                 textColor="#000"
@@ -652,23 +659,27 @@ const SupplyContent = () => {
                 decimalPlaces={2}
                 className="title-text-1"
               />
-            </Box>
-            <Box
+            </Flex>
+            <Flex
+              alignItems={"center"}
+              gap={"2px"}
               p="4px 8px"
               borderRadius="4px"
               border="1px solid #eaebef"
               fontSize="sm"
             >
               <Box as={"span"} className="light-text-2">
-                Collateral $
+                Collateral
               </Box>
               <FormattedCounter
+                prefixColor="#62677b"
+                prefix="$"
                 value={parseFloat(accountData.totalCollateral)}
                 fontSize={14}
                 textColor="#000"
                 decimalPlaces={2}
               />
-            </Box>
+            </Flex>
           </Flex>
         )}
         {wxdcUserData.isLoading ||
@@ -839,6 +850,7 @@ const SupplyContent = () => {
                     </Table.Cell>
                     <Table.Cell w="13%" fontSize="sm" className="title-text-1">
                       <FormattedCounter
+                        suffixColor="#6b7280"
                         value={item.apy}
                         fontSize={14}
                         textColor="#000"
@@ -1004,6 +1016,7 @@ const SupplyContent = () => {
                   </Table.Cell>
                   <Table.Cell w="15%" fontSize="sm" className="title-text-1">
                     <FormattedCounter
+                      suffixColor="#6b7280"
                       value={item.apy}
                       fontSize={14}
                       textColor="#000"

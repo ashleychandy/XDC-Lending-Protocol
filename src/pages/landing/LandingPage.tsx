@@ -28,6 +28,7 @@ import MeetCreditify from "./MeetCreditify";
 import OwnMoney from "./OwnMoney";
 import type { TokenDetailsDTO } from "./types/type";
 import WhyBuildOnXDC from "./WhyBuildOnXDC";
+import NewsLetter from "./NewsLetter";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -411,6 +412,8 @@ const LandingPage = () => {
           <InstantCapital />
           {/* Faq */}
           <Faq />
+          {/* News Letter */}
+          <NewsLetter />
           {/* Footer */}
           <LandingFooter />
         </Container>

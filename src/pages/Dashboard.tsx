@@ -141,13 +141,15 @@ const Dashboard = () => {
   return (
     <Box display="flex" flexDirection="column" minH="100vh">
       <Header />
-      <Box pt={"60px"} pb={"94px"} bg={"#2b2d3c"}>
+      <Box pt={"80px"} pb={"94px"} maxH={"290px"} bg={"#2b2d3c"}>
         <Container
           maxW={{
             md: "container.md",
             lg: "container.lg",
             xl: "container.xl",
+            "2xl": "container.2xl",
           }}
+          px={{ base: "auto", "2xl": "0" }}
           h="100%"
         >
           <Flex gap="2" alignItems="center" mb="15px">
@@ -170,8 +172,9 @@ const Dashboard = () => {
                   <Skeleton height="40px" width="150px" />
                 ) : (
                   <FormattedCounter
+                    prefixColor="#a5a8b6"
                     value={netWorth}
-                    fontSize={32}
+                    fontSize={21}
                     textColor="#fff"
                     prefix="$"
                     decimalPlaces={2}
@@ -187,8 +190,9 @@ const Dashboard = () => {
                   <Skeleton height="40px" width="100px" />
                 ) : (
                   <FormattedCounter
+                    suffixColor="#a5a8b6"
                     value={parseFloat(netApy)}
-                    fontSize={32}
+                    fontSize={21}
                     textColor={parseFloat(netApy) < 0 ? "#ef4444" : "#fff"}
                     suffix="%"
                     decimalPlaces={2}
@@ -206,7 +210,7 @@ const Dashboard = () => {
                 ) : (
                   <FormattedCounter
                     value={healthFactorValue}
-                    fontSize={32}
+                    fontSize={21}
                     textColor={healthFactorColor}
                     decimalPlaces={2}
                   />
@@ -233,7 +237,9 @@ const Dashboard = () => {
           md: "container.md",
           lg: "container.lg",
           xl: "container.xl",
+          "2xl": "container.2xl",
         }}
+        px={{ base: "auto", "2xl": "0" }}
         h="100%"
       >
         <Box mt={"-50px"}>

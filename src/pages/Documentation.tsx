@@ -1,22 +1,26 @@
-import { landingSystem } from "@/landingSystem";
+import React, { useState } from "react";
 import {
   Box,
-  Button,
-  ChakraProvider,
   Container,
   Flex,
   Heading,
-  Icon,
   Link,
+  Text,
+  Button,
+  VStack,
+  HStack,
+  ChakraProvider,
+  Icon,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import LandingFooter from "./landing/LandingFooter";
+import { landingSystem } from "@/landingSystem";
 import LandingHeader from "./landing/LandingHeader";
+import LandingFooter from "./landing/LandingFooter";
+import { useNavigate } from "react-router-dom";
 
 const Documentation = () => {
+  const [activeSection, setActiveSection] = useState("getting-started");
   const navigate = useNavigate();
-
   const sections = [
     {
       id: "getting-started",
@@ -250,8 +254,9 @@ const Documentation = () => {
       <Box
         bg="#FFFFFF"
         minH="100vh"
-        className="landing-page landing-page-light"
+        className="landing-page landing-page-light documentation"
       >
+        {/* Header */}
         <Container
           maxW={{
             base: "100%",
@@ -265,179 +270,219 @@ const Documentation = () => {
           pb={{ base: 2, lg: 6 }}
         >
           <LandingHeader />
-
-          <Box
-            py={{ base: "40px", md: "60px", lg: "80px" }}
-            maxW="1000px"
-            mx="auto"
-          >
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => navigate(-1)}
-              mb="20px"
-            >
-              <Icon>
-                <IoMdArrowBack />
-              </Icon>
-              Back
-            </Button>
-
-            <Heading
-              as="h1"
-              fontSize={{ base: "32px", md: "40px", lg: "48px" }}
-              mb={{ base: "10px", md: "15px" }}
-              fontWeight={700}
-            >
-              Documentation
-            </Heading>
-
+          {/* Main Content */}
+          <Flex gap={8} direction={{ base: "column", lg: "row" }} pt={"30px"}>
+            {/* Sidebar */}
             <Box
-              as="p"
-              fontSize={{ base: "14px", md: "16px" }}
-              mb={{ base: "30px", md: "40px" }}
-              opacity={0.7}
+              w={{ base: "100%", lg: "280px" }}
+              flexShrink={0}
+              position={{ base: "relative", lg: "sticky" }}
+              top={{ lg: "88px" }}
+              h={{ lg: "calc(100vh - 120px)" }}
+              overflowY={{ lg: "auto" }}
+              pb={{ base: 4, lg: 0 }}
             >
-              Complete guide to using Creditify protocol
-            </Box>
-
-            {/* Table of Contents */}
-            <Box
-              mb={{ base: "30px", md: "40px" }}
-              p={{ base: "20px", md: "24px" }}
-              bg="rgba(0,0,0,0.03)"
-              borderRadius="12px"
-            >
-              <Heading
-                as="h3"
-                fontSize={{ base: "18px", md: "20px" }}
-                mb="15px"
-                fontWeight={600}
-              >
-                Table of Contents
-              </Heading>
-              <Flex direction="column" gap="8px">
-                {sections.map((section) => (
-                  <Link
-                    key={section.id}
-                    href={`#${section.id}`}
-                    fontSize={{ base: "14px", md: "15px" }}
-                    color="#0066cc"
-                    _hover={{ textDecoration: "underline" }}
-                  >
-                    {section.title}
-                  </Link>
-                ))}
-              </Flex>
-            </Box>
-
-            {/* Documentation Sections */}
-            {sections.map((section, index) => (
               <Box
-                key={section.id}
-                id={section.id}
-                mb={{ base: "40px", md: "50px" }}
+                bg="white"
+                borderRadius="12px"
+                p={4}
+                border="1px solid"
+                borderColor="#E2E8F0"
+              >
+                <Text
+                  fontSize="12px"
+                  fontWeight="700"
+                  color="#718096"
+                  textTransform="uppercase"
+                  mb={3}
+                  letterSpacing="0.05em"
+                >
+                  Contents
+                </Text>
+                <VStack align="stretch" gap={1}>
+                  {sections.map((section) => (
+                    <Link
+                      key={section.id}
+                      href={`#${section.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setActiveSection(section.id);
+                        document
+                          .getElementById(section.id)
+                          ?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      px={3}
+                      py={2}
+                      borderRadius="8px"
+                      fontSize="14px"
+                      fontWeight="500"
+                      color={activeSection === section.id ? "#fff" : "#4A5568"}
+                      bg={activeSection === section.id ? "#000" : "transparent"}
+                      _hover={{
+                        bg: activeSection === section.id ? "#000" : "#7d7c7c",
+                        textDecoration: "none",
+                        color: "#ffffff",
+                      }}
+                      transition="all 0.2s"
+                    >
+                      {section.title}
+                    </Link>
+                  ))}
+                </VStack>
+              </Box>
+            </Box>
+
+            {/* Main Documentation */}
+            <Box flex={1} minW={0}>
+              <Box
+                bg="white"
+                borderRadius="12px"
+                p={{ base: 6, md: 8, lg: 10 }}
+                border="1px solid"
+                borderColor="#E2E8F0"
               >
                 <Heading
-                  as="h2"
-                  fontSize={{ base: "24px", md: "28px", lg: "32px" }}
-                  mb={{ base: "20px", md: "25px" }}
-                  fontWeight={700}
-                  pb="10px"
-                  borderBottom="2px solid #eee"
+                  fontSize={{ base: "32px", md: "40px" }}
+                  fontWeight="700"
+                  color="#1A202C"
+                  mb={3}
                 >
-                  {section.title}
+                  Documentation
                 </Heading>
-
-                {section.content.map((item, idx) => (
-                  <Box key={idx} mb="20px">
-                    {item.subtitle && (
+                <Text fontSize="18px" color="#718096" mb={"20px"}>
+                  Complete guide to using Creditify protocol
+                </Text>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate(-1)}
+                  mb={"30px"}
+                >
+                  <Icon>
+                    <IoMdArrowBack />
+                  </Icon>
+                  Back
+                </Button>
+                {/* Documentation Sections */}
+                <VStack align="stretch" gap={12}>
+                  {sections.map((section) => (
+                    <Box key={section.id} id={section.id}>
                       <Heading
-                        as="h3"
-                        fontSize={{ base: "18px", md: "20px" }}
-                        mb="12px"
-                        fontWeight={600}
+                        fontSize={{ base: "24px", md: "28px" }}
+                        fontWeight="700"
+                        color="#1A202C"
+                        mb={6}
+                        pb={3}
+                        borderBottom="2px solid"
+                        borderColor="#E2E8F0"
                       >
-                        {item.subtitle}
+                        {section.title}
                       </Heading>
-                    )}
-                    {item.text && (
-                      <Box
-                        as="p"
-                        fontSize={{ base: "14px", md: "16px" }}
-                        lineHeight={1.8}
-                        mb="12px"
-                      >
-                        {item.text}
-                      </Box>
-                    )}
-                    {item.list && (
-                      <Box as="ul" pl="20px" mb="12px">
-                        {item.list.map((listItem, listIdx) => (
-                          <Box
-                            as="li"
-                            key={listIdx}
-                            fontSize={{ base: "14px", md: "16px" }}
-                            lineHeight={1.8}
-                            mb="8px"
-                          >
-                            {listItem}
+
+                      <VStack align="stretch" gap={6}>
+                        {section.content.map((item, idx) => (
+                          <Box key={idx}>
+                            {item.subtitle && (
+                              <Heading
+                                fontSize={{ base: "18px", md: "20px" }}
+                                fontWeight="600"
+                                color="#2D3748"
+                                mb={3}
+                              >
+                                {item.subtitle}
+                              </Heading>
+                            )}
+                            {item.text && (
+                              <Text
+                                fontSize="16px"
+                                lineHeight="1.75"
+                                color="#4A5568"
+                                mb={3}
+                              >
+                                {item.text}
+                              </Text>
+                            )}
+                            {item.list && (
+                              <VStack align="stretch" gap={2} pl={4}>
+                                {item.list.map((listItem, listIdx) => (
+                                  <HStack key={listIdx} align="center" gap={3}>
+                                    <Box
+                                      w="6px"
+                                      h="6px"
+                                      bg="#000"
+                                      borderRadius="full"
+                                      flexShrink={0}
+                                    />
+                                    <Text
+                                      fontSize="16px"
+                                      lineHeight="1.75"
+                                      color="#4A5568"
+                                    >
+                                      {listItem}
+                                    </Text>
+                                  </HStack>
+                                ))}
+                              </VStack>
+                            )}
                           </Box>
                         ))}
-                      </Box>
-                    )}
-                  </Box>
-                ))}
-              </Box>
-            ))}
+                      </VStack>
+                    </Box>
+                  ))}
+                </VStack>
 
-            {/* Additional Resources */}
-            <Box
-              mt={{ base: "40px", md: "60px" }}
-              p={{ base: "20px", md: "30px" }}
-              bg="rgba(0,0,0,0.03)"
-              borderRadius="12px"
-            >
-              <Heading
-                as="h3"
-                fontSize={{ base: "20px", md: "24px" }}
-                mb="15px"
-                fontWeight={600}
-              >
-                Need More Help?
-              </Heading>
-              <Box
-                as="p"
-                fontSize={{ base: "14px", md: "16px" }}
-                lineHeight={1.8}
-                mb="15px"
-              >
-                If you have questions not covered in this documentation, please
-                reach out through our official channels:
+                {/* Additional Resources */}
+                <Box
+                  mt={12}
+                  p={6}
+                  bg="#F7FAFC"
+                  borderRadius="12px"
+                  border="1px solid"
+                  borderColor="#E2E8F0"
+                >
+                  <Heading
+                    fontSize="20px"
+                    fontWeight="600"
+                    color="#1A202C"
+                    mb={3}
+                  >
+                    Need More Help?
+                  </Heading>
+                  <Text
+                    fontSize="16px"
+                    lineHeight="1.75"
+                    color="#4A5568"
+                    mb={4}
+                  >
+                    If you have questions not covered in this documentation,
+                    please reach out through our official channels:
+                  </Text>
+                  <VStack alignItems="flex-start" gap={2}>
+                    <Link
+                      href="https://xdc.network"
+                      target="_blank"
+                      fontSize="15px"
+                      fontWeight="500"
+                      _hover={{ textDecoration: "underline" }}
+                    >
+                      → XDC Network Official Website
+                    </Link>
+                    <Link
+                      href="https://docs.xdc.network"
+                      target="_blank"
+                      fontSize="15px"
+                      fontWeight="500"
+                      _hover={{ textDecoration: "underline" }}
+                    >
+                      → XDC Network Documentation
+                    </Link>
+                  </VStack>
+                </Box>
               </Box>
-              <Flex direction="column" gap="8px">
-                <Link
-                  href="https://xdc.network"
-                  target="_blank"
-                  fontSize={{ base: "14px", md: "15px" }}
-                  color="#0066cc"
-                  _hover={{ textDecoration: "underline" }}
-                >
-                  → XDC Network Official Website
-                </Link>
-                <Link
-                  href="https://docs.xdc.network"
-                  target="_blank"
-                  fontSize={{ base: "14px", md: "15px" }}
-                  color="#0066cc"
-                  _hover={{ textDecoration: "underline" }}
-                >
-                  → XDC Network Documentation
-                </Link>
-              </Flex>
             </Box>
-          </Box>
+          </Flex>
 
+          {/* Footer */}
           <LandingFooter />
         </Container>
       </Box>

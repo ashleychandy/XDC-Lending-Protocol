@@ -2,6 +2,8 @@ import { Box, Flex } from "@chakra-ui/react";
 import Counter from "./Counter";
 
 interface FormattedCounterProps {
+  prefixColor?: string;
+  suffixColor?: string;
   value: string | number;
   fontSize?: number;
   textColor?: string;
@@ -16,6 +18,8 @@ interface FormattedCounterProps {
  * or a number and displays it with animated Counter components
  */
 export default function FormattedCounter({
+  prefixColor = "#a5a8b6",
+  suffixColor = "#a5a8b6",
   value,
   fontSize = 14,
   textColor = "#000",
@@ -85,9 +89,11 @@ export default function FormattedCounter({
       gap="0.5"
       display="inline-flex"
       className={className}
+      color={textColor}
+      lineHeight={"normal"}
     >
       {prefix && (
-        <Box fontSize={`${fontSize}px`} color={textColor}>
+        <Box fontSize={`${fontSize}px`} color={prefixColor}>
           {prefix}
         </Box>
       )}
@@ -137,7 +143,7 @@ export default function FormattedCounter({
         </>
       )}
       {suffix && (
-        <Box fontSize={`${fontSize}px`} color={textColor}>
+        <Box fontSize={`${fontSize}px`} color={suffixColor}>
           {suffix}
         </Box>
       )}
