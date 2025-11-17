@@ -223,11 +223,11 @@ tr:last-child > td {
 }
 
 /* Footer Light Theme */
-.landing-page-light a {
+.landing-page-light:not(.documentation) a {
   color: #000 !important;
 }
 
-.landing-page-light a:hover {
+.landing-page-light:not(.documentation) a:hover {
   color: #000 !important;
 }
 
