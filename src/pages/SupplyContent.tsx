@@ -842,7 +842,9 @@ const SupplyContent = () => {
                         />
                         <FormattedCounter
                           prefixColor="#62677b"
-                          prefix="$"
+                          {...(!item.dollarBalance.startsWith("<") && {
+                            prefix: "$",
+                          })}
                           value={item.dollarBalance}
                           fontSize={12}
                           textColor="#62677b"

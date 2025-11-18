@@ -858,7 +858,9 @@ function BorrowContent() {
                         />
                         <FormattedCounter
                           prefixColor="#62677b"
-                          {...(item.debt > "0.01" && { prefix: "$" })}
+                          {...(!item.dollarDebt.startsWith("<") && {
+                            prefix: "$",
+                          })}
                           value={item.dollarDebt}
                           fontSize={12}
                           textColor="#62677b"
@@ -1022,7 +1024,9 @@ function BorrowContent() {
                       />
                       <FormattedCounter
                         prefixColor="#62677b"
-                        prefix="$"
+                        {...(!item.dollarAvailable.startsWith("<") && {
+                          prefix: "$",
+                        })}
                         value={item.dollarAvailable}
                         fontSize={12}
                         textColor="#62677b"
