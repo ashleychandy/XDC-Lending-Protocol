@@ -1,4 +1,8 @@
-import { POOL_ABI, WRAPPED_TOKEN_GATEWAY_V3_ABI } from "@/config/abis";
+import {
+  ATOKEN_ABI,
+  POOL_ABI,
+  WRAPPED_TOKEN_GATEWAY_V3_ABI,
+} from "@/config/abis";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { maxUint256, parseUnits } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
@@ -38,7 +42,20 @@ export function useWithdraw() {
   };
 
   /**
+   * Approve gateway to spend aTokens (needed for withdrawETH)
+   */
+  const approveGateway = async (aTokenAddress: string) => {
+    return writeContractAsync({
+      address: aTokenAddress as `0x${string}`,
+      abi: ATOKEN_ABI,
+      functionName: "approve",
+      args: [contracts.wrappedTokenGateway as `0x${string}`, maxUint256],
+    });
+  };
+
+  /**
    * Withdraw native token (XDC) directly - automatically unwraps
+   * Note: Requires prior approval of aTokens to the gateway
    */
   const withdrawNative = async (
     amount: string,
@@ -58,6 +75,7 @@ export function useWithdraw() {
   return {
     withdraw,
     withdrawNative,
+    approveGateway,
     hash,
     isPending,
     isConfirming,

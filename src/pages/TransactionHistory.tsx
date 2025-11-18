@@ -2,6 +2,7 @@ import Footer from "@/components/Footer";
 import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { useAssetDetails } from "@/hooks/useAssetDetails";
 import { useChainConfig } from "@/hooks/useChainConfig";
+import { useTransactionHistoryPage } from "@/hooks/useTransactionHistoryPage";
 import Header from "@/pages/Header";
 import {
   Badge,
@@ -20,124 +21,45 @@ import {
   Spinner,
   Table,
 } from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
 import { FiChevronLeft, FiChevronRight, FiExternalLink } from "react-icons/fi";
 import { IoMdArrowBack } from "react-icons/io";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { formatUnits } from "viem";
-import { useAccount, useBlockNumber, usePublicClient } from "wagmi";
-
-interface Transaction {
-  hash: string;
-  type: string;
-  asset: string;
-  amount: string;
-  timestamp: number;
-  blockNumber: bigint;
-}
-
-interface CachedData {
-  transactions: Transaction[];
-  lastFetchBlock: bigint;
-  timestamp: number;
-}
-
-// Cache key generator
-const getCacheKey = (address: string, chainId: number) =>
-  `tx_history_${address}_${chainId}`;
-
-// Cache duration: 5 minutes
-const CACHE_DURATION = 5 * 60 * 1000;
+import { useAccount } from "wagmi";
 
 const TransactionHistory = () => {
   const chainConfig = useChainConfig();
-  const { network, contracts, tokens } = chainConfig;
-  const { chain, address } = useAccount();
-  const publicClient = usePublicClient();
+  const { network } = chainConfig;
+  const { chain } = useAccount();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "xdc";
-  const [txData, setTxData] = useState<Transaction[]>([]);
-  const [isLoadingTxs, setIsLoadingTxs] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(["all"]);
-  const itemsPerPage = 10;
 
   useAssetDetails(token);
 
-  // Load cached data on mount
-  useEffect(() => {
-    if (!address || !chain?.id) return;
-
-    const cacheKey = getCacheKey(address, chain.id);
-    const cached = localStorage.getItem(cacheKey);
-
-    if (cached) {
-      try {
-        const parsedCache: CachedData = JSON.parse(cached, (_key, value) => {
-          // Convert bigint strings back to bigint
-          if (_key === "blockNumber" || _key === "lastFetchBlock") {
-            return BigInt(value);
-          }
-          return value;
-        });
-
-        // Check if cache is still valid
-        const now = Date.now();
-        if (now - parsedCache.timestamp < CACHE_DURATION) {
-          setTxData(parsedCache.transactions);
-        }
-      } catch (error) {
-        console.error("Error loading cached transactions:", error);
-        localStorage.removeItem(cacheKey);
-      }
-    }
-  }, [address, chain?.id]);
-
-  // Filter transactions based on selected filters
-  const filteredTxData = useMemo(() => {
-    if (selectedFilters.includes("all") || selectedFilters.length === 0) {
-      return txData;
-    }
-
-    return txData.filter((tx) =>
-      selectedFilters.some(
-        (filter) => filter.toLowerCase() === tx.type.toLowerCase()
-      )
-    );
-  }, [txData, selectedFilters]);
-
-  // Calculate pagination with useMemo for performance
-  const { totalPages, startIndex, endIndex, currentTxData } = useMemo(() => {
-    const total = Math.ceil(filteredTxData.length / itemsPerPage);
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const current = filteredTxData.slice(start, end);
-
-    return {
-      totalPages: total,
-      startIndex: start,
-      endIndex: end,
-      currentTxData: current,
-    };
-  }, [filteredTxData, currentPage, itemsPerPage]);
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedFilters]);
+  // Use the all-in-one transaction history hook
+  const {
+    currentPageTransactions,
+    isLoading: isLoadingTxs,
+    selectedFilters,
+    setSelectedFilters,
+    currentPage,
+    totalPages,
+    startIndex,
+    endIndex,
+    nextPage: handleNextPage,
+    prevPage: handlePrevPage,
+    getAssetInfo,
+    formatAmount,
+    formatTimestamp,
+    getTypeColor,
+    filteredTransactions: filteredTxData,
+    transactions: txData,
+    fetchOlderTransactions,
+    currentBlockRange,
+  } = useTransactionHistoryPage({
+    blockRange: 50000n,
+    itemsPerPage: 10,
+  });
 
   const transactions = createListCollection({
     items: [
@@ -149,278 +71,12 @@ const TransactionHistory = () => {
     ],
   });
 
-  // Get current block number using wagmi hook
-  const { data: currentBlockNumber } = useBlockNumber({
-    watch: false,
-  });
-
-  // Fetch transaction history from contract events
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      if (!address || !publicClient || !currentBlockNumber) return;
-
-      setIsLoadingTxs(true);
-      setCurrentPage(1); // Reset to first page on new fetch
-      try {
-        // Fetch more blocks to show more transactions (last ~50k blocks)
-        const fromBlock =
-          currentBlockNumber > 50000n ? currentBlockNumber - 50000n : 0n;
-
-        // Pool contract ABI events
-        const poolAbi = [
-          {
-            type: "event",
-            name: "Supply",
-            inputs: [
-              { name: "reserve", type: "address", indexed: true },
-              { name: "user", type: "address", indexed: false },
-              { name: "onBehalfOf", type: "address", indexed: true },
-              { name: "amount", type: "uint256", indexed: false },
-              { name: "referralCode", type: "uint16", indexed: true },
-            ],
-          },
-          {
-            type: "event",
-            name: "Withdraw",
-            inputs: [
-              { name: "reserve", type: "address", indexed: true },
-              { name: "user", type: "address", indexed: true },
-              { name: "to", type: "address", indexed: true },
-              { name: "amount", type: "uint256", indexed: false },
-            ],
-          },
-          {
-            type: "event",
-            name: "Borrow",
-            inputs: [
-              { name: "reserve", type: "address", indexed: true },
-              { name: "user", type: "address", indexed: false },
-              { name: "onBehalfOf", type: "address", indexed: true },
-              { name: "amount", type: "uint256", indexed: false },
-              { name: "interestRateMode", type: "uint8", indexed: false },
-              { name: "borrowRate", type: "uint256", indexed: false },
-              { name: "referralCode", type: "uint16", indexed: true },
-            ],
-          },
-          {
-            type: "event",
-            name: "Repay",
-            inputs: [
-              { name: "reserve", type: "address", indexed: true },
-              { name: "user", type: "address", indexed: true },
-              { name: "repayer", type: "address", indexed: true },
-              { name: "amount", type: "uint256", indexed: false },
-              { name: "useATokens", type: "bool", indexed: false },
-            ],
-          },
-        ] as const;
-
-        // Fetch all event types
-        const [supplyLogs, withdrawLogs, borrowLogs, repayLogs] =
-          await Promise.all([
-            publicClient.getLogs({
-              address: contracts.pool,
-              event: poolAbi[0],
-              fromBlock,
-              toBlock: currentBlockNumber,
-              args: { onBehalfOf: address },
-            }),
-            publicClient.getLogs({
-              address: contracts.pool,
-              event: poolAbi[1],
-              fromBlock,
-              toBlock: currentBlockNumber,
-              args: { user: address },
-            }),
-            publicClient.getLogs({
-              address: contracts.pool,
-              event: poolAbi[2],
-              fromBlock,
-              toBlock: currentBlockNumber,
-              args: { onBehalfOf: address },
-            }),
-            publicClient.getLogs({
-              address: contracts.pool,
-              event: poolAbi[3],
-              fromBlock,
-              toBlock: currentBlockNumber,
-              args: { user: address },
-            }),
-          ]);
-
-        // Combine all logs
-        const allLogs = [
-          ...supplyLogs.map((log) => ({ ...log, eventType: "Supply" })),
-          ...withdrawLogs.map((log) => ({ ...log, eventType: "Withdraw" })),
-          ...borrowLogs.map((log) => ({ ...log, eventType: "Borrow" })),
-          ...repayLogs.map((log) => ({ ...log, eventType: "Repay" })),
-        ];
-
-        // Get unique block numbers
-        const uniqueBlockNumbers = [
-          ...new Set(allLogs.map((log) => log.blockNumber)),
-        ];
-
-        // Batch fetch all blocks at once
-        const blockPromises = uniqueBlockNumbers.map((blockNumber) =>
-          publicClient.getBlock({ blockNumber })
-        );
-        const blocks = await Promise.all(blockPromises);
-
-        // Create a block cache
-        const blockCache = new Map(
-          blocks.map((block) => [block.number, block])
-        );
-
-        // Process and combine all transactions
-        const allTxs: Transaction[] = [];
-
-        for (const log of supplyLogs) {
-          const block = blockCache.get(log.blockNumber);
-          if (block) {
-            allTxs.push({
-              hash: log.transactionHash,
-              type: "Supply",
-              asset: log.args.reserve || "Unknown",
-              amount: log.args.amount?.toString() || "0",
-              timestamp: Number(block.timestamp),
-              blockNumber: log.blockNumber,
-            });
-          }
-        }
-
-        for (const log of withdrawLogs) {
-          const block = blockCache.get(log.blockNumber);
-          if (block) {
-            allTxs.push({
-              hash: log.transactionHash,
-              type: "Withdraw",
-              asset: log.args.reserve || "Unknown",
-              amount: log.args.amount?.toString() || "0",
-              timestamp: Number(block.timestamp),
-              blockNumber: log.blockNumber,
-            });
-          }
-        }
-
-        for (const log of borrowLogs) {
-          const block = blockCache.get(log.blockNumber);
-          if (block) {
-            allTxs.push({
-              hash: log.transactionHash,
-              type: "Borrow",
-              asset: log.args.reserve || "Unknown",
-              amount: log.args.amount?.toString() || "0",
-              timestamp: Number(block.timestamp),
-              blockNumber: log.blockNumber,
-            });
-          }
-        }
-
-        for (const log of repayLogs) {
-          const block = blockCache.get(log.blockNumber);
-          if (block) {
-            allTxs.push({
-              hash: log.transactionHash,
-              type: "Repay",
-              asset: log.args.reserve || "Unknown",
-              amount: log.args.amount?.toString() || "0",
-              timestamp: Number(block.timestamp),
-              blockNumber: log.blockNumber,
-            });
-          }
-        }
-
-        // Sort by timestamp descending
-        allTxs.sort((a, b) => b.timestamp - a.timestamp);
-
-        setTxData(allTxs);
-
-        // Cache the results
-        if (address && chain?.id) {
-          const cacheKey = getCacheKey(address, chain.id);
-          const cacheData: CachedData = {
-            transactions: allTxs,
-            lastFetchBlock: currentBlockNumber,
-            timestamp: Date.now(),
-          };
-
-          try {
-            // Convert bigint to string for JSON serialization
-            const serialized = JSON.stringify(cacheData, (_key, value) =>
-              typeof value === "bigint" ? value.toString() : value
-            );
-            localStorage.setItem(cacheKey, serialized);
-          } catch (error) {
-            console.error("Error caching transactions:", error);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
-      } finally {
-        setIsLoadingTxs(false);
-      }
-    };
-
-    fetchTransactions();
-  }, [address, publicClient, contracts.pool, currentBlockNumber, chain?.id]);
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "Supply":
-        return "green";
-      case "Borrow":
-        return "blue";
-      case "Repay":
-        return "purple";
-      case "Withdraw":
-        return "orange";
-      default:
-        return "gray";
-    }
-  };
-
-  const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp * 1000);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear().toString().slice(-2);
-    return `${day}/${month}/${year}`;
-  };
-
-  const getAssetInfo = (address: string) => {
-    // Map reserve addresses to symbols and decimals
-    const addressLower = address.toLowerCase();
-    if (addressLower === tokens.wrappedNative.address.toLowerCase()) {
-      return { symbol: "WXDC", decimals: 18, slug: "xdc" };
-    }
-    if (addressLower === tokens.usdc.address.toLowerCase()) {
-      return { symbol: "USDC", decimals: 6, slug: "usdc" };
-    }
-    if (addressLower === tokens.cgo.address.toLowerCase()) {
-      return { symbol: "CGO", decimals: 18, slug: "cgo" };
-    }
-    return { symbol: address.slice(0, 6) + "...", decimals: 18, slug: "" };
-  };
-
-  const formatAmount = (amount: string, decimals: number = 18) => {
-    try {
-      const formatted = formatUnits(BigInt(amount), decimals);
-      const num = parseFloat(formatted);
-      // Return raw number for FormattedCounter to handle formatting
-      return num.toFixed(2);
-    } catch {
-      return "0.00";
-    }
-  };
-
-  // Show skeleton rows when loading
   const skeletonRows = Array.from({ length: 5 }, (_, i) => i);
 
   return (
     <Box display="flex" flexDirection="column" minH="100vh">
       <Header />
-      <Box pt={"70px"} pb={"94px"} maxH={"290px"} bg={"#2b2d3c"}>
+      <Box pt={"60px"} pb={"94px"} bg={"#2b2d3c"}>
         <Container
           maxW={{
             base: "100%",
@@ -485,27 +141,49 @@ const TransactionHistory = () => {
             borderRadius="5px"
             p="16px 24px"
           >
-            <Heading size="xl" className="title-text-1" mb={"30px"}>
-              Transactions
-            </Heading>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              mb={"30px"}
+              flexWrap="wrap"
+              gap="3"
+            >
+              <Box>
+                <Heading size="xl" className="title-text-1">
+                  Recent Transactions
+                </Heading>
+                <ChakraText fontSize="sm" color="#62677b" mt="1">
+                  Showing transactions from the last ~
+                  {currentBlockRange.toLocaleString()} blocks
+                </ChakraText>
+              </Box>
+              <Button
+                size="sm"
+                variant="outline"
+                colorPalette="blue"
+                onClick={fetchOlderTransactions}
+                disabled={isLoadingTxs}
+                loading={isLoadingTxs}
+              >
+                Load Older Transactions
+              </Button>
+            </Flex>
             <Select.Root
               multiple
               value={selectedFilters}
               onValueChange={(e) => {
                 const newFilters = e.value;
-                // If "all" is selected, clear other filters
                 if (
                   newFilters.includes("all") &&
                   !selectedFilters.includes("all")
                 ) {
                   setSelectedFilters(["all"]);
-                }
-                // If other filter is selected while "all" is active, remove "all"
-                else if (newFilters.length > 1 && newFilters.includes("all")) {
+                } else if (
+                  newFilters.length > 1 &&
+                  newFilters.includes("all")
+                ) {
                   setSelectedFilters(newFilters.filter((f) => f !== "all"));
-                }
-                // If no filters selected, default to "all"
-                else if (newFilters.length === 0) {
+                } else if (newFilters.length === 0) {
                   setSelectedFilters(["all"]);
                 } else {
                   setSelectedFilters(newFilters);
@@ -623,7 +301,7 @@ const TransactionHistory = () => {
                       </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                      {currentTxData.map((tx: Transaction, index: number) => {
+                      {currentPageTransactions.map((tx, index) => {
                         const assetInfo = getAssetInfo(tx.asset);
                         return (
                           <Table.Row key={`${tx.hash}-${index}`}>
@@ -694,7 +372,6 @@ const TransactionHistory = () => {
                   </Table.Root>
                 </Box>
 
-                {/* Pagination Controls */}
                 <Flex
                   mt={"24px"}
                   justifyContent="space-between"

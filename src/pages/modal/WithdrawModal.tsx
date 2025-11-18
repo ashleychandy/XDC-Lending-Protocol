@@ -37,6 +37,9 @@ interface Props {
   amount: string;
   setAmount: (value: string) => void;
   onClickWithdraw: () => void;
+  onClickGatewayApprove?: () => void;
+  isGatewayApproved?: boolean;
+  gatewayAllowance?: bigint;
   isPending?: boolean;
   isConfirming?: boolean;
   unwrapToNative?: boolean;
@@ -50,6 +53,9 @@ const WithdrawModal: React.FC<Props> = ({
   amount,
   setAmount,
   onClickWithdraw,
+  onClickGatewayApprove,
+  isGatewayApproved,
+  gatewayAllowance,
   isPending,
   isConfirming,
   unwrapToNative: externalUnwrapToNative,
@@ -280,6 +286,12 @@ const WithdrawModal: React.FC<Props> = ({
     newHealthFactorValue < 1.5 && newHealthFactorValue !== Infinity;
   const isWithdrawalDangerous =
     newHealthFactorValue < 1.05 && newHealthFactorValue !== Infinity;
+
+  // Check if gateway approval is needed for unwrapping
+  const needsGatewayApproval =
+    (tokenSymbol === "wxdc" || tokenSymbol === "xdc") &&
+    unwrapToNative &&
+    (gatewayAllowance === undefined || gatewayAllowance < BigInt(1e18)); // Check if allowance is less than 1 token or undefined
 
   return (
     <HStack wrap="wrap" gap="4">
@@ -523,29 +535,39 @@ const WithdrawModal: React.FC<Props> = ({
               <Dialog.Footer>
                 <Button
                   disabled={
-                    !amount ||
-                    amount.trim() === "" ||
-                    parseFloat(amount) === 0 ||
-                    parseFloat(amount) > parseFloat(suppliedBalance) ||
-                    isWithdrawalDangerous ||
-                    (isWithdrawalRisky && !riskAcknowledged) ||
-                    isPending ||
-                    isConfirming
+                    needsGatewayApproval && !isGatewayApproved
+                      ? isPending || isConfirming
+                      : !amount ||
+                        amount.trim() === "" ||
+                        parseFloat(amount) === 0 ||
+                        parseFloat(amount) > parseFloat(suppliedBalance) ||
+                        isWithdrawalDangerous ||
+                        (isWithdrawalRisky && !riskAcknowledged) ||
+                        isPending ||
+                        isConfirming
                   }
                   w="100%"
                   fontSize="18px"
-                  onClick={onClickWithdraw}
+                  onClick={
+                    needsGatewayApproval && !isGatewayApproved
+                      ? onClickGatewayApprove
+                      : onClickWithdraw
+                  }
                   variant={"plain"}
                   className="btn-color-dark-1"
                   // colorPalette={isWithdrawalRisky ? "orange" : "blue"}
                 >
-                  {!amount || amount.trim() === "" || parseFloat(amount) === 0
-                    ? "Enter an amount"
-                    : parseFloat(amount) > parseFloat(suppliedBalance)
-                      ? "Insufficient balance"
-                      : isWithdrawalDangerous
-                        ? "Health factor too low"
-                        : `Withdraw ${tokenConfig.symbol}`}
+                  {needsGatewayApproval && !isGatewayApproved
+                    ? "Approve Gateway"
+                    : !amount ||
+                        amount.trim() === "" ||
+                        parseFloat(amount) === 0
+                      ? "Enter an amount"
+                      : parseFloat(amount) > parseFloat(suppliedBalance)
+                        ? "Insufficient balance"
+                        : isWithdrawalDangerous
+                          ? "Health factor too low"
+                          : `Withdraw ${tokenConfig.symbol}`}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>

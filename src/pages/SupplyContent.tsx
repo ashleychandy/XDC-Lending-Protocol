@@ -2,6 +2,7 @@ import FormattedCounter from "@/components/ui/Counter/FormattedCounter";
 import { getTokenLogo } from "@/config/tokenLogos";
 import { formatUsdValue, formatValue } from "@/helpers/formatValue";
 import { useAssetPrice } from "@/hooks/useAssetPrice";
+import { useATokenAllowance } from "@/hooks/useATokenAllowance";
 import { useChainConfig } from "@/hooks/useChainConfig";
 import { useCollateral } from "@/hooks/useCollateral";
 import { useReserveCaps } from "@/hooks/useReserveCaps";
@@ -34,6 +35,7 @@ import { useNavigate } from "react-router-dom";
 import { formatUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
 import usdcIcon from "../assets/images/usdc.svg";
+import CollateralModal from "./modal/CollateralModal";
 import SupplyDoneModal from "./modal/SupplyDoneModal";
 import SupplyModal from "./modal/SupplyModal";
 import WithdrawDoneModal from "./modal/WithdrawDoneModal";
@@ -60,6 +62,16 @@ const SupplyContent = () => {
     useState<boolean>(false);
   const [unwrapToNative, setUnwrapToNative] = useState<boolean>(true);
   const [isApproved, setIsApproved] = useState<boolean>(false);
+  const [isGatewayApproved, setIsGatewayApproved] = useState<boolean>(false);
+  const [gatewayApprovalHash, setGatewayApprovalHash] = useState<
+    `0x${string}` | undefined
+  >();
+  const [isCollateralModal, setIsCollateralModal] = useState<boolean>(false);
+  const [collateralModalToken, setCollateralModalToken] = useState<
+    "wxdc" | "usdc" | "cgo"
+  >("wxdc");
+  const [collateralModalStatus, setCollateralModalStatus] =
+    useState<boolean>(false);
 
   // Sorting state for Your Supplies table
   const [suppliesSortField, setSuppliesSortField] = useState<
@@ -94,6 +106,14 @@ const SupplyContent = () => {
   );
 
   const wxdcReserveData = useReserveData(tokens.wrappedNative.address);
+
+  // Check aToken allowance for gateway (needed for withdrawETH)
+  const { allowance: gatewayAllowance, refetch: refetchGatewayAllowance } =
+    useATokenAllowance(
+      wxdcReserveData.aTokenAddress,
+      address,
+      contracts.wrappedTokenGateway
+    );
   const usdcReserveData = useReserveData(tokens.usdc.address);
   const cgoReserveData = useReserveData(tokens.cgo.address);
 
@@ -274,6 +294,32 @@ const SupplyContent = () => {
     },
   });
 
+  const handleGatewayApprove = async () => {
+    if (!address) return;
+    try {
+      const hash = await withdrawHook.approveGateway(
+        wxdcReserveData.aTokenAddress
+      );
+      setGatewayApprovalHash(hash);
+    } catch (err) {
+      console.error("Gateway approval error:", err);
+    }
+  };
+
+  // Watch gateway approval transaction
+  useTransactionFlow({
+    hash: gatewayApprovalHash,
+    onSuccess: () => {
+      setIsGatewayApproved(true);
+      setGatewayApprovalHash(undefined);
+      refetchGatewayAllowance();
+    },
+    onError: (err) => {
+      console.error("Gateway approval failed:", err);
+      setGatewayApprovalHash(undefined);
+    },
+  });
+
   const handleWithdraw = async (unwrapToNative: boolean = false) => {
     if (!address || !amount) return;
     const token =
@@ -310,12 +356,25 @@ const SupplyContent = () => {
     }
   };
 
-  const handleCollateralToggle = async (
-    assetAddress: `0x${string}`,
-    useAsCollateral: boolean
+  const openCollateralModal = (
+    tokenSymbol: "wxdc" | "usdc" | "cgo",
+    currentStatus: boolean
   ) => {
+    setCollateralModalToken(tokenSymbol);
+    setCollateralModalStatus(currentStatus);
+    setIsCollateralModal(true);
+  };
+
+  const handleCollateralConfirm = async () => {
     try {
-      await collateralHook.setCollateral(assetAddress, useAsCollateral);
+      const assetAddress =
+        collateralModalToken === "wxdc"
+          ? tokens.wrappedNative.address
+          : collateralModalToken === "cgo"
+            ? tokens.cgo.address
+            : tokens.usdc.address;
+
+      await collateralHook.setCollateral(assetAddress, !collateralModalStatus);
     } catch (err) {
       console.error("Collateral toggle error:", err);
     }
@@ -338,11 +397,13 @@ const SupplyContent = () => {
     hash: collateralHook.hash,
     onSuccess: () => {
       console.log("Collateral setting updated successfully");
+      setIsCollateralModal(false);
       // Invalidate all queries to refetch updated data
       queryClient.invalidateQueries();
     },
     onError: (err) => {
       console.error("Error updating collateral setting:", err);
+      setIsCollateralModal(false);
     },
   });
 
@@ -581,6 +642,7 @@ const SupplyContent = () => {
             setIsWithdrawModal(false);
             setAmount("");
             setUnwrapToNative(true);
+            setIsGatewayApproved(false);
           }}
           tokenSymbol={selectedToken}
           amount={amount}
@@ -588,6 +650,9 @@ const SupplyContent = () => {
           onClickWithdraw={() => {
             handleWithdraw(unwrapToNative);
           }}
+          onClickGatewayApprove={handleGatewayApprove}
+          isGatewayApproved={isGatewayApproved}
+          gatewayAllowance={gatewayAllowance}
           isPending={withdrawHook.isPending}
           isConfirming={withdrawHook.isConfirming}
           unwrapToNative={unwrapToNative}
@@ -604,6 +669,17 @@ const SupplyContent = () => {
           amount={amount}
           tokenSymbol={selectedToken.toUpperCase()}
           txHash={withdrawHook.hash as `0x${string}`}
+        />
+      )}
+      {isCollateralModal && (
+        <CollateralModal
+          isOpen={isCollateralModal}
+          onClose={() => setIsCollateralModal(false)}
+          tokenSymbol={collateralModalToken}
+          currentCollateralStatus={collateralModalStatus}
+          onConfirm={handleCollateralConfirm}
+          isPending={collateralHook.isPending}
+          isConfirming={collateralHook.isConfirming}
         />
       )}
       {/* Your Supplies */}
@@ -865,14 +941,10 @@ const SupplyContent = () => {
                         colorPalette="green"
                         checked={item.isCollateral}
                         size="sm"
-                        onCheckedChange={(e) =>
-                          handleCollateralToggle(
-                            item.symbol === "wxdc"
-                              ? tokens.wrappedNative.address
-                              : item.symbol === "cgo"
-                                ? tokens.cgo.address
-                                : tokens.usdc.address,
-                            e.checked
+                        onCheckedChange={() =>
+                          openCollateralModal(
+                            item.symbol as "wxdc" | "usdc" | "cgo",
+                            item.isCollateral
                           )
                         }
                         disabled={collateralHook.isPending}
