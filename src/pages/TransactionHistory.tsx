@@ -646,7 +646,9 @@ const TransactionHistory = () => {
                               }
                               onClick={() => {
                                 if (assetInfo.slug) {
-                                  navigate(`/asset/${assetInfo.slug}`);
+                                  navigate(
+                                    `/asset-details?token=${assetInfo.slug}`
+                                  );
                                 }
                               }}
                             >
