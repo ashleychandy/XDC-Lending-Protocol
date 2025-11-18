@@ -12,9 +12,9 @@ import {
 import { FaCheck } from "react-icons/fa6";
 import { FiExternalLink } from "react-icons/fi";
 import { IoMdClose } from "react-icons/io";
+import { IoWalletOutline } from "react-icons/io5";
 import { useAccount } from "wagmi";
 import { useChainConfig } from "../../hooks/useChainConfig";
-import { IoWalletOutline } from "react-icons/io5";
 
 interface Props {
   isOpen: boolean;
@@ -91,21 +91,44 @@ const SupplyDoneModal: React.FC<Props> = ({
     }
 
     try {
-      // Specify custom symbol for consistency and to ensure it works with MetaMask
+      // Try to add with shortened symbol first (MetaMask has 11 char limit)
       const result = await window.ethereum.request({
         method: "wallet_watchAsset",
         params: {
           type: "ERC20",
           options: {
             address: aToken.address,
-            symbol: aToken.symbol,
+            symbol: aToken.symbol, // Use shortened symbol
             decimals: aToken.decimals,
           },
         },
       });
       console.log("Add token result:", result);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to add token to wallet:", error);
+
+      // If symbol mismatch, try without symbol (let wallet read from contract)
+      if (error?.code === -32602) {
+        try {
+          const result = await window.ethereum.request({
+            method: "wallet_watchAsset",
+            params: {
+              type: "ERC20",
+              options: {
+                address: aToken.address,
+                decimals: aToken.decimals,
+              },
+            },
+          });
+          console.log("Add token result (retry):", result);
+        } catch (retryError) {
+          console.error("Retry also failed:", retryError);
+          alert(
+            "Unable to add token to wallet automatically. Please add it manually using the contract address: " +
+              aToken.address
+          );
+        }
+      }
     }
   };
 
