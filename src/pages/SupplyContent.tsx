@@ -841,10 +841,11 @@ const SupplyContent = () => {
                           className="title-text-1"
                         />
                         <FormattedCounter
+                          prefixColor="#62677b"
+                          prefix="$"
                           value={item.dollarBalance}
                           fontSize={12}
-                          textColor="#6b7280"
-                          className="light-text-2"
+                          textColor="#62677b"
                         />
                       </Flex>
                     </Table.Cell>
